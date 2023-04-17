@@ -10,6 +10,8 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
+#define X_SCALE 2
+
 typedef struct {
     int x;
     int y;
@@ -51,7 +53,7 @@ typedef struct
 char *get_xresource(char *start, char *end)
 {
     Xresource resources[] = {
-        {"FONTSIZE", "1"},
+        {"FONTSIZE", "2"},
         {"WIDTH", "800"},
         {"HEIGHT", "200"}};
 
@@ -177,9 +179,9 @@ Vec2i vec2i_sub_const(Vec2i a, int b)
     return r;
 }
 
-int vec2i_dot(Vec2i a, Vec2i b)
+float vec2i_dot(Vec2i a, Vec2i b)
 {
-    return a.x * b.x + a.y * b.y;
+    return (float)a.x * b.x + a.y * b.y;
 }
 
 int main(int argv, char **argc)
@@ -214,6 +216,9 @@ int main(int argv, char **argc)
     // init_pair(2, 3, 7);
     // init_pair(3, 4, 2);
     // init_pair(4, 7, 4);
+    Circle circle = {
+        {5, 5}, 2
+    };
     while (1)
     {
         getmaxyx(stdscr, window_size.y, window_size.x);
@@ -228,17 +233,13 @@ int main(int argv, char **argc)
         add_term_line("W:%d H:%d", window_size.x, window_size.y);
         box(win, 0, 0);
         render_term(win);
+        window_size.x /= X_SCALE;
         // mvwprintw(win, 0, 1, "Console");
         // mvwprintw(win, 1, 1, "Hello");
-        Circle circle = {
-            {5, 5}, 1
-        };
         // add_term_line("x:%d y:%d", x, y);
-        mvwprintw(win_game, circle.center.x, circle.center.y, "o");
+        // mvwprintw(win_game, circle.center.y, circle.center.x, "o");
 
-        circle.center = vec2i_add(circle.center, vel);
-
-        // print_circle(win_game, window_size, circle);
+        print_circle(win_game, window_size, circle);
         // char c = getch();
         // if (c == 'w' || c == KEY_UP) 
         //     y -= y_vel;
@@ -249,37 +250,48 @@ int main(int argv, char **argc)
         // if (c == 'd' || c == KEY_RIGHT)
         //     x += x_vel;
         Line window_bottom = {
-            {0, window_size.y},
-            {window_size.x, window_size.y}
+            {0, window_size.y - 1},
+            {window_size.x - 1, window_size.y - 1}
         };
         Line window_left = {
             {0, 0},
-            {0, window_size.y}
+            {0, window_size.y - 1}
         };
         Line window_right = {
-            {window_size.x, 0},
-            {window_size.x, window_size.y}
+            {window_size.x - 1, 0},
+            {window_size.x - 1, window_size.y - 1}
         };
         Line window_top = {
             {0, 0},
             {window_size.x, 0}
         };
 
+        Vec2i prev_center = circle.center;
+        circle.center = vec2i_add(circle.center, vel);
+
         if (collide_circle_line(circle, window_bottom)) {
             Vec2i normal = {0, 1};
-            vel = vec2i_sub(vel, vec2i_mul_const(normal, -2 * vec2i_dot(vel, normal)));
+            circle.center = prev_center;
+            vel = vec2i_add(vel, vec2i_mul_const(vec2i_mul_const(normal, vec2i_dot(vel, normal)), -2));
         }
-        // else if (collide_circle_line(circle, window_top))
-        // {
-        //     Vec2i normal = {0, -1};
-        // }
-        // else if (collide_circle_line(circle, window_left))
-        // {
-        //     Vec2i normal = {-1, 0};
-        // }
-        // else if (collide_circle_line(circle, window_right))
-        // {
-        // }
+        else if (collide_circle_line(circle, window_top))
+        {
+            Vec2i normal = {0, -1};
+            circle.center = prev_center;
+            vel = vec2i_add(vel, vec2i_mul_const(vec2i_mul_const(normal, vec2i_dot(vel, normal)), -2));
+        }
+        else if (collide_circle_line(circle, window_left))
+        {
+            Vec2i normal = {-1, 0};
+            circle.center = prev_center;
+            vel = vec2i_add(vel, vec2i_mul_const(vec2i_mul_const(normal, vec2i_dot(vel, normal)), -2));
+        }
+        else if (collide_circle_line(circle, window_right))
+        {
+            Vec2i normal = {1, 0};
+            circle.center = prev_center;
+            vel = vec2i_add(vel, vec2i_mul_const(vec2i_mul_const(normal, vec2i_dot(vel, normal)), -2));
+        }
         // refresh();
         wrefresh(win);
         wrefresh(win_game);
@@ -326,9 +338,9 @@ int collide_ellipse_line(Ellipse ellipse, Line line)
     int x2 = line.end.y;
     int y1 = line.start.x;
     int y2 = line.end.x;
-    int xe = ellipse.center.x;
-    int ye = ellipse.center.y;
-    int rex = ellipse.radius.x;
+    int xe = ellipse.center.y + 1;
+    int ye = ellipse.center.x + 1;
+    int rex = ellipse.radius.x * X_SCALE;
     int rey = ellipse.radius.y;
     x1 -= xe;
     x2 -= xe;
@@ -359,7 +371,7 @@ void print_circle(WINDOW* win, Vec2i win_size, Circle c)
     print_ellipse(win, win_size, c.center.x, c.center.y, c.radius, c.radius);
 }
 
-void print_ellipse(WINDOW* win, Vec2i win_size, int x, int y, int r2, int r1)
+void print_ellipse(WINDOW* win, Vec2i win_size, int y, int x, int r2, int r1)
 {
     int d1 = r1 * 2;
     int d2 = r2 * 2;
@@ -373,8 +385,10 @@ void print_ellipse(WINDOW* win, Vec2i win_size, int x, int y, int r2, int r1)
         {
             if (sqrt(pow(i - y - r1, 2) / pow(r1, 2) + pow(j - x - r2, 2) / pow(r2, 2)) > 1)
                 continue;
-            mvwprintw(win, j, i*2, "*");
-            mvwprintw(win, j, i*2+1, "*");
+            for (int k = 0; k < X_SCALE; k++)
+            {
+                mvwprintw(win, j, i*X_SCALE+k, "*");
+            }
         }
     }
 }
