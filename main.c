@@ -319,3 +319,10 @@ void print_rectangle(int startrow, int startcol, int height, int width)
         }
     }
 }
+//BOX
+
+
+//LIGHTING
+
+
+//MOVEMENT
