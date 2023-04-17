@@ -6,7 +6,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#define YX_RATIO 2
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
@@ -132,7 +131,7 @@ int main(int argv, char **argc)
 
     int max_y = 0, max_x = 0;
     time(&fps_timestamp);
-    int x = 5, y = 15;
+    int x = 5, y = 5;
     int x_vel = 1, y_vel = 1;
     initscr();
     noecho();
@@ -143,17 +142,20 @@ int main(int argv, char **argc)
     Vec2i window_size;
 
     init_pair(1, COLOR_CYAN, COLOR_CYAN);
+    init_pair(2, COLOR_BLACK, COLOR_WHITE);
     // init_pair(2, 3, 7);
     // init_pair(3, 4, 2);
     // init_pair(4, 7, 4);
-    attrset(COLOR_PAIR(1));
     while (1)
     {
         getmaxyx(stdscr, window_size.y, window_size.x);
         erase();
+        attrset(COLOR_PAIR(2));
+        mvprintw(0,0,"W:%d H:%d", window_size.x, window_size.y);
+        attrset(COLOR_PAIR(1));
         Circle circle = {
             {x, y},
-            10
+            2
         };
         print_circle(window_size, circle);
         // char c = getch();
@@ -188,8 +190,8 @@ int main(int argv, char **argc)
             collide_circle_line(circle, window_left) ||
             collide_circle_line(circle, window_right))
         {
-            x = 50;
-            y = 50;
+            x = window_size.x / 2;
+            y = window_size.y / 2;
             int temp = y_vel;
             y_vel = -x_vel;
             x_vel = y_vel;
@@ -215,7 +217,7 @@ int collide_circle_line(Circle circle, Line line)
 {
     Ellipse ellipse = {
         circle.center,
-        {circle.radius, (int)(circle.radius * YX_RATIO)}
+        {circle.radius, circle.radius}
     };
     return collide_ellipse_line(ellipse, line);
 }
@@ -267,7 +269,7 @@ int collide_ellipse_line(Ellipse ellipse, Line line)
 
 void print_circle(Vec2i win_size, Circle c)
 {
-    print_ellipse(win_size, c.center.x, c.center.y, c.radius, (int)(c.radius * YX_RATIO));
+    print_ellipse(win_size, c.center.x, c.center.y, c.radius, c.radius);
 }
 
 void print_ellipse(Vec2i win_size, int x, int y, int r2, int r1)
@@ -284,8 +286,8 @@ void print_ellipse(Vec2i win_size, int x, int y, int r2, int r1)
         {
             if (sqrt(pow(i - y - r1, 2) / pow(r1, 2) + pow(j - x - r2, 2) / pow(r2, 2)) > 1)
                 continue;
-            move(j, i);
-            printw("*");
+            mvprintw(j, i*2, "*");
+            mvprintw(j, i*2+1, "*");
         }
     }
 }
