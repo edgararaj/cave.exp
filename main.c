@@ -552,3 +552,10 @@ void print_rectangleu(WINDOW* win, int startrow, int startcol, int height, int w
         }
     }
 }
+//BOX
+
+
+//LIGHTING
+
+
+//MOVEMENT
