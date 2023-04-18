@@ -103,6 +103,17 @@ void setup_xresources()
     fwrite(find, 1, temp + strlen(temp) - find, w);
 }
 
+typedef struct {
+    int x, y;
+} Point;
+
+Point get_center(Rect *room) {
+    Point center;
+    center.x = room->x + room->width / 2;
+    center.y = room->y + room->height / 2;
+    return center;
+}
+
 time_t fps_timestamp;
 int fps_frame_counter = 0;
 int fps = 20;
@@ -538,6 +549,41 @@ void print_rectangleu(WINDOW* win, int startrow, int startcol, int height, int w
         for (int c = startcol; c <= startcol + width; c++)
         {
             mvwprintw(win, r, c, "*");
+        }
+    }
+}
+
+void apply_horizontal_tunnel(int x1, int x2, int y) {
+    int start = x1 < x2 ? x1 : x2;
+    int end = x1 > x2 ? x1 : x2;
+
+    for (int x = start; x <= end; x++) {
+        mvaddch(y, x, '#');
+    }
+}
+
+void apply_vertical_tunnel(int y1, int y2, int x) {
+    int start = y1 < y2 ? y1 : y2;
+    int end = y1 > y2 ? y1 : y2;
+
+    for (int y = start; y <= end; y++) {
+        mvaddch(y, x, '#');
+    }
+}
+
+void generate_tunnels(Rect *rooms, int num_rooms, Map *map) {
+    srand(time(NULL));
+
+    for (int i = 1; i < num_rooms; i++) {
+        Point prev_center = get_center(&rooms[i - 1]);
+        Point new_center = get_center(&rooms[i]);
+
+        if (rand() % 2 == 1) {
+            apply_horizontal_tunnel(prev_center.x, new_center.x, prev_center.y, map);
+            apply_vertical_tunnel(prev_center.y, new_center.y, new_center.x, map);
+        } else {
+            apply_vertical_tunnel(prev_center.y, new_center.y, prev_center.x, map);
+            apply_horizontal_tunnel(prev_center.x, new_center.x, new_center.y, map);
         }
     }
 }
