@@ -42,6 +42,11 @@ typedef struct {
     Vec2i radius;
 } Ellipse;
 
+typedef struct {
+    int* data;
+    Vec2i size;
+} Bitmap;
+
 void print_triangle(WINDOW* win, int startrow, int startcol, int height);
 void print_rectangleu(WINDOW* win, int startrow, int startcol, int height, int width);
 void print_ellipse(WINDOW* win, Vec2i, int y, int x, int r1, int r2);
@@ -260,6 +265,11 @@ void order_rects(Rect* rects, int rects_count)
     }
 }
 
+void generate_tunnels_and_rasterize(Bitmap bitmap, Rect* rects, int rect_count)
+{
+
+}
+
 int main(int argv, char **argc)
 {  
     char* flag = argc[1];
@@ -308,8 +318,9 @@ int main(int argv, char **argc)
     Rect ordered_rects[10];
     order_rects(rects, rects_count);
 
-    int pixmap[100-20][40];
-    generate_tunnels_and_rasterize(rects, rects_count);
+    int data[100-20][40];
+    Bitmap pixmap = {data, {100-20, 40}};
+    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
 
     while (1)
     {
