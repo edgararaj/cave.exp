@@ -11,50 +11,72 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 #define X_SCALE 2
+#define WIDTH 80
+#define WIDTH_SCALED 160
+#define HEIGHT 50
 
-typedef struct {
+#define XSTR(s) STR(s)
+#define STR(s) #s
+
+typedef struct
+{
     int x;
     int y;
 } Vec2i;
 
-typedef struct {
+typedef struct
+{
     float x;
     float y;
 } Vec2f;
 
-typedef struct {
+typedef struct
+{
     Vec2i start;
     Vec2i end;
 } Line;
 
-typedef struct {
+typedef struct
+{
     Vec2i tl;
     Vec2i br;
+    short color;
 } Rect;
 
-typedef struct {
+typedef struct
+{
     Vec2i center;
     int radius;
 } Circle;
 
-typedef struct {
+typedef struct
+{
     Vec2i center;
     Vec2i radius;
 } Ellipse;
 
-typedef struct {
-    int* data;
-    Vec2i size;
+typedef struct
+{
+    int *data;
+    union
+    {
+        Vec2i size;
+        struct
+        {
+            int width;
+            int height;
+        };
+    };
 } Bitmap;
 
-void print_triangle(WINDOW* win, int startrow, int startcol, int height);
-void print_rectangleu(WINDOW* win, int startrow, int startcol, int height, int width);
-void print_ellipse(WINDOW* win, Vec2i, int y, int x, int r1, int r2);
-void print_circle(WINDOW* win, Vec2i, Circle);
+void print_triangle(WINDOW *win, int startrow, int startcol, int height);
+void print_rectangleu(WINDOW *win, int startrow, int startcol, int height, int width);
+void print_ellipse(WINDOW *win, Vec2i, int y, int x, int r1, int r2);
+void print_circle(WINDOW *win, Vec2i, Circle);
 int collide_ellipse_line(Ellipse ellipse, Line line);
 int collide_circle_line(Circle ellipse, Line line);
 int collide_rect_rect(Rect a, Rect b);
-void print_rectangle(WINDOW* win, Rect rect);
+void print_rectangle(WINDOW *win, Rect rect);
 
 typedef struct
 {
@@ -66,8 +88,8 @@ char *get_xresource(char *start, char *end)
 {
     Xresource resources[] = {
         {"FONTSIZE", "12"},
-        {"WIDTH", "100"},
-        {"HEIGHT", "40"}};
+        {"WIDTH", XSTR(WIDTH_SCALED)},
+        {"HEIGHT", XSTR(HEIGHT)}};
 
     for (size_t i = 0; i < ARRAY_SIZE(resources); i++)
     {
@@ -108,14 +130,33 @@ void setup_xresources()
     fwrite(find, 1, temp + strlen(temp) - find, w);
 }
 
-typedef struct {
-    int x, y;
-} Point;
+void apply_horizontal_tunnel(int x1, int x2, int y, Bitmap bitmap)
+{
+    int start = x1 < x2 ? x1 : x2;
+    int end = x1 > x2 ? x1 : x2;
 
-Point get_center(Rect *room) {
-    Point center;
-    center.x = room->x + room->width / 2;
-    center.y = room->y + room->height / 2;
+    for (int x = start; x <= end; x++)
+    {
+        bitmap.data[y * bitmap.width + x] = 1;
+    }
+}
+
+void apply_vertical_tunnel(int y1, int y2, int x, Bitmap bitmap)
+{
+    int start = y1 < y2 ? y1 : y2;
+    int end = y1 > y2 ? y1 : y2;
+
+    for (int y = start; y <= end; y++)
+    {
+        bitmap.data[y * bitmap.width + x] = 1;
+    }
+}
+
+Vec2i get_center(Rect rect)
+{
+    Vec2i center;
+    center.x = rect.tl.x + (rect.br.x - rect.tl.x) / 2;
+    center.y = rect.tl.y + (rect.br.y - rect.tl.y) / 2;
     return center;
 }
 
@@ -145,25 +186,28 @@ void limit_fps()
 
 int term_line_index = 0;
 char term_lines[20][50] = {};
-void add_term_line(const char* format, ...) {
-if (term_line_index == 19)
+void add_term_line(const char *format, ...)
 {
-    for (int i = 0; i < 19; i++)
+    if (term_line_index == 19)
     {
-        strcpy(term_lines[i], term_lines[i+1]);
+        for (int i = 0; i < 19; i++)
+        {
+            strcpy(term_lines[i], term_lines[i + 1]);
+        }
+        term_line_index = 18;
     }
-    term_line_index = 18;
-}
-  va_list va;
-  va_start(va, format);
-  const int ret = vsnprintf(term_lines[term_line_index++], 50, format, va);
-  va_end(va);
+    va_list va;
+    va_start(va, format);
+    const int ret = vsnprintf(term_lines[term_line_index++], 50, format, va);
+    va_end(va);
 }
 
-void render_term(WINDOW* win) {
-  for (int i = 0; i < 20 && *term_lines[i]; i++) {
-    mvwprintw(win, i+1, 1, term_lines[i]);
-  }
+void render_term(WINDOW *win)
+{
+    for (int i = 0; i < 20 && *term_lines[i]; i++)
+    {
+        mvwprintw(win, i + 1, 1, term_lines[i]);
+    }
 }
 
 Vec2i vec2i_add(Vec2i a, Vec2i b)
@@ -234,39 +278,53 @@ Rect gen_random_subrect(Rect container)
     return result;
 }
 
-int generate_rects(Rect window, Rect* rects, int rects_max)
+Rect expand_rect(Rect rect, int amount)
+{
+    Rect result;
+    result.br.y = rect.br.y + amount;
+    result.br.x = rect.br.x + amount;
+    result.tl.x = rect.tl.x - amount;
+    result.tl.y = rect.tl.y - amount;
+    return result;
+}
+
+int generate_rects(Rect window, Rect *rects, int rects_max)
 {
     int rects_count = 0;
-    for (size_t i = 0; i < rects_max; i++)
+    for (int i = 0; i < rects_max; i++)
     {
         Rect new_rect;
         int valid_new_rect;
-        for (int j = 0; j < 10; j++)
+        for (int j = 0; j < 255; j++)
         {
             valid_new_rect = 1;
             new_rect = gen_random_subrect(window);
             for (int n = 0; n < rects_count; n++)
             {
-                if (collide_rect_rect(rects[n], new_rect))
+                if (collide_rect_rect(rects[n], expand_rect(new_rect, 2)))
                 {
                     valid_new_rect = 0;
                     break;
                 }
             }
-            if (valid_new_rect) break;
+            if (valid_new_rect)
+                break;
         }
-        if (valid_new_rect) rects[rects_count++] = new_rect;
+        if (valid_new_rect)
+        {
+            rects[rects_count++] = new_rect;
+        }
     }
-
+    return rects_count;
 }
 
-void order_rects(Rect* rects, int rects_count)
+void order_rects(Rect *rects, int rects_count)
 {
     for (int i = 0; i < rects_count; i++)
     {
         for (int j = 0; j < rects_count; j++)
         {
-            if (rects[i].tl.y < rects[j].tl.y)
+            if (rects[i].tl.x < rects[j].tl.x)
             {
                 Rect temp = rects[i];
                 rects[i] = rects[j];
@@ -276,14 +334,50 @@ void order_rects(Rect* rects, int rects_count)
     }
 }
 
-void generate_tunnels_and_rasterize(Bitmap bitmap, Rect* rects, int rect_count)
+void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count)
 {
+    for (int i = 1; i < rect_count; i++)
+    {
+        Vec2i prev_center = get_center(rects[i - 1]);
+        Vec2i new_center = get_center(rects[i]);
 
+        add_term_line("P:%d,%d N:%d,%d", prev_center.x, prev_center.y, new_center.x, new_center.y);
+
+        if (rand() % 2 == 1)
+        {
+            apply_horizontal_tunnel(prev_center.x, new_center.x, prev_center.y, bitmap);
+            apply_vertical_tunnel(prev_center.y, new_center.y, new_center.x, bitmap);
+        }
+        else
+        {
+            apply_vertical_tunnel(prev_center.y, new_center.y, prev_center.x, bitmap);
+            apply_horizontal_tunnel(prev_center.x, new_center.x, new_center.y, bitmap);
+        }
+    }
+}
+
+void print_bitmap(WINDOW *window, Vec2i window_size, Bitmap bitmap)
+{
+    int max_y = MIN(bitmap.height, window_size.y);
+    for (int y = 0; y < max_y; y++)
+    {
+        int max_x = MIN(bitmap.width, window_size.x);
+        for (int x = 0; x < max_x; x++)
+        {
+            if (bitmap.data[y * bitmap.width + x] == 1)
+            {
+                for (int k = 0; k < X_SCALE; k++)
+                {
+                    mvwprintw(window, y, x * X_SCALE + k, "%d", bitmap.data[y * bitmap.width + x]);
+                }
+            }
+        }
+    }
 }
 
 int main(int argv, char **argc)
-{  
-    char* flag = argc[1];
+{
+    char *flag = argc[1];
     if (argc[1] && strcmp(argc[1], "--setup") == 0)
     {
         printf("Setting up Xresources\n");
@@ -307,30 +401,34 @@ int main(int argv, char **argc)
     WINDOW *win = newwin(30, 20, 0, 0);
     WINDOW *win_game = newwin(30, 20, 0, 20);
 
+    init_pair(0, COLOR_WHITE, COLOR_BLACK);
     init_pair(1, COLOR_CYAN, COLOR_CYAN);
-    init_pair(2, COLOR_WHITE, COLOR_BLACK);
-    wattrset(win, COLOR_PAIR(2));
+    wattrset(win, COLOR_PAIR(0));
     wattrset(win_game, COLOR_PAIR(1));
     // init_pair(2, 3, 7);
     // init_pair(3, 4, 2);
     // init_pair(4, 7, 4);
     Circle circle = {
-        {5, 5}, 2
-    };
+        {5, 5}, 2};
 
     Rect window = {};
     window.tl.x = 0;
     window.tl.y = 0;
-    window.br.x = 100 - 20;
-    window.br.y = 40;
+    window.br.x = WIDTH - 20;
+    window.br.y = HEIGHT;
 
-    Rect rects[10];
+    Rect rects[20];
     int rects_count = generate_rects(window, rects, ARRAY_SIZE(rects));
-    Rect ordered_rects[10];
+    Rect ordered_rects[ARRAY_SIZE(rects)];
     order_rects(rects, rects_count);
 
-    int data[100-20][40];
-    Bitmap pixmap = {data, {100-20, 40}};
+    for (int i = 0; i < rects_count; i++)
+    {
+        rects[i].color = i + 1;
+    }
+
+    int data[WIDTH - 20][HEIGHT] = {};
+    Bitmap pixmap = {(int *)data, {WIDTH - 20, HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
 
     while (1)
@@ -341,7 +439,7 @@ int main(int argv, char **argc)
         wresize(win_game, window_size.y, window_size.x);
         werase(win);
         werase(win_game);
-        wattrset(win_game, COLOR_PAIR(2));
+        wattrset(win_game, COLOR_PAIR(0));
         box(win_game, 0, 0);
         mvwprintw(win_game, 0, 1, "W:%d H:%d", window_size.x, window_size.y);
         wattrset(win_game, COLOR_PAIR(1));
@@ -352,8 +450,15 @@ int main(int argv, char **argc)
 
         for (int i = 0; i < rects_count; i++)
         {
+            wattrset(win_game, COLOR_PAIR(1));
             print_rectangle(win_game, rects[i]);
+            Vec2i center = get_center(rects[i]);
+            // wattrset(win_game, COLOR_PAIR(0));
+            // mvwprintw(win_game, center.y, center.x, "%d", rects[i].color);
         }
+
+        wattrset(win_game, COLOR_PAIR(1));
+        print_bitmap(win_game, window_size, pixmap);
 
         // mvwprintw(win, 0, 1, "Console");
         // mvwprintw(win, 1, 1, "Hello");
@@ -362,7 +467,7 @@ int main(int argv, char **argc)
 
         // print_circle(win_game, window_size, circle);
         // char c = getch();
-        // if (c == 'w' || c == KEY_UP) 
+        // if (c == 'w' || c == KEY_UP)
         //     y -= y_vel;
         // if (c == 's' || c == KEY_DOWN)
         //     y += y_vel;
@@ -446,18 +551,17 @@ int collide_rect_rect(Rect a, Rect b)
     int r1y = a.tl.y;
     int r2y = b.tl.y;
 
-    return (r1x + r1w >= r2x &&     // r1 right edge past r2 left
-    r1x <= r2x + r2w &&       // r1 left edge past r2 right
-    r1y + r1h >= r2y &&       // r1 top edge past r2 bottom
-    r1y <= r2y + r2h);       // r1 bottom edge past r2 top
+    return (r1x + r1w >= r2x && // r1 right edge past r2 left
+            r1x <= r2x + r2w && // r1 left edge past r2 right
+            r1y + r1h >= r2y && // r1 top edge past r2 bottom
+            r1y <= r2y + r2h);  // r1 bottom edge past r2 top
 }
 
 int collide_circle_line(Circle circle, Line line)
 {
     Ellipse ellipse = {
         circle.center,
-        {circle.radius, circle.radius}
-    };
+        {circle.radius, circle.radius}};
     return collide_ellipse_line(ellipse, line);
 }
 /**
@@ -506,12 +610,12 @@ int collide_ellipse_line(Ellipse ellipse, Line line)
     return 0;
 }
 
-void print_circle(WINDOW* win, Vec2i win_size, Circle c)
+void print_circle(WINDOW *win, Vec2i win_size, Circle c)
 {
     print_ellipse(win, win_size, c.center.x, c.center.y, c.radius, c.radius);
 }
 
-void print_ellipse(WINDOW* win, Vec2i win_size, int y, int x, int r2, int r1)
+void print_ellipse(WINDOW *win, Vec2i win_size, int y, int x, int r2, int r1)
 {
     int d1 = r1 * 2;
     int d2 = r2 * 2;
@@ -527,13 +631,13 @@ void print_ellipse(WINDOW* win, Vec2i win_size, int y, int x, int r2, int r1)
                 continue;
             for (int k = 0; k < X_SCALE; k++)
             {
-                mvwprintw(win, j, i*X_SCALE+k, "*");
+                mvwprintw(win, j, i * X_SCALE + k, "*");
             }
         }
     }
 }
 
-void print_triangle(WINDOW* win, int startrow, int startcol, int height)
+void print_triangle(WINDOW *win, int startrow, int startcol, int height)
 {
     int x = startcol;
 
@@ -541,65 +645,32 @@ void print_triangle(WINDOW* win, int startrow, int startcol, int height)
     {
         for (int c = startcol; c <= x; c++)
         {
-            mvwprintw(win, r, c,"*");
+            mvwprintw(win, r, c, "*");
         }
         x++;
         startcol--;
     }
 }
 
-void print_rectangle(WINDOW* win, Rect rect)
+void print_rectangle(WINDOW *win, Rect rect)
 {
+    // wattrset(win, COLOR_PAIR(rect.color));
     print_rectangleu(win, rect.tl.y, rect.tl.x, rect.br.y - rect.tl.y, rect.br.x - rect.tl.x);
 }
 
-void print_rectangleu(WINDOW* win, int startrow, int startcol, int height, int width)
+void print_rectangleu(WINDOW *win, int startrow, int startcol, int height, int width)
 {
     for (int r = startrow; r <= startrow + height; r++)
     {
         for (int c = startcol; c <= startcol + width; c++)
         {
-            mvwprintw(win, r, c, "*");
+            for (int k = 0; k < X_SCALE; k++)
+            {
+                mvwprintw(win, r, c * X_SCALE + k, "*");
+            }
         }
     }
 }
-//BOX
+// BOX
 
-
-//LIGHTING
-
-
-void apply_horizontal_tunnel(int x1, int x2, int y) {
-    int start = x1 < x2 ? x1 : x2;
-    int end = x1 > x2 ? x1 : x2;
-
-    for (int x = start; x <= end; x++) {
-        mvaddch(y, x, '#');
-    }
-}
-
-void apply_vertical_tunnel(int y1, int y2, int x) {
-    int start = y1 < y2 ? y1 : y2;
-    int end = y1 > y2 ? y1 : y2;
-
-    for (int y = start; y <= end; y++) {
-        mvaddch(y, x, '#');
-    }
-}
-
-void generate_tunnels(Rect *rooms, int num_rooms, Map *map) {
-    srand(time(NULL));
-
-    for (int i = 1; i < num_rooms; i++) {
-        Point prev_center = get_center(&rooms[i - 1]);
-        Point new_center = get_center(&rooms[i]);
-
-        if (rand() % 2 == 1) {
-            apply_horizontal_tunnel(prev_center.x, new_center.x, prev_center.y, map);
-            apply_vertical_tunnel(prev_center.y, new_center.y, new_center.x, map);
-        } else {
-            apply_vertical_tunnel(prev_center.y, new_center.y, prev_center.x, map);
-            apply_horizontal_tunnel(prev_center.x, new_center.x, new_center.y, map);
-        }
-    }
-}
+// LIGHTING
