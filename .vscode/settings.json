@@ -1,6 +1,5 @@
 {
     "files.associations": {
-        "unistd.h": "c",
         "state.h": "c"
     }
 }

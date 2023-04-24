@@ -1,17 +1,16 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <curses.h>
 #include <time.h>
 #include "state.h"
-#include "mapa.h"
 
 void do_movement_action(Circle *st, int dx, int dy)
 {
     st->center.x += dx;
     st->center.y += dy;
 }
+
 void update(Circle *st)
 {
     int key = getch();
