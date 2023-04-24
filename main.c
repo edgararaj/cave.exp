@@ -366,10 +366,7 @@ void print_bitmap(WINDOW *window, Vec2i window_size, Bitmap bitmap)
         {
             if (bitmap.data[y * bitmap.width + x] == 1)
             {
-                for (int k = 0; k < X_SCALE; k++)
-                {
-                    mvwprintw(window, y, x * X_SCALE + k, "%d", bitmap.data[y * bitmap.width + x]);
-                }
+                mvwprintw(window, y, x, "?.");
             }
         }
     }
@@ -446,7 +443,7 @@ int main(int argv, char **argc)
         // add_term_line("W:%d H:%d", window_size.x, window_size.y);
         box(win, 0, 0);
         render_term(win);
-        window_size.x /= X_SCALE;
+        //window_size.x /= X_SCALE;
 
         for (int i = 0; i < rects_count; i++)
         {
@@ -664,10 +661,7 @@ void print_rectangleu(WINDOW *win, int startrow, int startcol, int height, int w
     {
         for (int c = startcol; c <= startcol + width; c++)
         {
-            for (int k = 0; k < X_SCALE; k++)
-            {
-                mvwprintw(win, r, c * X_SCALE + k, "*");
-            }
+            mvwprintw(win, r, c, "?.");
         }
     }
 }
