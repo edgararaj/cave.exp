@@ -3,17 +3,18 @@
 #include <unistd.h>
 #include <curses.h>
 #include <time.h>
-#include "state.h"
+#include "objects.h"
 
-void do_movement_action(Circle *st, int dx, int dy)
+void do_movement_action(Rect *st, int dx, int dy)
 {
-    st->center.x += dx;
-    st->center.y += dy;
+    st->tl.y += dx;
+    st->br.y += dx;
+    st->tl.x += dy;
+    st->br.x += dy;
 }
 
-void update(Circle *st)
+void update(Rect *st, int key)
 {
-    int key = getch();
 
     switch (key)
     {
@@ -52,9 +53,6 @@ void update(Circle *st)
     case '3':
         do_movement_action(st, +1, +1);
         break;
-    case 'q':
-        endwin();
-        exit(0);
-        break;
+    default: break;
     }
 }
