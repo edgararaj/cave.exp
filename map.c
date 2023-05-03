@@ -134,3 +134,60 @@ void order_rects(Rect *rects, int rects_count)
         }
     }
 }
+
+void erode(Bitmap bitmap, int iterations) {
+    // Crie um gerador de números aleatórios
+    srand(time(NULL));
+
+    // Erode com DLA
+    for (int i = 0; i < iterations; i++) {
+        // Encontre todas as células abertas
+        int open_tiles[bitmap.width * bitmap.height];
+        int open_tile_count = 0;
+
+        for (int j = 0; j < bitmap.width * bitmap.height; j++) {
+            if (bitmap.data[j] ==             1) { // Supondo que 1 seja o código para '#'
+                open_tiles[open_tile_count++] = j;
+            }
+        }
+
+        // Escolha uma célula aberta aleatoriamente
+        int random_index = rand() % open_tile_count;
+        int digger = open_tiles[random_index];
+        int digger_x = digger % bitmap.width;
+        int digger_y = digger / bitmap.width;
+
+        // Enquanto a célula escolhida ainda for um '#', escolha uma direção aleatória e mova o "digger"
+        while (bitmap.data[digger] == 1) {
+            int direction = rand() % 4;
+
+            switch (direction) {
+                case 0: // Mova para a esquerda
+                    if (digger_x > 2) {
+                        digger_x -= 1;
+                    }
+                    break;
+                case 1: // Mova para a direita
+                    if (digger_x < bitmap.width - 2) {
+                        digger_x += 1;
+                    }
+                    break;
+                case 2: // Mova para cima
+                    if (digger_y > 2) {
+                        digger_y -= 1;
+                    }
+                    break;
+                case 3: // Mova para baixo
+                    if (digger_y < bitmap.height - 2) {
+                        digger_y += 1;
+                    }
+                    break;
+            }
+
+            digger = digger_y * bitmap.width + digger_x;
+        }
+
+        // Marque a nova célula como um '#'
+        bitmap.data[digger] = 1;
+    }
+}
