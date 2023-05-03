@@ -57,6 +57,12 @@ typedef struct
     };
 } Bitmap;
 
+typedef struct {
+    int x, y;           // Coordenadas da câmera
+    int width, height;  // Largura e altura da câmera
+    int margin;         // Margem nas bordas da câmera
+} Camera;
+
 Rect gen_random_subrect(Rect container);
 
 Vec2i get_center(Rect rect);

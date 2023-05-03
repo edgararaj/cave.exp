@@ -55,6 +55,18 @@ int kbhit(void)
     }
 }
 
+void render_player(WINDOW *win, Camera camera, Rect player) {
+    // Ajusta as coordenadas do jogador para a posição da câmera
+    int screen_x = player.tl.x - camera.x;
+    int screen_y = player.tl.y - camera.y;
+    
+    // Renderiza o jogador na posição ajustada
+    Rect rect = {
+        screen_x, screen_y, player.br.x - camera.x, player.br.y - camera.y
+    };
+    print_rectangle(win, rect);
+}
+
 int main(int argv, char **argc)
 {
     char *flag = argc[1];
@@ -107,8 +119,8 @@ int main(int argv, char **argc)
         rects[i].color = 1;
     }
 
-    int data[GAME_WIDTH][GAME_HEIGHT] = {};
-    Bitmap pixmap = {(int *)data, {GAME_WIDTH, GAME_HEIGHT}};
+    int data[MAP_WIDTH][MAP_HEIGHT] = {};
+    Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     for (int i = 0; i < 4; i++)
     {
@@ -117,6 +129,8 @@ int main(int argv, char **argc)
 
     Vec2i first_rect_center = get_center(rects[0]);
     Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
+
+    Camera camera = {0, 0, 0, 0, 10};
 
     while (1)
     {
@@ -130,10 +144,18 @@ int main(int argv, char **argc)
         wattrset(win_game, COLOR_PAIR(0));
         wattrset(win_game, COLOR_PAIR(1));
 
+        wattrset(win_game, COLOR_PAIR(0));
+        wprintw(win_game, "%d, %d\n", window_size.x, window_size.y);
+
+        camera.width = window_size.x;
+        camera.height = window_size.y;
+        update_camera(&camera, player.tl.x, player.tl.y);
+
         int key = getch();
 
         wattrset(win_game, COLOR_PAIR(1));
-        print_bitmap(win_game, window_size, pixmap);
+        render_map(camera, pixmap, win_game);
+        // print_bitmap(win_game, window_size, pixmap);
 
         Rect prev_player = player;
         update(&player, key);
@@ -144,17 +166,22 @@ int main(int argv, char **argc)
 
         int r = 50;
         float inc = asinf(sqrtf(2)/2/(r+2));
+        // Atualizar a posição da luz para levar em conta a posição da câmera
+        Vec2f light_pos_screen = {
+            player.tl.x - camera.x,
+            player.tl.y - camera.y};
+
         wattrset(win_game, COLOR_PAIR(3));
-        for (float theta = 0; theta < 2 * M_PI; theta += inc) {
+        for (float theta = 0; theta < 2 * M_PI; theta += inc)
+        {
             Vec2f vec = {
-                cos(theta), sin(theta)
-            };
-            Vec2f line_pos = vec2i_to_f(player.tl);
+                cos(theta), sin(theta)};
+            Vec2f line_pos = light_pos_screen;
             for (int k = 0; k < r; k++)
             {
                 line_pos = vec2f_add(line_pos, vec);
 
-                int data = pixmap.data[(int)line_pos.y * pixmap.width + (int)line_pos.x];
+                int data = pixmap.data[(int)(line_pos.y + camera.y) * pixmap.width + (int)(line_pos.x + camera.x)];
                 if (!data)
                 {
                     break;
@@ -162,8 +189,10 @@ int main(int argv, char **argc)
                 print_pixel(win_game, line_pos.x, line_pos.y);
             }
         }
+
         wattrset(win_game, COLOR_PAIR(1));
-        print_rectangle(win_game, player);
+        render_player(win_game, camera, player);
+        // print_rectangle(win_game, player);
 
         render_term(win);
         box(win, 0, 0);
