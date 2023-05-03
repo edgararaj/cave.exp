@@ -110,10 +110,11 @@ int main(int argv, char **argc)
     int data[GAME_WIDTH][GAME_HEIGHT] = {};
     Bitmap pixmap = {(int *)data, {GAME_WIDTH, GAME_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    for (int i = 0; i < 4; i++)
-    {
-        bitmap_dla_noise(pixmap);
-    }
+    erode(pixmap, 650);
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     bitmap_dla_noise(pixmap);
+    // }
 
     Vec2i first_rect_center = get_center(rects[0]);
     Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
