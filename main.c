@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include <math.h>
 #include <assert.h>
@@ -122,7 +123,7 @@ int main(int argv, char **argc)
     int data[MAP_WIDTH][MAP_HEIGHT] = {};
     Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 650);
+    erode(pixmap, 4000);
     // for (int i = 0; i < 4; i++)
     // {
     //     bitmap_dla_noise(pixmap);
@@ -166,7 +167,7 @@ int main(int argv, char **argc)
         }
 
         int r = 50;
-        float inc = asinf(sqrtf(2)/2/(r+2));
+        float inc = M_PI / 360.f;
         // Atualizar a posição da luz para levar em conta a posição da câmera
         Vec2f light_pos_screen = {
             player.tl.x - camera.x,
