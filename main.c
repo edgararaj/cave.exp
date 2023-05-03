@@ -88,6 +88,7 @@ int main(int argv, char **argc)
     init_pair(0, COLOR_WHITE, COLOR_BLACK);
     init_pair(1, COLOR_CYAN, COLOR_CYAN);
     init_pair(2, COLOR_RED, COLOR_RED);
+    init_pair(3, COLOR_BLUE, COLOR_BLUE);
     wattrset(win, COLOR_PAIR(0));
     wattrset(win_game, COLOR_PAIR(1));
     Rect window = {};
@@ -141,33 +142,28 @@ int main(int argv, char **argc)
             player = prev_player;
         }
 
-        wattrset(win_game, COLOR_PAIR(2));
-        print_rectangle(win_game, player);
-
-        float theta = 0;
-        // for (float theta = 0; theta < 2 * M_PI; theta += M_PI/6) {
-        Vec2f vec = {
-            cos(theta), sin(theta)
-        };
-        //add_term_line("%f, %f\n", vec.x, vec.y);
-        add_term_line("--------\n");
-        Vec2f line_pos = vec2i_to_f(player.tl);
-        Line line = { player.tl, player.tl };
-        for (int k = 0; k < 100; k++)
-        {
-            line_pos = vec2f_add(line_pos, vec);
-
-            add_term_line("%f, %f\n", line_pos.x, line_pos.y);
-            if (pixmap.data[(int)line_pos.y * pixmap.width + (int)line_pos.x])
+        int r = 50;
+        float inc = asinf(sqrtf(2)/2/(r+2));
+        wattrset(win_game, COLOR_PAIR(3));
+        for (float theta = 0; theta < 2 * M_PI; theta += inc) {
+            Vec2f vec = {
+                cos(theta), sin(theta)
+            };
+            Vec2f line_pos = vec2i_to_f(player.tl);
+            for (int k = 0; k < r; k++)
             {
-                line.end = vec2f_to_i(line_pos);
+                line_pos = vec2f_add(line_pos, vec);
+
+                int data = pixmap.data[(int)line_pos.y * pixmap.width + (int)line_pos.x];
+                if (!data)
+                {
+                    break;
+                }
+                print_pixel(win_game, line_pos.x, line_pos.y);
             }
         }
-        wattrset(win_game, COLOR_PAIR(2));
-        add_term_line("--------\n");
-        add_term_line("%d,%d -> %d,%d\n", line.start.x, line.start.y, line.end.x, line.end.y);
-        print_line(win_game, line);
-        // }
+        wattrset(win_game, COLOR_PAIR(1));
+        print_rectangle(win_game, player);
 
         render_term(win);
         box(win, 0, 0);

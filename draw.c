@@ -84,8 +84,8 @@ void print_rectangleu(WINDOW *win, int startrow, int startcol, int height, int w
 void print_line(WINDOW *win, Line line)
 {
     int delta_x = SIGN(line.end.x - line.start.x);
-    int delta_y = SIGN(line.end.y - line.start.y);
-    int j = line.start.y;
+    float delta_y = (float)(line.end.y - line.start.y) / (line.end.x - line.start.x) * SIGN(line.end.x - line.start.x);
+    float j = line.start.y;
     for (int i = line.start.x; i != line.end.x; i += delta_x)
     {
         print_pixel(win, i, j);
