@@ -81,6 +81,18 @@ void print_rectangleu(WINDOW *win, int startrow, int startcol, int height, int w
     }
 }
 
+void print_line(WINDOW *win, Line line)
+{
+    int delta_x = SIGN(line.end.x - line.start.x);
+    int delta_y = SIGN(line.end.y - line.start.y);
+    int j = line.start.y;
+    for (int i = line.start.x; i != line.end.x; i += delta_x)
+    {
+        print_pixel(win, i, j);
+        j += delta_y;
+    }
+}
+
 void bitmap_draw_rectangle(Bitmap bitmap, Rect rect)
 {
     int startrow = rect.tl.y;

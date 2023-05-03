@@ -83,6 +83,7 @@ int main(int argv, char **argc)
 
     WINDOW *win = newwin(30, INGAME_TERM_SIZE, 0, 0);
     WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    nodelay(win_game, 1);
 
     init_pair(0, COLOR_WHITE, COLOR_BLACK);
     init_pair(1, COLOR_CYAN, COLOR_CYAN);
@@ -129,7 +130,6 @@ int main(int argv, char **argc)
         wattrset(win_game, COLOR_PAIR(1));
 
         int key = getch();
-        add_term_line("%d\n", key);
 
         wattrset(win_game, COLOR_PAIR(1));
         print_bitmap(win_game, window_size, pixmap);
@@ -141,13 +141,41 @@ int main(int argv, char **argc)
             player = prev_player;
         }
 
+        wattrset(win_game, COLOR_PAIR(2));
         print_rectangle(win_game, player);
+
+        float theta = 0;
+        // for (float theta = 0; theta < 2 * M_PI; theta += M_PI/6) {
+        Vec2f vec = {
+            cos(theta), sin(theta)
+        };
+        //add_term_line("%f, %f\n", vec.x, vec.y);
+        add_term_line("--------\n");
+        Vec2f line_pos = vec2i_to_f(player.tl);
+        Line line = { player.tl, player.tl };
+        for (int k = 0; k < 100; k++)
+        {
+            line_pos = vec2f_add(line_pos, vec);
+
+            add_term_line("%f, %f\n", line_pos.x, line_pos.y);
+            if (pixmap.data[(int)line_pos.y * pixmap.width + (int)line_pos.x])
+            {
+                line.end = vec2f_to_i(line_pos);
+            }
+        }
+        wattrset(win_game, COLOR_PAIR(2));
+        add_term_line("--------\n");
+        add_term_line("%d,%d -> %d,%d\n", line.start.x, line.start.y, line.end.x, line.end.y);
+        print_line(win_game, line);
+        // }
+
         render_term(win);
         box(win, 0, 0);
+
         wrefresh(win);
         wrefresh(win_game);
     }
 
-        endwin();
+    endwin();
     return 0;
 }

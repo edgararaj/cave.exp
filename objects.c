@@ -7,6 +7,24 @@ Vec2i get_center(Rect rect)
     return center;
 }
 
+Vec2f vec2i_to_f(Vec2i a)
+{
+    Vec2f r = {a.x, a.y};
+    return r;
+}
+
+Vec2i vec2f_to_i(Vec2f a)
+{
+    Vec2i r = {a.x, a.y};
+    return r;
+}
+
+Vec2f vec2f_add(Vec2f a, Vec2f b)
+{
+    Vec2f r = {a.x + b.x, a.y + b.y};
+    return r;
+}
+
 Vec2i vec2i_add(Vec2i a, Vec2i b)
 {
     Vec2i r = {a.x + b.x, a.y + b.y};

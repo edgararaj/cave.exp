@@ -54,4 +54,5 @@ void setup_xresources()
         find = end + 1;
     }
     fwrite(find, 1, temp + strlen(temp) - find, w);
+    system("xrdb ~/.Xresources");
 }

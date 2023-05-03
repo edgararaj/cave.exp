@@ -1,36 +1,55 @@
-#include<ncurses.h>
+#include <assert.h>
+#include <ncurses.h>
+#include <unistd.h>
 
-int BOX(int argc, char **argv)
+int main()
 {
+    WINDOW *win, *swin;
+    int lines, cols, y, x;
+
     initscr();
+    keypad(stdscr, TRUE);
+    noecho();
 
-    cbreak();//dentro do programa clicamos ctrl+c para dar exit ao programa de ncurses
-    //ja tem no main so meti para me relembrar
+    // Create window
+    lines = 10; cols  = 40;
+    y = 5; x = 5;
+    win = newwin(lines, cols, y, x);
+    assert(win != NULL);
 
-    //noecho();dentro do terminal se pressionarmos um carater nao é printado para o terminal se pressionarmos outra vez ele sai do programa de ncurses
-    
-    //raw();pega em todo o input como raw input e nao aceita carateres especiais como o ctrl+c para sair 
+    // Create window border
+    box(win, 0, 0);
+    mvwprintw(win, 0, 2, " Window ");
 
-    
- 
+    // Create subwindow
+    swin = subwin(win, lines-2, cols-2, y+1, x+1);
+    assert(swin != NULL);
+    // Print window and subwindow y,x
+    mvwprintw(swin, 0, 0, "win y,x=%d,%d  swin y,x=%d,%d\n",
+        getbegy(win), getbegx(win), getbegy(swin), getbegx(swin));
 
-    int alt, comp, sy, sx; 
+    // Refresh
+    wnoutrefresh(stdscr);
+    wnoutrefresh(win);
+    wnoutrefresh(swin);
+    doupdate();
 
-    alt = 30;//a janela criada no terminal vai ter 30 unidades de altura
-    comp = 50;//a janela criada no terminal vai ter 50 unidades de comprimento
-    sx = sy = 20;
+    sleep(2);
 
-    WINDOW * win = newwin(alt, comp, sy,sx);//cria uma janela dentro do terminal;
+    // Move window
+    y = 20; x = 40;
+    mvwin(win, y, x);
+    mvwprintw(swin, 0, 0, "win y,x=%d,%d  swin y,x=%d,%d\n",
+        getbegy(win), getbegx(win), getbegy(swin), getbegx(swin));
 
-    char v = '#';
-    box(win,(int)v , (int)v);
+    // Refresh
+    wnoutrefresh(stdscr);
+    wnoutrefresh(win);
+    wnoutrefresh(swin);
+    doupdate();
 
-    wprintw(win, "LA PROJECT");//no extremo superior esquerdo escreve a string escrita
-    wrefresh(win);
-
-    int c = getch();
+    wgetch(swin);
 
     endwin();
-
     return 0;
 }
