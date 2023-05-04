@@ -120,38 +120,3 @@ Rect expand_rect(Rect rect, int amount)
     result.tl.y = rect.tl.y - amount;
     return result;
 }
-
-void update_camera(Camera* camera, int player_x, int player_y) {
-    // Verifica se o jogador está perto das bordas da câmera
-    if (player_x - camera->x < camera->margin) {
-        camera->x = player_x - camera->margin;
-    }
-    else if (player_x - camera->x > camera->width - camera->margin) {
-        camera->x = player_x - camera->width + camera->margin;
-    }
-    if (player_y - camera->y < camera->margin) {
-        camera->y = player_y - camera->margin;
-    }
-    else if (player_y - camera->y > camera->height - camera->margin) {
-        camera->y = player_y - camera->height + camera->margin;
-    }
-
-    // Garante que a câmera não sai dos limites do mapa
-    if (camera->x < 0) camera->x = 0;
-    if (camera->y < 0) camera->y = 0;
-    if (camera->x + camera->width > MAP_WIDTH) camera->x = MAP_WIDTH - camera->width;
-    if (camera->y + camera->height > MAP_HEIGHT) camera->y = MAP_HEIGHT - camera->height;
-}
-
-void render_map(Camera camera, Bitmap map, WINDOW* window) {
-    for (int x = 0; x < camera.width; ++x) {
-        for (int y = 0; y < camera.height; ++y) {
-            int map_x = x + camera.x;
-            int map_y = y + camera.y;
-            if (map.data[map_y * map.width + map_x] == 1)
-            {
-                print_pixel(window, x, y);
-            }
-        }
-    }
-}

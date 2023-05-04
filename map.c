@@ -1,6 +1,7 @@
 #include "objects.h"
 #include "draw.h"
 #include "term.h"
+#include "camera.h"
 
 void apply_horizontal_tunnel(int x1, int x2, int y, Bitmap bitmap)
 {
@@ -189,5 +190,18 @@ void erode(Bitmap bitmap, int iterations) {
 
         // Marque a nova célula como um '#'
         bitmap.data[digger] = 1;
+    }
+}
+
+void render_map(Camera camera, Bitmap map, WINDOW* window) {
+    for (int x = 0; x < camera.width; ++x) {
+        for (int y = 0; y < camera.height; ++y) {
+            int map_x = x + camera.x;
+            int map_y = y + camera.y;
+            if (map.data[map_y * map.width + map_x] == 1)
+            {
+                print_pixel(window, x, y);
+            }
+        }
     }
 }

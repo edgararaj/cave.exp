@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "objects.h"
 #include "utils.h"
+
 #include "movimento.c"
 #include "objects.c"
 #include "collide.c"
@@ -16,6 +17,7 @@
 #include "term.c"
 #include "xterm.c"
 #include "utils.c"
+#include "camera.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -134,6 +136,8 @@ int main(int argv, char **argc)
 
     Camera camera = {0, 0, 0, 0, 10};
 
+    CameraMode cam_mode = CameraMode_Margin;
+
     while (1)
     {
         getmaxyx(stdscr, window_size.y, window_size.x);
@@ -147,13 +151,22 @@ int main(int argv, char **argc)
         wattrset(win_game, COLOR_PAIR(1));
 
         wattrset(win_game, COLOR_PAIR(0));
-        wprintw(win_game, "%d, %d\n", window_size.x, window_size.y);
+        // wprintw(win_game, "%d, %d\n", window_size.x, window_size.y);
+        window_size.x /= X_SCALE;
 
         camera.width = window_size.x;
         camera.height = window_size.y;
-        update_camera(&camera, player.tl.x, player.tl.y);
-
         int key = getch();
+        if (key == 't')
+        {
+            cam_mode = ++cam_mode % CameraMode__Size;
+        }
+
+        if (key == ' ')
+        {
+            add_term_line("ola\n");
+            center_camera(&camera, player.tl.x, player.tl.y);
+        }
 
         wattrset(win_game, COLOR_PAIR(1));
         render_map(camera, pixmap, win_game);
@@ -195,6 +208,11 @@ int main(int argv, char **argc)
         wattrset(win_game, COLOR_PAIR(1));
         render_player(win_game, camera, player);
         // print_rectangle(win_game, player);
+
+        if (cam_mode == CameraMode_Margin)
+            update_camera(&camera, player.tl.x, player.tl.y);
+        else 
+            center_camera(&camera, player.tl.x, player.tl.y);
 
         render_term(win);
         box(win, 0, 0);
