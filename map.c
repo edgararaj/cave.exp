@@ -11,6 +11,10 @@ void apply_horizontal_tunnel(int x1, int x2, int y, Bitmap bitmap)
     for (int x = start; x <= end; x++)
     {
         bitmap.data[y * bitmap.width + x] = 1;
+        if (y + 1 < bitmap.height) // Verifica se não estamos no limite do bitmap
+        {
+            bitmap.data[(y + 1) * bitmap.width + x] = 1;
+        }
     }
 }
 
@@ -22,6 +26,10 @@ void apply_vertical_tunnel(int y1, int y2, int x, Bitmap bitmap)
     for (int y = start; y <= end; y++)
     {
         bitmap.data[y * bitmap.width + x] = 1;
+        if (x + 1 < bitmap.width) // Verifica se não estamos no limite do bitmap
+        {
+            bitmap.data[y * bitmap.width + x + 1] = 1;
+        }
     }
 }
 

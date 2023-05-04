@@ -125,7 +125,7 @@ int main(int argv, char **argc)
     int data[MAP_WIDTH][MAP_HEIGHT] = {};
     Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 4000);
+    erode(pixmap, 100);
     // for (int i = 0; i < 4; i++)
     // {
     //     bitmap_dla_noise(pixmap);
