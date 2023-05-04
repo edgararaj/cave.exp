@@ -11,15 +11,15 @@ void create_torches(Bitmap pixmap, Rect* torches, int num_torches) {
         do {
             x = rand() % pixmap.width;
             y = rand() % pixmap.height;
-        } while (pixmap.data[y * pixmap.width + x] == 0); // Ensure the torch is not placed in a wall
+        } while (pixmap.data[y * pixmap.width + x] == 0); // Verifica se a tocha não está colocada numa parede
 
-        torches[i] = (Rect){{x, y}, {x, y}, 3}; // 3 is the light intensity
+        torches[i] = (Rect){{x, y}, {x, y}, 3}; // 3 é a intensidade da luz
     }
 }
 
 void render_light(WINDOW* win_game, Camera camera, Bitmap pixmap, int x, int y, int r)
 {
-    float inc = M_PI / 360.f;
+    float inc = M_PI / 720.f;
     // Atualizar a posição da luz para levar em conta a posição da câmera
     Vec2f light_pos_screen = {
         x - camera.x + 0.5f,

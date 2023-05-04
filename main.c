@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "objects.h"
 #include "utils.h"
+#include "inventory.h"
 
 #include "movimento.c"
 #include "objects.c"
@@ -19,12 +20,14 @@
 #include "utils.c"
 #include "camera.c"
 #include "light.c"
+#include "inventory.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
 int fps = 20;
 int fps_limit = 60;
 int sleep_time = 10000;
+Inventory inventory;
 
 void limit_fps()
 {
@@ -127,7 +130,7 @@ int main(int argv, char **argc)
     int data[MAP_WIDTH][MAP_HEIGHT] = {};
     Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 100);
+    erode(pixmap, 2200);
     // for (int i = 0; i < 4; i++)
     // {
     //     bitmap_dla_noise(pixmap);
@@ -144,6 +147,16 @@ int main(int argv, char **argc)
     Rect torches[MAX_TORCHES];
     int num_torches = MAX_TORCHES;
     create_torches(pixmap, torches, num_torches);
+
+    init_inventory(&inventory, 10);
+
+    Item item1 = {"Sword", 'S', COLOR_WHITE};
+    Item item2 = {"Potion", 'P', COLOR_RED};
+    add_item(&inventory, item1);
+    add_item(&inventory, item2);
+
+    WINDOW *win_inventory = newwin(30, 20, 0, 2 * INGAME_TERM_SIZE);
+    noecho();
 
     while (1)
     {
@@ -175,6 +188,18 @@ int main(int argv, char **argc)
             center_camera(&camera, player.tl.x, player.tl.y);
         }
 
+        if (key == 'i') {
+            int ch;
+            while (1) {
+                draw_inventory(win_inventory, &inventory);
+                ch = getch();
+                if (ch == 'i' || ch == 'q') { // Pressione 'i' ou 'q' para sair do inventário
+                    break;
+                }
+            }
+        }
+
+
         wattrset(win_game, COLOR_PAIR(1));
         render_map(camera, pixmap, win_game);
         // print_bitmap(win_game, window_size, pixmap);
@@ -203,6 +228,8 @@ int main(int argv, char **argc)
             update_camera(&camera, player.tl.x, player.tl.y);
         else 
             center_camera(&camera, player.tl.x, player.tl.y);
+
+        draw_inventory(win_inventory, &inventory);
 
         render_term(win);
         box(win, 0, 0);
