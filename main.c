@@ -105,6 +105,7 @@ int main(int argv, char **argc)
     init_pair(1, COLOR_CYAN, COLOR_CYAN);
     init_pair(2, COLOR_RED, COLOR_RED);
     init_pair(3, COLOR_BLUE, COLOR_BLUE);
+    init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
     wattrset(win, COLOR_PAIR(0));
     wattrset(win_game, COLOR_PAIR(1));
     Rect window = {};
@@ -189,6 +190,8 @@ int main(int argv, char **argc)
 
         for (int i = 0; i < num_torches; i++)
         {
+            wattrset(win_game, COLOR_PAIR(6));
+            print_pixel(win_game, torches[i].tl.x - camera.x, torches[i].tl.y - camera.y);
             render_light(win_game, camera, pixmap, torches[i].tl.x, torches[i].tl.y, 5);
         }
 
