@@ -47,20 +47,7 @@ void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
         break;
       }
       line_pos = vec2f_add(line_pos, vec);
-      float distance = sqrtf(powf(line_pos.x - light_pos_screen.x, 2) +
-                             powf(line_pos.y - light_pos_screen.y, 2));
-      // Normalizar a distância para um valor entre 0 e 1
-      float normalized_distance = distance / r;
 
-      // Criar um gradiente de cor baseado na distância normalizada
-      int color_intensity =
-          3 - (int)(normalized_distance *
-                    3); // 3 corresponde à intensidade da luz original
-      if (color_intensity < 1) {
-        color_intensity = 1;
-      }
-
-      wattrset(win_game, COLOR_PAIR(color_intensity + 10));
       print_pixel(win_game, line_pos.x, line_pos.y);
     }
   }

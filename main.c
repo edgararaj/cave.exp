@@ -140,21 +140,21 @@ int main(int argv, char **argc)
     window.br.x = GAME_WIDTH;
     window.br.y = GAME_HEIGHT;
 
-    // Definir as cores base para o gradiente (valores entre 0 e 1000)
-    short start_color[3] = {0, 0, 0};      // preto
-    short end_color[3] = {1000, 1000, 1000}; // branco
+    // // Definir as cores base para o gradiente (valores entre 0 e 1000)
+    // short start_color[3] = {0, 0, 0};      // preto
+    // short end_color[3] = {0, 0, 1000}; // branco
 
-    // Número de cores intermediárias para gerar
-    int num_pairs = 8;
+    // // Número de cores intermediárias para gerar
+    // int num_pairs = 8;
 
-    // Verificar se o terminal suporta cores e o número mínimo de pares de cores necessários
-    if (has_colors() && COLOR_PAIRS >= num_pairs + 1) {
-        init_gradient_color_pairs(start_color, end_color, num_pairs, 10);
-    } else {
-        endwin();
-        printf("O terminal não suporta cores ou não tem pares de cores suficientes.\n");
-        exit(1);
-    }
+    // // Verificar se o terminal suporta cores e o número mínimo de pares de cores necessários
+    // if (has_colors() && COLOR_PAIRS >= num_pairs + 1) {
+    //     init_gradient_color_pairs(start_color, end_color, num_pairs, 10);
+    // } else {
+    //     endwin();
+    //     printf("O terminal não suporta cores ou não tem pares de cores suficientes.\n");
+    //     exit(1);
+    // }
 
     Rect rects[20];
     int rects_count = generate_rects(window, rects, ARRAY_SIZE(rects));
@@ -201,7 +201,7 @@ int main(int argv, char **argc)
         werase(win);
         werase(win_game);
         wattrset(win_game, COLOR_PAIR(0));
-        wattrset(win_game, COLOR_PAIR(1));
+
 
         wattrset(win_game, COLOR_PAIR(0));
         // wprintw(win_game, "%d, %d\n", window_size.x, window_size.y);
@@ -232,10 +232,7 @@ int main(int argv, char **argc)
             }
         }
 
-
-        wattrset(win_game, COLOR_PAIR(1));
         render_map(camera, pixmap, win_game);
-        // print_bitmap(win_game, window_size, pixmap);
 
         Rect prev_player = player;
         update(&player, key);
@@ -244,7 +241,10 @@ int main(int argv, char **argc)
             player = prev_player;
         }
 
-        render_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 10);
+        wattrset(win_game, COLOR_PAIR(1));
+        //render_map_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 30, pixmap);
+
+        render_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 30);
 
         for (int i = 0; i < num_torches; i++)
         {
