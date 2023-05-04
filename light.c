@@ -19,16 +19,17 @@ void create_torches(Bitmap pixmap, Rect *torches, int num_torches) {
 }
 
 int map_is_wall(Bitmap pixmap, Camera camera, Vec2f pos) {
-  int data =
-      pixmap.data[(int)(pos.y + camera.y) * pixmap.width + (int)(pos.x + camera.x)];
+  int data = pixmap.data[(int)(pos.y + camera.y) * pixmap.width +
+                         (int)(pos.x + camera.x)];
   return !data;
 }
 
-int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc)
-{
-    Vec2f inc_x = {inc.x, 0}; 
-    Vec2f inc_y = {0, inc.y};
-    return (!map_is_wall(pixmap, camera, vec2f_add(pos, inc_x)) || !map_is_wall(pixmap, camera, vec2f_add(pos, inc_y))) && !map_is_wall(pixmap, camera, vec2f_add(pos, inc));
+int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc) {
+  Vec2f inc_x = {inc.x, 0};
+  Vec2f inc_y = {0, inc.y};
+  return (!map_is_wall(pixmap, camera, vec2f_add(pos, inc_x)) ||
+          !map_is_wall(pixmap, camera, vec2f_add(pos, inc_y))) &&
+         !map_is_wall(pixmap, camera, vec2f_add(pos, inc));
 }
 
 void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
@@ -46,6 +47,20 @@ void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
         break;
       }
       line_pos = vec2f_add(line_pos, vec);
+      float distance = sqrtf(powf(line_pos.x - light_pos_screen.x, 2) +
+                             powf(line_pos.y - light_pos_screen.y, 2));
+      // Normalizar a distância para um valor entre 0 e 1
+      float normalized_distance = distance / r;
+
+      // Criar um gradiente de cor baseado na distância normalizada
+      int color_intensity =
+          3 - (int)(normalized_distance *
+                    3); // 3 corresponde à intensidade da luz original
+      if (color_intensity < 1) {
+        color_intensity = 1;
+      }
+
+      wattrset(win_game, COLOR_PAIR(color_intensity + 10));
       print_pixel(win_game, line_pos.x, line_pos.y);
     }
   }

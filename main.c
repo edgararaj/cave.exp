@@ -74,6 +74,27 @@ void render_player(WINDOW *win, Camera camera, Rect player) {
     print_rectangle(win, rect);
 }
 
+
+// Função para interpolação linear entre duas cores
+void lerp_color(short start_color[3], short end_color[3], float t, short *result_color) {
+    for (int i = 0; i < 3; i++) {
+        result_color[i] = (short) (start_color[i] + t * (end_color[i] - start_color[i]));
+    }
+}
+
+// Função para inicializar pares de cores com cores de gradiente
+void init_gradient_color_pairs(short start_color[3], short end_color[3], int num_pairs, int base) {
+    for (int i = base; i < num_pairs; i++) {
+        float t = (float) i / (num_pairs - 1);
+        short gradient_color[3];
+        lerp_color(start_color, end_color, t, gradient_color);
+
+        // Inicializar a cor do gradiente
+        init_color(COLOR_PAIR(i + 1), gradient_color[0], gradient_color[1], gradient_color[2]);
+        init_pair(i + 1, COLOR_PAIR(i + 1), COLOR_BLACK);
+    }
+}
+
 int main(int argv, char **argc)
 {
     char *flag = argc[1];
@@ -102,6 +123,8 @@ int main(int argv, char **argc)
 
     WINDOW *win = newwin(30, INGAME_TERM_SIZE, 0, 0);
     WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    WINDOW *win_inventory = newwin(30, 20, 0, 2 * INGAME_TERM_SIZE);
+    noecho();
     nodelay(win_game, 1);
 
     init_pair(0, COLOR_WHITE, COLOR_BLACK);
@@ -117,6 +140,22 @@ int main(int argv, char **argc)
     window.br.x = GAME_WIDTH;
     window.br.y = GAME_HEIGHT;
 
+    // Definir as cores base para o gradiente (valores entre 0 e 1000)
+    short start_color[3] = {0, 0, 0};      // preto
+    short end_color[3] = {1000, 1000, 1000}; // branco
+
+    // Número de cores intermediárias para gerar
+    int num_pairs = 8;
+
+    // Verificar se o terminal suporta cores e o número mínimo de pares de cores necessários
+    if (has_colors() && COLOR_PAIRS >= num_pairs + 1) {
+        init_gradient_color_pairs(start_color, end_color, num_pairs, 10);
+    } else {
+        endwin();
+        printf("O terminal não suporta cores ou não tem pares de cores suficientes.\n");
+        exit(1);
+    }
+
     Rect rects[20];
     int rects_count = generate_rects(window, rects, ARRAY_SIZE(rects));
     Rect ordered_rects[ARRAY_SIZE(rects)];
@@ -131,10 +170,6 @@ int main(int argv, char **argc)
     Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
-    // for (int i = 0; i < 4; i++)
-    // {
-    //     bitmap_dla_noise(pixmap);
-    // }
 
     Vec2i first_rect_center = get_center(rects[0]);
     Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
@@ -155,8 +190,6 @@ int main(int argv, char **argc)
     add_item(&inventory, item1);
     add_item(&inventory, item2);
 
-    WINDOW *win_inventory = newwin(30, 20, 0, 2 * INGAME_TERM_SIZE);
-    noecho();
 
     while (1)
     {

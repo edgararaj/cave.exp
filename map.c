@@ -51,22 +51,6 @@ int radius_count(Bitmap bitmap, int x, int y, int r)
     return result;
 }
 
-void bitmap_dla_noise(Bitmap bitmap)
-{
-    for (int i = 0; i < bitmap.width; i++)
-    {
-        for (int j = 0; j < bitmap.height; j++)
-        {
-            if (!bitmap.data[j * bitmap.width + i])
-            {
-                int r = radius_count(bitmap, i, j, 2);
-                add_term_line("%d\n", r);
-                bitmap.data[j * bitmap.width + i] = r >= 15;
-            }
-        }
-    }
-}
-
 void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count)
 {
     bitmap_draw_rectangle(bitmap, rects[0]);
