@@ -57,3 +57,6 @@ Vec2i get_center(Rect rect);
 Rect expand_rect(Rect rect, int amount);
 Vec2i rect_size(Rect rect);
 Rect subdivide_rect(Rect container, int div, int index);
+
+
+Vec2f vec2f_add(Vec2f a, Vec2f b);

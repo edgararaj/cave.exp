@@ -18,6 +18,7 @@
 #include "xterm.c"
 #include "utils.c"
 #include "camera.c"
+#include "light.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -138,6 +139,11 @@ int main(int argv, char **argc)
 
     CameraMode cam_mode = CameraMode_Margin;
 
+
+    Rect torches[MAX_TORCHES];
+    int num_torches = MAX_TORCHES;
+    create_torches(pixmap, torches, num_torches);
+
     while (1)
     {
         getmaxyx(stdscr, window_size.y, window_size.x);
@@ -179,30 +185,11 @@ int main(int argv, char **argc)
             player = prev_player;
         }
 
-        int r = 50;
-        float inc = M_PI / 360.f;
-        // Atualizar a posição da luz para levar em conta a posição da câmera
-        Vec2f light_pos_screen = {
-            player.tl.x - camera.x,
-            player.tl.y - camera.y};
+        render_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 10);
 
-        wattrset(win_game, COLOR_PAIR(3));
-        for (float theta = 0; theta < 2 * M_PI; theta += inc)
+        for (int i = 0; i < num_torches; i++)
         {
-            Vec2f vec = {
-                cos(theta), sin(theta)};
-            Vec2f line_pos = light_pos_screen;
-            for (int k = 0; k < r; k++)
-            {
-                line_pos = vec2f_add(line_pos, vec);
-
-                int data = pixmap.data[(int)(line_pos.y + camera.y) * pixmap.width + (int)(line_pos.x + camera.x)];
-                if (!data)
-                {
-                    break;
-                }
-                print_pixel(win_game, line_pos.x, line_pos.y);
-            }
+            render_light(win_game, camera, pixmap, torches[i].tl.x, torches[i].tl.y, 5);
         }
 
         wattrset(win_game, COLOR_PAIR(1));
