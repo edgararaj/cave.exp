@@ -17,6 +17,7 @@ typedef struct
     WINDOW *win_game;
     Bitmap pixmap;
     Rect *torches;
+    Bitmap illuminated;
 } GameState;
 
 typedef struct

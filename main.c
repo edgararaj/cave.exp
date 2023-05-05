@@ -131,20 +131,19 @@ void draw_game(GameState* gs, Vec2i window_size, int key)
     render_map(gs->camera, gs->pixmap, gs->win_game);
 
     wattrset(gs->win_game, COLOR_PAIR(1));
-    // render_map_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 30, pixmap);
 
-    render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30);
+    render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30, &gs->illuminated);
 
     for (int i = 0; i < MAX_TORCHES; i++)
     {
         wattrset(gs->win_game, COLOR_PAIR(6));
         print_pixel(gs->win_game, gs->torches[i].tl.x - gs->camera.x, gs->torches[i].tl.y - gs->camera.y);
-        render_light(gs->win_game, gs->camera, gs->pixmap, gs->torches[i].tl.x, gs->torches[i].tl.y, 5);
+        render_light(gs->win_game, gs->camera, gs->pixmap, gs->torches[i].tl.x, gs->torches[i].tl.y, 5, NULL);
     }
 
     wattrset(gs->win_game, COLOR_PAIR(1));
     render_player(gs->win_game, gs->camera, gs->player);
-    // print_rectangle(win_game, player);
+    render_minimap(gs->win_game, gs->illuminated, window_size, gs->player.tl);
 
     wrefresh(gs->win_game);
 }
@@ -186,6 +185,8 @@ int main(int argv, char **argc)
     init_pair(2, COLOR_RED, COLOR_RED);
     init_pair(3, COLOR_BLUE, COLOR_BLUE);
     init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(8, COLOR_GREEN, COLOR_GREEN);
+    init_pair(9, COLOR_WHITE, COLOR_WHITE);
     wattrset(win, COLOR_PAIR(0));
     wattrset(win_game, COLOR_PAIR(1));
 
@@ -226,6 +227,9 @@ int main(int argv, char **argc)
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
 
+    int illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
+    Bitmap illuminated = {(int *)illuminated_data, {MAP_WIDTH, MAP_HEIGHT}};
+
     Vec2i first_rect_center = get_center(rects[0]);
     Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x + 1, first_rect_center.y + 1}, 2};
 
@@ -251,6 +255,7 @@ int main(int argv, char **argc)
     gs.pixmap = pixmap;
     gs.win_game = win_game;
     gs.win_inventory = win_inventory;
+    gs.illuminated = illuminated;
 
     State state = State_Menu;
 
