@@ -224,7 +224,7 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i pl
 
   int trans_x = window_size.x - minimap_width - 1;
   int trans_y = 1;
-  wattrset(win, COLOR_PAIR(9));
+  wattrset(win, COLOR_PAIR(3));
   print_rectangleu(win, 0, trans_x - 1, trans_y + minimap_height + 1, trans_x + minimap_width - 1);
 
   wattrset(win, COLOR_PAIR(8));

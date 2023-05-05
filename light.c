@@ -44,7 +44,6 @@ void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
   // Atualizar a posição da luz para levar em conta a posição da câmera
   Vec2f light_pos_screen = {x - camera.x + 0.5f, y - camera.y + 0.5f};
 
-  wattrset(win_game, COLOR_PAIR(3));
   for (float theta = 0; theta < 2 * M_PI; theta += inc)
   {
     Vec2f vec = {cos(theta), sin(theta)};

@@ -128,16 +128,16 @@ void draw_game(GameState* gs, Vec2i window_size, int key)
 
     add_term_line("%d, %d\n", gs->camera.x + gs->camera.width, MAP_WIDTH);
 
-    render_map(gs->camera, gs->pixmap, gs->win_game);
+    // render_map(gs->camera, gs->pixmap, gs->win_game);
 
-    wattrset(gs->win_game, COLOR_PAIR(1));
-
+    wattrset(gs->win_game, COLOR_PAIR(9));
     render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30, &gs->illuminated);
 
     for (int i = 0; i < MAX_TORCHES; i++)
     {
-        wattrset(gs->win_game, COLOR_PAIR(6));
+        wattrset(gs->win_game, COLOR_PAIR(3));
         print_pixel(gs->win_game, gs->torches[i].tl.x - gs->camera.x, gs->torches[i].tl.y - gs->camera.y);
+        wattrset(gs->win_game, COLOR_PAIR(6));
         render_light(gs->win_game, gs->camera, gs->pixmap, gs->torches[i].tl.x, gs->torches[i].tl.y, 5, NULL);
     }
 
@@ -235,7 +235,7 @@ int main(int argv, char **argc)
 
     Camera camera = {0, 0, 0, 0, 10};
 
-    CameraMode cam_mode = CameraMode_Margin;
+    CameraMode cam_mode = CameraMode_Follow;
 
     Rect torches[MAX_TORCHES];
     create_torches(pixmap, torches, MAX_TORCHES);
