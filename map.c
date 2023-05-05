@@ -172,7 +172,7 @@ void render_map(Camera camera, Bitmap map, WINDOW *window) {
     for (int y = 0; y < camera.height; ++y) {
       int map_x = x + camera.x;
       int map_y = y + camera.y;
-      if (map.data[map_y * map.width + map_x] == 0) {
+      if (map.data[map_y * map.width + map_x] == 1) {
         print_pixel(window, x, y);
       }
     }
