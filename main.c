@@ -9,6 +9,7 @@
 #include "objects.h"
 #include "utils.h"
 #include "inventory.h"
+#include "state.h"
 
 #include "movimento.c"
 #include "objects.c"
@@ -21,6 +22,7 @@
 #include "camera.c"
 #include "light.c"
 #include "inventory.c"
+#include "menu.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -47,45 +49,33 @@ void limit_fps()
     usleep(sleep_time);
 }
 
-int kbhit(void)
+void render_player(WINDOW *win, Camera camera, Rect player)
 {
-    int ch = getch();
-
-    if (ch != ERR)
-    {
-        ungetch(ch);
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-void render_player(WINDOW *win, Camera camera, Rect player) {
     // Ajusta as coordenadas do jogador para a posição da câmera
     int screen_x = player.tl.x - camera.x;
     int screen_y = player.tl.y - camera.y;
-    
+
     // Renderiza o jogador na posição ajustada
     Rect rect = {
-        screen_x, screen_y, player.br.x - camera.x, player.br.y - camera.y
-    };
+        screen_x, screen_y, player.br.x - camera.x, player.br.y - camera.y};
     print_rectangle(win, rect);
 }
 
-
 // Função para interpolação linear entre duas cores
-void lerp_color(short start_color[3], short end_color[3], float t, short *result_color) {
-    for (int i = 0; i < 3; i++) {
-        result_color[i] = (short) (start_color[i] + t * (end_color[i] - start_color[i]));
+void lerp_color(short start_color[3], short end_color[3], float t, short *result_color)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        result_color[i] = (short)(start_color[i] + t * (end_color[i] - start_color[i]));
     }
 }
 
 // Função para inicializar pares de cores com cores de gradiente
-void init_gradient_color_pairs(short start_color[3], short end_color[3], int num_pairs, int base) {
-    for (int i = base; i < num_pairs; i++) {
-        float t = (float) i / (num_pairs - 1);
+void init_gradient_color_pairs(short start_color[3], short end_color[3], int num_pairs, int base)
+{
+    for (int i = base; i < num_pairs; i++)
+    {
+        float t = (float)i / (num_pairs - 1);
         short gradient_color[3];
         lerp_color(start_color, end_color, t, gradient_color);
 
@@ -93,6 +83,70 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3], int num
         init_color(COLOR_PAIR(i + 1), gradient_color[0], gradient_color[1], gradient_color[2]);
         init_pair(i + 1, COLOR_PAIR(i + 1), COLOR_BLACK);
     }
+}
+
+void draw_game(GameState* gs, Vec2i window_size, int key)
+{
+    gs->camera.width = window_size.x;
+    gs->camera.height = window_size.y;
+    if (key == 't')
+    {
+        gs->cam_mode = ++gs->cam_mode % CameraMode__Size;
+    }
+
+    if (key == ' ')
+    {
+        center_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
+        add_term_line("%d, %d\n", gs->camera.x, gs->camera.y);
+    }
+
+    if (key == 'i')
+    {
+        int ch;
+        while (1)
+        {
+            draw_inventory(gs->win_inventory, &inventory);
+            ch = getch();
+            if (ch == 'i' || ch == 'q')
+            { // Pressione 'i' ou 'q' para sair do inventário
+                break;
+            }
+        }
+    }
+
+    Rect prev_player = gs->player;
+    update(&gs->player, key);
+    if (collide_rect_bitmap(gs->player, gs->pixmap))
+    {
+        gs->player = prev_player;
+    }
+
+    if (gs->cam_mode == CameraMode_Margin)
+        update_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
+    else
+        center_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
+
+    add_term_line("%d, %d\n", gs->camera.x + gs->camera.width, MAP_WIDTH);
+
+    render_map(gs->camera, gs->pixmap, gs->win_game);
+
+    wattrset(gs->win_game, COLOR_PAIR(1));
+    // render_map_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 30, pixmap);
+
+    render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30);
+
+    for (int i = 0; i < MAX_TORCHES; i++)
+    {
+        wattrset(gs->win_game, COLOR_PAIR(6));
+        print_pixel(gs->win_game, gs->torches[i].tl.x - gs->camera.x, gs->torches[i].tl.y - gs->camera.y);
+        render_light(gs->win_game, gs->camera, gs->pixmap, gs->torches[i].tl.x, gs->torches[i].tl.y, 5);
+    }
+
+    wattrset(gs->win_game, COLOR_PAIR(1));
+    render_player(gs->win_game, gs->camera, gs->player);
+    // print_rectangle(win_game, player);
+
+    wrefresh(gs->win_game);
 }
 
 int main(int argv, char **argc)
@@ -118,14 +172,14 @@ int main(int argv, char **argc)
     start_color();
     intrflush(stdscr, 0);
     keypad(stdscr, 1);
+    nodelay(stdscr, 1);
 
     Vec2i window_size;
 
     WINDOW *win = newwin(30, INGAME_TERM_SIZE, 0, 0);
     WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_inventory = newwin(30, 20, 0, 2 * INGAME_TERM_SIZE);
-    noecho();
-    nodelay(win_game, 1);
+    WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
 
     init_pair(0, COLOR_WHITE, COLOR_BLACK);
     init_pair(1, COLOR_CYAN, COLOR_CYAN);
@@ -134,11 +188,12 @@ int main(int argv, char **argc)
     init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
     wattrset(win, COLOR_PAIR(0));
     wattrset(win_game, COLOR_PAIR(1));
+
     Rect window = {};
     window.tl.x = 0;
     window.tl.y = 0;
-    window.br.x = GAME_WIDTH;
-    window.br.y = GAME_HEIGHT;
+    window.br.x = MAP_WIDTH;
+    window.br.y = MAP_HEIGHT;
 
     // // Definir as cores base para o gradiente (valores entre 0 e 1000)
     // short start_color[3] = {0, 0, 0};      // preto
@@ -172,16 +227,14 @@ int main(int argv, char **argc)
     erode(pixmap, 2200);
 
     Vec2i first_rect_center = get_center(rects[0]);
-    Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
+    Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x + 1, first_rect_center.y + 1}, 2};
 
     Camera camera = {0, 0, 0, 0, 10};
 
     CameraMode cam_mode = CameraMode_Margin;
 
-
     Rect torches[MAX_TORCHES];
-    int num_torches = MAX_TORCHES;
-    create_torches(pixmap, torches, num_torches);
+    create_torches(pixmap, torches, MAX_TORCHES);
 
     init_inventory(&inventory, 10);
 
@@ -190,6 +243,20 @@ int main(int argv, char **argc)
     add_item(&inventory, item1);
     add_item(&inventory, item2);
 
+    GameState gs;
+    gs.cam_mode = cam_mode;
+    gs.camera = camera;
+    gs.player = player;
+    gs.torches = torches;
+    gs.pixmap = pixmap;
+    gs.win_game = win_game;
+    gs.win_inventory = win_inventory;
+
+    State state = State_Menu;
+
+    StartMenuState sms;
+    sms.win = win_menu;
+    sms.highlight = 0;
 
     while (1)
     {
@@ -198,77 +265,27 @@ int main(int argv, char **argc)
         window_size.x -= INGAME_TERM_SIZE;
         wresize(win, window_size.y, INGAME_TERM_SIZE);
         wresize(win_game, window_size.y, window_size.x);
+        window_size.x /= X_SCALE;
         werase(win);
         werase(win_game);
         wattrset(win_game, COLOR_PAIR(0));
 
-
-        wattrset(win_game, COLOR_PAIR(0));
-        // wprintw(win_game, "%d, %d\n", window_size.x, window_size.y);
-        window_size.x /= X_SCALE;
-
-        camera.width = window_size.x;
-        camera.height = window_size.y;
+        add_term_line("%d, %d\n", window_size.x, window_size.y);
         int key = getch();
-        if (key == 't')
+
+        if (state == State_Game)
         {
-            cam_mode = ++cam_mode % CameraMode__Size;
+            draw_game(&gs, window_size, key);
         }
-
-        if (key == ' ')
-        {
-            add_term_line("ola\n");
-            center_camera(&camera, player.tl.x, player.tl.y);
-        }
-
-        if (key == 'i') {
-            int ch;
-            while (1) {
-                draw_inventory(win_inventory, &inventory);
-                ch = getch();
-                if (ch == 'i' || ch == 'q') { // Pressione 'i' ou 'q' para sair do inventário
-                    break;
-                }
-            }
-        }
-
-        render_map(camera, pixmap, win_game);
-
-        Rect prev_player = player;
-        update(&player, key);
-        if (collide_rect_bitmap(player, pixmap))
-        {
-            player = prev_player;
-        }
-
-        wattrset(win_game, COLOR_PAIR(1));
-        //render_map_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 30, pixmap);
-
-        render_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 30);
-
-        for (int i = 0; i < num_torches; i++)
-        {
-            wattrset(win_game, COLOR_PAIR(6));
-            print_pixel(win_game, torches[i].tl.x - camera.x, torches[i].tl.y - camera.y);
-            render_light(win_game, camera, pixmap, torches[i].tl.x, torches[i].tl.y, 5);
-        }
-
-        wattrset(win_game, COLOR_PAIR(1));
-        render_player(win_game, camera, player);
-        // print_rectangle(win_game, player);
-
-        if (cam_mode == CameraMode_Margin)
-            update_camera(&camera, player.tl.x, player.tl.y);
         else 
-            center_camera(&camera, player.tl.x, player.tl.y);
-
-        draw_inventory(win_inventory, &inventory);
+        {
+            draw_menu(&sms, &state, key);
+        }
 
         render_term(win);
         box(win, 0, 0);
 
         wrefresh(win);
-        wrefresh(win_game);
     }
 
     endwin();

@@ -72,10 +72,10 @@ int collide_line_bitmap(Line line, Bitmap bitmap)
 
 int collide_rect_bitmap(Rect rect, Bitmap bitmap)
 {
-    Line left = {{rect.tl.x, rect.tl.y}, {rect.tl.x, rect.br.y}};
-    Line top = {{rect.tl.x, rect.tl.y}, {rect.br.x, rect.tl.y}};
-    Line right = {{rect.br.x, rect.tl.y}, {rect.br.x, rect.br.y}};
-    Line bottom = {{rect.tl.x, rect.br.y}, {rect.br.x, rect.br.y}};
+    Line left = {{rect.tl.x, rect.tl.y}, {rect.tl.x, rect.br.y - 1}};
+    Line top = {{rect.tl.x, rect.tl.y}, {rect.br.x - 1, rect.tl.y}};
+    Line right = {{rect.br.x - 1, rect.tl.y}, {rect.br.x - 1, rect.br.y - 1}};
+    Line bottom = {{rect.tl.x, rect.br.y - 1}, {rect.br.x - 1, rect.br.y - 1}};
 
     return (collide_line_bitmap(left, bitmap) || collide_line_bitmap(top, bitmap) ||
             collide_line_bitmap(right, bitmap) || collide_line_bitmap(bottom, bitmap));

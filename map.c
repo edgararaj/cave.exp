@@ -1,3 +1,4 @@
+#include <math.h>
 #include "camera.h"
 #include "draw.h"
 #include "objects.h"
@@ -111,9 +112,6 @@ void order_rects(Rect *rects, int rects_count) {
 }
 
 void erode(Bitmap bitmap, int iterations) {
-  // Crie um gerador de números aleatórios
-  srand(time(NULL));
-
   // Erode com DLA
   for (int i = 0; i < iterations; i++) {
     // Encontre todas as células abertas
@@ -134,7 +132,8 @@ void erode(Bitmap bitmap, int iterations) {
 
     // Enquanto a célula escolhida ainda for um '#', escolha uma direção
     // aleatória e mova o "digger"
-    while (bitmap.data[digger] == 1) {
+    int cap = 1000;
+    while (bitmap.data[digger] == 1 && cap --> 0) {
       int direction = rand() % 4;
 
       switch (direction) {
@@ -173,18 +172,18 @@ void render_map(Camera camera, Bitmap map, WINDOW *window) {
     for (int y = 0; y < camera.height; ++y) {
       int map_x = x + camera.x;
       int map_y = y + camera.y;
-      if (map.data[map_y * map.width + map_x] == 1) {
+      if (map.data[map_y * map.width + map_x] == 0) {
         print_pixel(window, x, y);
       }
     }
   }
 }
 
-void render_map_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x,
-                      int y, int r, Bitmap map) {
+void render_map_light(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect player, int r, Bitmap map) {
   float inc = M_PI / 9000.f;
+  Vec2i player_size = rect_size(player);
   // Atualizar a posição da luz para levar em conta a posição da câmera
-  Vec2f light_pos_screen = {x - camera.x + 0.5f, y - camera.y + 0.5f};
+  Vec2f light_pos_screen = {player.tl.x - camera.x + player_size.x / 2.f, player.tl.y - camera.y + player_size.x / 2.f};
 
 
    wattrset(win_game, COLOR_PAIR(3));
