@@ -56,8 +56,7 @@ void render_player(WINDOW *win, Camera camera, Rect player)
     int screen_y = player.tl.y - camera.y;
 
     // Renderiza o jogador na posição ajustada
-    Rect rect = {
-        screen_x, screen_y, player.br.x - camera.x, player.br.y - camera.y};
+    Rect rect = {{screen_x, screen_y}, {player.br.x - camera.x, player.br.y - camera.y}, 1};
     print_rectangle(win, rect);
 }
 
@@ -85,13 +84,14 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3], int num
     }
 }
 
-void draw_game(GameState* gs, Vec2i window_size, int key)
+void draw_game(GameState *gs, Vec2i window_size, int key)
 {
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
     if (key == 't')
     {
-        gs->cam_mode = ++gs->cam_mode % CameraMode__Size;
+        ++gs->cam_mode;
+        gs->cam_mode %= CameraMode__Size;
     }
 
     if (key == ' ')
@@ -128,7 +128,8 @@ void draw_game(GameState* gs, Vec2i window_size, int key)
 
     add_term_line("%d, %d\n", gs->camera.x + gs->camera.width, MAP_WIDTH);
 
-    // render_map(gs->camera, gs->pixmap, gs->win_game);
+    wattrset(gs->win_game, COLOR_PAIR(1));
+    render_map(gs->camera, gs->pixmap, gs->win_game);
 
     wattrset(gs->win_game, COLOR_PAIR(9));
     render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30, &gs->illuminated);
@@ -213,7 +214,7 @@ int main(int argv, char **argc)
     // }
 
     Rect rects[20];
-    int rects_count = generate_rects(window, rects, ARRAY_SIZE(rects));
+    int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     Rect ordered_rects[ARRAY_SIZE(rects)];
     order_rects(rects, rects_count);
 
@@ -226,6 +227,7 @@ int main(int argv, char **argc)
     Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
+    bitmap_draw_box(pixmap, window);
 
     int illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
     Bitmap illuminated = {(int *)illuminated_data, {MAP_WIDTH, MAP_HEIGHT}};
@@ -282,7 +284,7 @@ int main(int argv, char **argc)
         {
             draw_game(&gs, window_size, key);
         }
-        else 
+        else
         {
             draw_menu(&sms, &state, key);
         }
