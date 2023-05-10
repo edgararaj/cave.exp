@@ -13,7 +13,7 @@ Monster generateMoster()
 
     monster.hp = 10;
     monster.dmg = 2;
-    monster.speed = 0, 80;
+    monster.speed = rand() % 5;
 
     return monster;
 }
@@ -87,6 +87,21 @@ void Attack(Monster *monster, int playerPosition, int *player_hp)
         *player_hp = -1;
     }
 }
+
+void spawn_Comilao(char map[MAP_HEIGHT][MAP_WIDTH], int x, int y, char character)
+{
+    for (int y = 0; y < MAP_HEIGHT; y++)
+    {
+        for(int x = 0; x < MAP_WIDTH; x++)
+        {
+            printf("%c ", map[y][x]);
+        }
+
+        printf("\n");
+    }
+    
+}
+
 
 
 
