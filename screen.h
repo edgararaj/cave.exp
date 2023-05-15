@@ -1,5 +1,6 @@
-#define TERM_WIDTH 150
-#define TERM_HEIGHT 50
+#define FONT_SIZE 9
+#define TERM_WIDTH 250
+#define TERM_HEIGHT 70
 #define X_SCALE 2
 #define INGAME_TERM_SIZE 20
 #define GAME_WIDTH ((TERM_WIDTH - INGAME_TERM_SIZE) / X_SCALE)

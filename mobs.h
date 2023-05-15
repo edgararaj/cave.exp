@@ -2,9 +2,9 @@
 #include "objects.h"
 
 typedef enum {
-    MobType_Normal,
+    MobType_Stupid,
     MobType_Coward,
-    MobType_Aggressive,
+    MobType_Intelligent,
     MobType__Size
 } MobType;
 

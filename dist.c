@@ -1,10 +1,15 @@
 #include "objects.h"
+#include "map.h"
 
 void dist_pass_recursive(Bitmap distmap, Vec2i point, int value)
 {
     if (value >= MAX_DIST) return;
     int data = distmap.data[point.y * distmap.width + point.x];
-    if (data == WALL) return;
+    if (map_is_wall(distmap, vec2i_to_f(point))) {
+        // HACK: Put shine on walls
+        distmap.data[point.y * distmap.width + point.x] = SHINE;
+        return;
+    };
     if (data <= value && data > DIST_BASE) return;
     distmap.data[point.y * distmap.width + point.x] = value;
     for (int i = -1; i < 2; i++)
@@ -31,6 +36,10 @@ void dist_reset(Bitmap distmap)
             if (distmap.data[y * distmap.width + x] > DIST_BASE)
             {
                 distmap.data[y * distmap.width + x] = WALKABLE;
+            }
+            if (distmap.data[y * distmap.width + x] == SHINE)
+            {
+                distmap.data[y * distmap.width + x] = WALL;
             }
         }
     }

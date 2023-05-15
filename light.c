@@ -18,22 +18,6 @@ void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
   }
 }
 
-int map_is_wall(Bitmap pixmap, Camera camera, Vec2f pos)
-{
-  int data = pixmap.data[(int)(pos.y + camera.y) * pixmap.width +
-                         (int)(pos.x + camera.x)];
-  return !data;
-}
-
-int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc)
-{
-  Vec2f inc_x = {inc.x, 0};
-  Vec2f inc_y = {0, inc.y};
-  return (!map_is_wall(pixmap, camera, vec2f_add(pos, inc_x)) ||
-          !map_is_wall(pixmap, camera, vec2f_add(pos, inc_y))) &&
-         !map_is_wall(pixmap, camera, vec2f_add(pos, inc));
-}
-
 void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
                   int r, Bitmap *illuminated)
 {

@@ -13,7 +13,7 @@ typedef struct {
 char *get_xresource(char *start, char *end)
 {
     Xresource resources[] = {
-        {"FONTSIZE", "12"},
+        {"FONTSIZE", XSTR(FONT_SIZE)},
         {"WIDTH", XSTR(TERM_WIDTH)},
         {"HEIGHT", XSTR(TERM_HEIGHT)}};
 

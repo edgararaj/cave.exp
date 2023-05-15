@@ -1,4 +1,5 @@
 #include "collide.h"
+#include "map.h"
 
 int collide_rect_rect(Rect a, Rect b)
 {
@@ -63,7 +64,7 @@ int collide_line_bitmap(Line line, Bitmap bitmap)
 {
     for (int i = line.start.x; i <= line.end.x; i++) {
         for (int j = line.start.y; j <= line.end.y; j++) {
-            if (!bitmap.data[j * bitmap.width + i])
+            if (map_is_wall(bitmap, (Vec2f){i, j}))
                 return 1;
         }
     }

@@ -1,6 +1,13 @@
 #pragma once
+#include "objects.h"
+
 typedef struct {
-    int x, y;           // Coordenadas da câmera
+    union {
+        Vec2i offset;
+        struct {
+            int x, y;           // Coordenadas da câmera
+        };
+    };
     int width, height;  // Largura e altura da câmera
     int margin;         // Margem nas bordas da câmera
 } Camera;

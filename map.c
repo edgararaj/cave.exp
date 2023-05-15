@@ -201,6 +201,21 @@ void erode(Bitmap bitmap, int iterations)
   }
 }
 
+int map_is_wall(Bitmap pixmap, Vec2f pos)
+{
+  int data = pixmap.data[(int)pos.y * pixmap.width + (int)pos.x];
+  return data == WALL || data == SHINE;
+}
+
+int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc)
+{
+  Vec2f inc_x = {inc.x, 0};
+  Vec2f inc_y = {0, inc.y};
+  return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x), vec2i_to_f(camera.offset))) ||
+          !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y), vec2i_to_f(camera.offset)))) &&
+          !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc), vec2i_to_f(camera.offset)));
+}
+
 void render_map(WINDOW* win_game, Camera camera, Bitmap map, WINDOW *window)
 {
   for (int x = 0; x < camera.width; ++x)
@@ -210,18 +225,23 @@ void render_map(WINDOW* win_game, Camera camera, Bitmap map, WINDOW *window)
       int map_x = x + camera.x;
       int map_y = y + camera.y;
       int data = map.data[map_y * map.width + map_x];
-      if (data == WALKABLE)
+      if (!map_is_wall(map, (Vec2f){map_x, map_y}))
       {
-        wattrset(win_game, COLOR_PAIR(1));
+        wattrset(win_game, COLOR_PAIR(10));
         print_pixel(window, x, y);
       }
-      if (data > DIST_BASE && data < MAX_DIST)
+      if (data == SHINE)
       {
-        wattrset(win_game, COLOR_PAIR(0));
-        char s[] = "0";
-        s[0] += (data - DIST_BASE);
-        print_pixel_custom(window, x, y, s);
+        wattrset(win_game, COLOR_PAIR(3));
+        print_pixel(window, x, y);
       }
+      // if (data > DIST_BASE && data < MAX_DIST)
+      // {
+      //   wattrset(win_game, COLOR_PAIR(0));
+      //   char s[] = "0";
+      //   s[0] += (data - DIST_BASE);
+      //   print_pixel_custom(window, x, y, s);
+      // }
     }
   }
 }
