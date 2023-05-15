@@ -1,23 +1,20 @@
+#include "light.h"
 #include "camera.h"
 #include "objects.h"
 #include <math.h>
 
-#define MAX_TORCHES 10
-
-void create_torches(Bitmap pixmap, Rect *torches, int num_torches)
+void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
 {
-
   for (int i = 0; i < num_torches; i++)
   {
     int x, y;
     do
     {
-      x = rand() % pixmap.width;
-      y = rand() % pixmap.height;
-    } while (pixmap.data[y * pixmap.width + x] ==
-             0); // Verifica se a tocha não está colocada numa parede
+      x = random_between(0, pixmap.width);
+      y = random_between(0, pixmap.height);
+    } while (pixmap.data[y * pixmap.width + x] == WALKABLE);
 
-    torches[i] = (Rect){{x, y}, {x, y}, 3}; // 3 é a intensidade da luz
+    torches[i] = (Torch){(Rect){{x, y}, {x, y}, 3}, random_between(3, 6)};
   }
 }
 
@@ -38,7 +35,7 @@ int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc)
 }
 
 void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
-                  int r, Bitmap* illuminated)
+                  int r, Bitmap *illuminated)
 {
   float inc = M_PI / 720.f;
   // Atualizar a posição da luz para levar em conta a posição da câmera

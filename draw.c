@@ -77,9 +77,9 @@ void print_rectangle(WINDOW *win, Rect rect)
 
 void print_rectangleu(WINDOW *win, int startrow, int startcol, int height, int width)
 {
-    for (int r = startrow; r < startrow + height; r++)
+    for (int r = startrow; r <= startrow + height; r++)
     {
-        for (int c = startcol; c < startcol + width; c++)
+        for (int c = startcol; c <= startcol + width; c++)
         {
             print_pixel(win, c, r);
         }
