@@ -23,6 +23,7 @@
 #include "light.c"
 #include "inventory.c"
 #include "menu.c"
+#include "dist.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -127,12 +128,13 @@ void draw_game(GameState *gs, Vec2i window_size, int key)
         center_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
 
     add_term_line("%d, %d\n", gs->camera.x + gs->camera.width, MAP_WIDTH);
+    dist_reset(gs->pixmap);
+    dist_pass(gs->pixmap, gs->player.tl);
 
-    wattrset(gs->win_game, COLOR_PAIR(1));
-    render_map(gs->camera, gs->pixmap, gs->win_game);
+    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game);
 
-    wattrset(gs->win_game, COLOR_PAIR(9));
-    render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30, &gs->illuminated);
+    // wattrset(gs->win_game, COLOR_PAIR(9));
+    // render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30, &gs->illuminated);
 
     for (int i = 0; i < MAX_TORCHES; i++)
     {

@@ -1,3 +1,4 @@
+#include "map.h"
 #include <math.h>
 #include "camera.h"
 #include "draw.h"
@@ -200,7 +201,7 @@ void erode(Bitmap bitmap, int iterations)
   }
 }
 
-void render_map(Camera camera, Bitmap map, WINDOW *window)
+void render_map(WINDOW* win_game, Camera camera, Bitmap map, WINDOW *window)
 {
   for (int x = 0; x < camera.width; ++x)
   {
@@ -208,9 +209,18 @@ void render_map(Camera camera, Bitmap map, WINDOW *window)
     {
       int map_x = x + camera.x;
       int map_y = y + camera.y;
-      if (map.data[map_y * map.width + map_x] == 1)
+      int data = map.data[map_y * map.width + map_x];
+      if (data == WALKABLE)
       {
+        wattrset(win_game, COLOR_PAIR(1));
         print_pixel(window, x, y);
+      }
+      if (data > DIST_BASE && data < MAX_DIST)
+      {
+        wattrset(win_game, COLOR_PAIR(0));
+        char s[] = "0";
+        s[0] += (data - DIST_BASE);
+        print_pixel_custom(window, x, y, s);
       }
     }
   }
