@@ -1,13 +1,12 @@
+#include <ncurses.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <ncurses.h>
 
 /*
  * Return 1 (true) if there are any unread characters, 0 (false) otherwise
  */
-int kbhit(void)
-{
+int kbhit(void) {
     struct timeval timeout;
     fd_set readfds;
     int how;
@@ -31,8 +30,7 @@ int kbhit(void)
         return 0;
 }
 
-int main(void)
-{
+int main(void) {
     initscr();
 
     cbreak();

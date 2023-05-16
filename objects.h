@@ -1,58 +1,48 @@
 #pragma once
 #include <ncurses.h>
 
-typedef struct
-{
+typedef struct {
     int x;
     int y;
 } Vec2i;
 
-typedef struct
-{
+typedef struct {
     float x;
     float y;
 } Vec2f;
 
-typedef struct
-{
+typedef struct {
     Vec2i start;
     Vec2i end;
 } Line;
 
-typedef struct
-{
+typedef struct {
     Vec2i tl;
     Vec2i br;
     short color;
 } Rect;
 
-typedef struct
-{
+typedef struct {
     Vec2f tl;
     Vec2f br;
     short color;
 } RectFloat;
 
-typedef struct
-{
+typedef struct {
     Vec2i center;
     int radius;
 } Circle;
 
-typedef struct
-{
+typedef struct {
     Vec2i center;
     Vec2i radius;
 } Ellipse;
 
-typedef struct
-{
+typedef struct {
     int *data;
-    union
-    {
+    union {
         Vec2i size;
-        struct
-        {
+        struct {
             int width;
             int height;
         };

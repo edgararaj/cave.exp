@@ -1,0 +1,10 @@
+---
+BasedOnStyle: Google
+IndentWidth: 4
+IndentCaseLabels: true
+---
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+IndentCaseLabels: true
+---
