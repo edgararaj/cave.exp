@@ -1,13 +1,9 @@
 #pragma once
 
+#include "player.h"
+
 // Define the maximum number of items a player can carry
 #define MAX_INVENTORY_SIZE 10
-
-typedef struct {
-    Player_Stats stats;
-    Item inventory[MAX_INVENTORY_SIZE];
-    int inventorySize; // This will keep track of how many items the player is currently carrying
-} Player;
 
 // Define the item type
 typedef enum {
@@ -23,3 +19,9 @@ typedef struct {
     char symbol;
     int color;
 } Item;
+
+typedef struct {
+    Player_Stats stats;
+    Item inventory[MAX_INVENTORY_SIZE];
+    int inventorySize; // This will keep track of how many items the player is currently carrying
+} Player;
