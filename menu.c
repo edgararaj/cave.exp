@@ -37,6 +37,9 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
             *state = State_Game;
         }
         mvwprintw(sms->win, 10, 1, "%d", sms->highlight);
+        if (sms->highlight == 1) {
+            *state = State_Info;
+        }
     }
 
     wrefresh(sms->win);

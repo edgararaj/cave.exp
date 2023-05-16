@@ -5,7 +5,11 @@
 #include "objects.h"
 #include <ncurses.h>
 
-typedef enum { State_Game, State_Menu } State;
+typedef enum {
+    State_Game,
+    State_Menu,
+    State_Info,
+} State;
 
 typedef struct {
     Camera camera;

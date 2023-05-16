@@ -75,6 +75,7 @@ int main(int argv, char **argc) {
     WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    WINDOW *win_info = newwin(30, 20, 0, INGAME_TERM_SIZE);
 
     setup_colors();
     wattrset(win, COLOR_PAIR(0));
@@ -165,8 +166,11 @@ int main(int argv, char **argc) {
 
         if (state == State_Game) {
             draw_game(&gs, window_size, key);
-        } else {
+        } else if (state == State_Menu) {
             draw_menu(&sms, &state, key);
+
+        } else if (state == State_Info) {
+            draw_info(&state, win_info, key);
         }
 
         render_term(win);
