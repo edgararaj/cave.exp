@@ -77,6 +77,7 @@ int main(int argv, char **argc) {
     WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_info = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    wbkgd(win_game, COLOR_PAIR(LIGHT_BASE + LIGHT_RADIUS - 1));
 
     setup_colors();
     wattrset(win, COLOR_PAIR(0));

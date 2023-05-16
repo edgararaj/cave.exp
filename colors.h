@@ -31,15 +31,37 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3],
     }
 }
 
+typedef enum {
+    Color_Black,
+    Color_Red,
+    Color_Green,
+    Color_Yellow,
+    Color_Blue,
+    Color_Magenta,
+    Color_Cyan,
+    Color_White,
+    Color__Size,
+    Culur_Default,
+    Culur_Black
+} Color;
+
 void setup_colors() {
-    init_pair(0, COLOR_WHITE, COLOR_BLACK);
-    init_pair(1, COLOR_CYAN, COLOR_CYAN);
-    init_pair(2, COLOR_RED, COLOR_RED);
-    init_pair(3, COLOR_BLUE, COLOR_BLUE);
-    init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
-    init_pair(8, COLOR_GREEN, COLOR_GREEN);
-    init_pair(9, COLOR_WHITE, COLOR_WHITE);
-    init_pair(10, COLOR_BLACK, COLOR_BLACK);
+    init_color(Culur_Black, 0, 0, 0);
+    int i;
+    for (i = 0; i < Color__Size; i++) {
+        init_pair(i, i, i);
+    }
+    init_pair(Culur_Default, COLOR_WHITE, COLOR_BLACK);
+
+    // init_pair(0, COLOR_WHITE, COLOR_BLACK);
+    // init_pair(1, COLOR_CYAN, COLOR_CYAN);
+    // init_pair(2, COLOR_RED, COLOR_RED);
+    // init_pair(3, COLOR_BLUE, COLOR_BLUE);
+    // init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
+    // init_pair(8, COLOR_GREEN, COLOR_GREEN);
+    // init_pair(9, COLOR_WHITE, COLOR_WHITE);
+    // init_pair(10, COLOR_BLACK, COLOR_BLACK);
+
     // init_color(11, 100, 1000, 1000);
     // init_pair(11, 11, 11);
     // init_color(12, 900, 900, 900);
@@ -50,8 +72,8 @@ void setup_colors() {
     // init_pair(14, 14, 14);
 
     // Definir as cores base para o gradiente (valores entre 0 e 1000)
-    short start_color[3] = {1000, 1000, 1000}; // preto
-    short end_color[3] = {0, 0, 0};            // branco
+    short start_color[3] = {700, 500, 20}; // preto
+    short end_color[3] = {0, 0, 0};        // branco
 
     // Número de cores intermediárias para gerar
     int num_pairs = LIGHT_RADIUS;

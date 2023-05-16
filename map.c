@@ -221,10 +221,11 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window) {
             int map_x = x + camera.x;
             int map_y = y + camera.y;
             int data = map.data[map_y * map.width + map_x];
-            if (!map_is_wall(map, (Vec2f){map_x, map_y})) {
-                wattrset(win_game, COLOR_PAIR(10));
-                print_pixel(window, x, y);
-            }
+            // if (!map_is_wall(map, (Vec2f){map_x, map_y})) {
+            //     wattrset(win_game, COLOR_PAIR(LIGHT_BASE + LIGHT_RADIUS -
+            //     1)); print_pixel(window, x, y);
+            // }
+
             if (data == SHINE) {
                 wattrset(win_game, COLOR_PAIR(3));
                 print_pixel(window, x, y);
