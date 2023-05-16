@@ -28,6 +28,13 @@ typedef struct
 
 typedef struct
 {
+    Vec2f tl;
+    Vec2f br;
+    short color;
+} RectFloat;
+
+typedef struct
+{
     Vec2i center;
     int radius;
 } Circle;
@@ -57,6 +64,10 @@ Vec2i get_center(Rect rect);
 Rect expand_rect(Rect rect, int amount);
 Vec2i rect_size(Rect rect);
 Rect subdivide_rect(Rect container, int div, int index);
-
-
+Rect rect_translate(Rect rect, Vec2i trans);
+RectFloat rect_float_translate(RectFloat rect, Vec2f trans);
+Vec2f vec2i_to_f(Vec2i a);
+Vec2f vec2f_div_const(Vec2f a, int b);
+Vec2i vec2f_to_i(Vec2f a);
 Vec2f vec2f_add(Vec2f a, Vec2f b);
+Vec2i vec2i_add(Vec2i a, Vec2i b);

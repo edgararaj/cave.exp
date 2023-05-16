@@ -21,6 +21,7 @@ typedef struct
     Torch *torches;
     Mob *mobs;
     Bitmap illuminated;
+    Inventory inventory;
 } GameState;
 
 typedef struct

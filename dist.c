@@ -10,12 +10,10 @@ void dist_pass_recursive(Bitmap distmap, Vec2i point, int value)
         distmap.data[point.y * distmap.width + point.x] = SHINE;
         return;
     };
-    if (data <= value && data > DIST_BASE) return;
+    if (data <= value && data >= DIST_BASE) return;
     distmap.data[point.y * distmap.width + point.x] = value;
-    for (int i = -1; i < 2; i++)
-    {
-        for (int j = -1; j < 2; j++)
-        {
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
             Vec2i add = {i, j};
             dist_pass_recursive(distmap, vec2i_add(point, add), value + 1);
         }
@@ -33,7 +31,7 @@ void dist_reset(Bitmap distmap)
     {
         for (int y = 0; y < distmap.height; y++)
         {
-            if (distmap.data[y * distmap.width + x] > DIST_BASE)
+            if (distmap.data[y * distmap.width + x] >= DIST_BASE && distmap.data[y * distmap.width + x] < MAX_DIST)
             {
                 distmap.data[y * distmap.width + x] = WALKABLE;
             }

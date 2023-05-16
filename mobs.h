@@ -1,6 +1,8 @@
 #pragma once
 #include "objects.h"
 
+#define MAX_MOBS 10
+
 typedef enum {
     MobType_Stupid,
     MobType_Coward,
@@ -13,5 +15,5 @@ typedef struct {
     int hp;
     float speed;
     MobType type;
-    Rect rect;
+    RectFloat rect;
 } Mob;

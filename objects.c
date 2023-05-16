@@ -26,6 +26,12 @@ Vec2f vec2f_add(Vec2f a, Vec2f b)
     return r;
 }
 
+Vec2f vec2f_div_const(Vec2f a, int b)
+{
+    Vec2f r = {a.x / b, a.y / b};
+    return r;
+}
+
 Vec2i vec2i_add(Vec2i a, Vec2i b)
 {
     Vec2i r = {a.x + b.x, a.y + b.y};
@@ -67,10 +73,33 @@ float vec2i_dot(Vec2i a, Vec2i b)
     return (float)a.x * b.x + a.y * b.y;
 }
 
+float vec2i_sqrdistance(Vec2i a)
+{
+    return vec2i_dot(a, a);
+}
+
 Vec2i rect_size(Rect rect)
 {
     Vec2i r = {rect.br.x - rect.tl.x, rect.br.y - rect.tl.y};
     return r;
+}
+
+Rect rect_translate(Rect rect, Vec2i trans)
+{
+  Rect result;
+  result.color = rect.color;
+  result.tl = vec2i_add(rect.tl, trans);
+  result.br = vec2i_add(rect.br, trans);
+  return result;
+}
+
+RectFloat rect_float_translate(RectFloat rect, Vec2f trans)
+{
+  RectFloat result;
+  result.color = rect.color;
+  result.tl = vec2f_add(rect.tl, trans);
+  result.br = vec2f_add(rect.br, trans);
+  return result;
 }
 
 // -------------------

@@ -25,13 +25,13 @@
 #include "menu.c"
 #include "dist.c"
 #include "mobs.c"
+#include "game.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
 int fps = 20;
 int fps_limit = 60;
 int sleep_time = 10000;
-Inventory inventory;
 
 void limit_fps()
 {
@@ -49,17 +49,6 @@ void limit_fps()
     }
     fps_frame_counter++;
     usleep(sleep_time);
-}
-
-void render_rect(WINDOW *win, Camera camera, Rect player)
-{
-    // Ajusta as coordenadas do jogador para a posição da câmera
-    int screen_x = player.tl.x - camera.x;
-    int screen_y = player.tl.y - camera.y;
-
-    // Renderiza o jogador na posição ajustada
-    Rect rect = {{screen_x, screen_y}, {player.br.x - camera.x, player.br.y - camera.y}, player.color};
-    print_rectangle(win, rect);
 }
 
 // Função para interpolação linear entre duas cores
@@ -84,78 +73,6 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3], int num
         init_color(COLOR_PAIR(i + 1), gradient_color[0], gradient_color[1], gradient_color[2]);
         init_pair(i + 1, COLOR_PAIR(i + 1), COLOR_BLACK);
     }
-}
-
-void draw_game(GameState *gs, Vec2i window_size, int key)
-{
-    gs->camera.width = window_size.x;
-    gs->camera.height = window_size.y;
-    if (key == 't')
-    {
-        ++gs->cam_mode;
-        gs->cam_mode %= CameraMode__Size;
-    }
-
-    if (key == ' ')
-    {
-        center_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
-        add_term_line("%d, %d\n", gs->camera.x, gs->camera.y);
-    }
-
-    if (key == 'i')
-    {
-        int ch;
-        while (1)
-        {
-            draw_inventory(gs->win_inventory, &inventory);
-            ch = getch();
-            if (ch == 'i' || ch == 'q')
-            { // Pressione 'i' ou 'q' para sair do inventário
-                break;
-            }
-        }
-    }
-
-    Rect prev_player = gs->player;
-    update(&gs->player, key);
-    if (collide_rect_bitmap(gs->player, gs->pixmap))
-    {
-        gs->player = prev_player;
-    }
-
-    if (gs->cam_mode == CameraMode_Margin)
-        update_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
-    else
-        center_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
-
-    add_term_line("%d, %d\n", gs->camera.x + gs->camera.width, MAP_WIDTH);
-    dist_reset(gs->pixmap);
-    dist_pass(gs->pixmap, gs->player.tl);
-
-    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game);
-
-    wattrset(gs->win_game, COLOR_PAIR(9));
-    render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 20, &gs->illuminated);
-
-    // for (int i = 0; i < MAX_TORCHES; i++)
-    // {
-    //     wattrset(gs->win_game, COLOR_PAIR(3));
-    //     print_pixel(gs->win_game, gs->torches[i].tl.x - gs->camera.x, gs->torches[i].tl.y - gs->camera.y);
-    //     wattrset(gs->win_game, COLOR_PAIR(6));
-    //     render_light(gs->win_game, gs->camera, gs->pixmap, gs->torches[i].tl.x, gs->torches[i].tl.y, 5, NULL);
-    // }
-
-    for (int i = 0; i < MAX_MOBS; i++)
-    {
-        wattrset(gs->win_game, COLOR_PAIR(8));
-        render_rect(gs->win_game, gs->camera, gs->mobs[i].rect);
-    }
-
-    wattrset(gs->win_game, COLOR_PAIR(1));
-    render_rect(gs->win_game, gs->camera, gs->player);
-    render_minimap(gs->win_game, gs->illuminated, window_size, gs->player.tl);
-
-    wrefresh(gs->win_game);
 }
 
 int main(int argv, char **argc)
@@ -253,6 +170,7 @@ int main(int argv, char **argc)
     Mob mobs[MAX_MOBS];
     create_mobs(pixmap, mobs, MAX_MOBS);
 
+    Inventory inventory;
     init_inventory(&inventory, 10);
 
     Item item1 = {"Sword", 'S', COLOR_WHITE};
@@ -270,6 +188,7 @@ int main(int argv, char **argc)
     gs.win_game = win_game;
     gs.win_inventory = win_inventory;
     gs.illuminated = illuminated;
+    gs.inventory = inventory;
 
     State state = State_Menu;
 

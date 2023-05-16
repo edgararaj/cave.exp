@@ -235,13 +235,18 @@ void render_map(WINDOW* win_game, Camera camera, Bitmap map, WINDOW *window)
         wattrset(win_game, COLOR_PAIR(3));
         print_pixel(window, x, y);
       }
-      // if (data > DIST_BASE && data < MAX_DIST)
-      // {
-      //   wattrset(win_game, COLOR_PAIR(0));
-      //   char s[] = "0";
-      //   s[0] += (data - DIST_BASE);
-      //   print_pixel_custom(window, x, y, s);
-      // }
+      if (data > DIST_BASE && data < MAX_DIST)
+      {
+        wattrset(win_game, COLOR_PAIR(0));
+        char s[] = "0";
+        s[0] += (data - DIST_BASE);
+        print_pixel_custom(window, x, y, s);
+      }
+      if (data == DIST_BASE)
+      {
+        wattrset(win_game, COLOR_PAIR(3));
+        print_pixel(window, x, y);
+      }
     }
   }
 }

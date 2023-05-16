@@ -1,3 +1,8 @@
+#pragma once
+#include "screen.h"
+#define MAP_WIDTH (2*GAME_WIDTH)
+#define MAP_HEIGHT (2*GAME_HEIGHT)
+
 #define WALL 0
 #define WALKABLE 1
 #define SHINE 2
