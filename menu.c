@@ -3,9 +3,9 @@
 #include <string.h>
 
 void draw_menu(StartMenuState *sms, State *state, int choice) {
-    char *choices[] = {"START",         "CONTINUE",       "TUTORIAL",
-                       "WORK DONE BY:", "Afonso Martins", "Davide Santos",
-                       "Edgar Araujo",  "Goncalo Barroso"};
+    char *choices[] = {
+        "START",         "INFO",         "WORK DONE BY:",  "Afonso Martins",
+        "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
     switch (choice) {
@@ -17,7 +17,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
             break;
         case KEY_DOWN:
             ++sms->highlight;
-            sms->highlight %= 3;
+            sms->highlight %= 2;
             break;
         default:
             break;

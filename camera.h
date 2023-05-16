@@ -17,3 +17,5 @@ typedef enum {
     CameraMode_Follow,
     CameraMode__Size
 } CameraMode;
+
+void update_camera(Camera *camera, int player_x, int player_y);

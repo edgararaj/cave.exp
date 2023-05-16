@@ -61,3 +61,6 @@ Vec2f vec2f_div_const(Vec2f a, int b);
 Vec2i vec2f_to_i(Vec2f a);
 Vec2f vec2f_add(Vec2f a, Vec2f b);
 Vec2i vec2i_add(Vec2i a, Vec2i b);
+float vec2i_sqrdistance(Vec2i a);
+Vec2i vec2i_add(Vec2i a, Vec2i b);
+Vec2i vec2i_sub(Vec2i a, Vec2i b);

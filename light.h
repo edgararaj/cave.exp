@@ -8,3 +8,6 @@ typedef struct {
     Rect position;
     int intensitiy;
 } Torch;
+
+void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
+                  int r, Bitmap *illuminated);

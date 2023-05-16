@@ -17,3 +17,5 @@ typedef struct {
     MobType type;
     RectFloat rect;
 } Mob;
+
+void update_mobs(Mob *mobs, int num_mobs, Vec2i player, Bitmap map);

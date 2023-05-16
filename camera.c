@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "map.h"
 #include "screen.h"
 
 void ensure_camera_inside_map(Camera *camera) {

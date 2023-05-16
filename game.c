@@ -1,3 +1,4 @@
+#include "camera.h"
 #include "map.h"
 #include "mobs.h"
 #include "objects.h"

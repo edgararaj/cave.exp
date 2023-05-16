@@ -15,6 +15,7 @@
 #include "dist.c"
 #include "draw.c"
 #include "game.c"
+#include "info.c"
 #include "inventory.c"
 #include "light.c"
 #include "map.c"
@@ -168,7 +169,6 @@ int main(int argv, char **argc) {
             draw_game(&gs, window_size, key);
         } else if (state == State_Menu) {
             draw_menu(&sms, &state, key);
-
         } else if (state == State_Info) {
             draw_info(&state, win_info, key);
         }
