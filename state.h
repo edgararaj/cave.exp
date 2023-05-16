@@ -1,6 +1,8 @@
 #pragma once
 #include "camera.h"
 #include "objects.h"
+#include "mobs.h"
+#include "light.h"
 #include <ncurses.h>
 
 typedef enum {
@@ -16,7 +18,9 @@ typedef struct
     WINDOW *win_inventory;
     WINDOW *win_game;
     Bitmap pixmap;
-    Rect *torches;
+    Torch *torches;
+    Mob *mobs;
+    Bitmap illuminated;
 } GameState;
 
 typedef struct

@@ -27,6 +27,8 @@
 #include "menu.c"
 #include "hud.c"
 #include "items.c"
+#include "dist.c"
+#include "mobs.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -54,15 +56,14 @@ void limit_fps()
     usleep(sleep_time);
 }
 
-void render_player(WINDOW *win, Camera camera, Rect player)
+void render_rect(WINDOW *win, Camera camera, Rect player)
 {
     // Ajusta as coordenadas do jogador para a posição da câmera
     int screen_x = player.tl.x - camera.x;
     int screen_y = player.tl.y - camera.y;
 
     // Renderiza o jogador na posição ajustada
-    Rect rect = {
-        screen_x, screen_y, player.br.x - camera.x, player.br.y - camera.y};
+    Rect rect = {{screen_x, screen_y}, {player.br.x - camera.x, player.br.y - camera.y}, player.color};
     print_rectangle(win, rect);
 }
 
@@ -90,13 +91,14 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3], int num
     }
 }
 
-void draw_game(GameState* gs, Vec2i window_size, int key)
+void draw_game(GameState *gs, Vec2i window_size, int key)
 {
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
     if (key == 't')
     {
-        gs->cam_mode = ++gs->cam_mode % CameraMode__Size;
+        ++gs->cam_mode;
+        gs->cam_mode %= CameraMode__Size;
     }
 
     if (key == ' ')
@@ -132,24 +134,31 @@ void draw_game(GameState* gs, Vec2i window_size, int key)
         center_camera(&gs->camera, gs->player.tl.x, gs->player.tl.y);
 
     add_term_line("%d, %d\n", gs->camera.x + gs->camera.width, MAP_WIDTH);
+    dist_reset(gs->pixmap);
+    dist_pass(gs->pixmap, gs->player.tl);
 
-    render_map(gs->camera, gs->pixmap, gs->win_game);
+    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game);
 
-    wattrset(gs->win_game, COLOR_PAIR(1));
-    // render_map_light(win_game, camera, pixmap, player.tl.x, player.tl.y, 30, pixmap);
+    wattrset(gs->win_game, COLOR_PAIR(9));
+    render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 20, &gs->illuminated);
 
-    render_light(gs->win_game, gs->camera, gs->pixmap, gs->player.tl.x, gs->player.tl.y, 30);
+    // for (int i = 0; i < MAX_TORCHES; i++)
+    // {
+    //     wattrset(gs->win_game, COLOR_PAIR(3));
+    //     print_pixel(gs->win_game, gs->torches[i].tl.x - gs->camera.x, gs->torches[i].tl.y - gs->camera.y);
+    //     wattrset(gs->win_game, COLOR_PAIR(6));
+    //     render_light(gs->win_game, gs->camera, gs->pixmap, gs->torches[i].tl.x, gs->torches[i].tl.y, 5, NULL);
+    // }
 
-    for (int i = 0; i < MAX_TORCHES; i++)
+    for (int i = 0; i < MAX_MOBS; i++)
     {
-        wattrset(gs->win_game, COLOR_PAIR(6));
-        print_pixel(gs->win_game, gs->torches[i].tl.x - gs->camera.x, gs->torches[i].tl.y - gs->camera.y);
-        render_light(gs->win_game, gs->camera, gs->pixmap, gs->torches[i].tl.x, gs->torches[i].tl.y, 5);
+        wattrset(gs->win_game, COLOR_PAIR(8));
+        render_rect(gs->win_game, gs->camera, gs->mobs[i].rect);
     }
 
     wattrset(gs->win_game, COLOR_PAIR(1));
-    render_player(gs->win_game, gs->camera, gs->player);
-    // print_rectangle(win_game, player);
+    render_rect(gs->win_game, gs->camera, gs->player);
+    render_minimap(gs->win_game, gs->illuminated, window_size, gs->player.tl);
 
     wrefresh(gs->win_game);
 }
@@ -166,9 +175,7 @@ int main(int argv, char **argc)
     }
 
     srand(time(NULL));
-    int max_y = 0, max_x = 0;
     time(&fps_timestamp);
-    Vec2i vel = {1, 1};
     cbreak();
     noecho();
     nonl();
@@ -191,6 +198,9 @@ int main(int argv, char **argc)
     init_pair(2, COLOR_RED, COLOR_RED);
     init_pair(3, COLOR_BLUE, COLOR_BLUE);
     init_pair(6, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(8, COLOR_GREEN, COLOR_GREEN);
+    init_pair(9, COLOR_WHITE, COLOR_WHITE);
+    init_pair(10, COLOR_BLACK, COLOR_BLACK);
     wattrset(win, COLOR_PAIR(0));
     wattrset(win_game, COLOR_PAIR(1));
 
@@ -217,7 +227,7 @@ int main(int argv, char **argc)
     // }
 
     Rect rects[20];
-    int rects_count = generate_rects(window, rects, ARRAY_SIZE(rects));
+    int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     Rect ordered_rects[ARRAY_SIZE(rects)];
     order_rects(rects, rects_count);
 
@@ -230,16 +240,23 @@ int main(int argv, char **argc)
     Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
+    bitmap_draw_box(pixmap, window);
+
+    int illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
+    Bitmap illuminated = {(int *)illuminated_data, {MAP_WIDTH, MAP_HEIGHT}};
 
     Vec2i first_rect_center = get_center(rects[0]);
-    Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x + 1, first_rect_center.y + 1}, 2};
+    Rect player = {{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
 
-    Camera camera = {0, 0, 0, 0, 10};
+    Camera camera = {{0, 0}, 0, 0, 10};
 
-    CameraMode cam_mode = CameraMode_Margin;
+    CameraMode cam_mode = CameraMode_Follow;
 
-    Rect torches[MAX_TORCHES];
+    Torch torches[MAX_TORCHES];
     create_torches(pixmap, torches, MAX_TORCHES);
+
+    Mob mobs[MAX_MOBS];
+    create_mobs(pixmap, mobs, MAX_MOBS);
 
     init_inventory(&inventory, 10);
     noecho();
@@ -265,9 +282,11 @@ int main(int argv, char **argc)
     gs.camera = camera;
     gs.player = player;
     gs.torches = torches;
+    gs.mobs = mobs;
     gs.pixmap = pixmap;
     gs.win_game = win_game;
     gs.win_inventory = win_inventory;
+    gs.illuminated = illuminated;
 
     State state = State_Menu;
 
@@ -295,7 +314,7 @@ int main(int argv, char **argc)
             draw_game(&gs, window_size, key);
             displayHUD(&player_stats);
         }
-        else 
+        else
         {
             draw_menu(&sms, &state, key);
         }

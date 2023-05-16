@@ -1,4 +1,5 @@
 #include "collide.h"
+#include "map.h"
 
 int collide_rect_rect(Rect a, Rect b)
 {
@@ -63,7 +64,7 @@ int collide_line_bitmap(Line line, Bitmap bitmap)
 {
     for (int i = line.start.x; i <= line.end.x; i++) {
         for (int j = line.start.y; j <= line.end.y; j++) {
-            if (!bitmap.data[j * bitmap.width + i])
+            if (map_is_wall(bitmap, (Vec2f){i, j}))
                 return 1;
         }
     }
@@ -72,10 +73,10 @@ int collide_line_bitmap(Line line, Bitmap bitmap)
 
 int collide_rect_bitmap(Rect rect, Bitmap bitmap)
 {
-    Line left = {{rect.tl.x, rect.tl.y}, {rect.tl.x, rect.br.y - 1}};
-    Line top = {{rect.tl.x, rect.tl.y}, {rect.br.x - 1, rect.tl.y}};
-    Line right = {{rect.br.x - 1, rect.tl.y}, {rect.br.x - 1, rect.br.y - 1}};
-    Line bottom = {{rect.tl.x, rect.br.y - 1}, {rect.br.x - 1, rect.br.y - 1}};
+    Line left = {{rect.tl.x, rect.tl.y}, {rect.tl.x, rect.br.y}};
+    Line top = {{rect.tl.x, rect.tl.y}, {rect.br.x, rect.tl.y}};
+    Line right = {{rect.br.x, rect.tl.y}, {rect.br.x, rect.br.y}};
+    Line bottom = {{rect.tl.x, rect.br.y}, {rect.br.x, rect.br.y}};
 
     return (collide_line_bitmap(left, bitmap) || collide_line_bitmap(top, bitmap) ||
             collide_line_bitmap(right, bitmap) || collide_line_bitmap(bottom, bitmap));

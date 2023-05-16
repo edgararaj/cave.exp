@@ -3,9 +3,14 @@
 
 void print_pixel(WINDOW *win, int x, int y)
 {
+    print_pixel_custom(win, x, y, "*");
+}
+
+void print_pixel_custom(WINDOW *win, int x, int y, char* c)
+{
     for (int k = 0; k < X_SCALE; k++)                                                                                                                              
     {                                                                                                                                                              
-        mvwprintw(win, y, x * X_SCALE + k, "*");
+        mvwprintw(win, y, x * X_SCALE + k, c);
     }  
 }
 
@@ -72,9 +77,9 @@ void print_rectangle(WINDOW *win, Rect rect)
 
 void print_rectangleu(WINDOW *win, int startrow, int startcol, int height, int width)
 {
-    for (int r = startrow; r < startrow + height; r++)
+    for (int r = startrow; r <= startrow + height; r++)
     {
-        for (int c = startcol; c < startcol + width; c++)
+        for (int c = startcol; c <= startcol + width; c++)
         {
             print_pixel(win, c, r);
         }
@@ -106,4 +111,43 @@ void bitmap_draw_rectangle(Bitmap bitmap, Rect rect)
             bitmap.data[r * bitmap.width + c] = 1;
         }
     }
+}
+
+void bitmap_draw_line(Bitmap bitmap, Line line)
+{
+    int x0 = line.start.x;
+    int y0 = line.start.y;
+    int x1 = line.end.x;
+    int y1 = line.end.y;
+    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    int err = (dx > dy ? dx : -dy) / 2, e2;
+
+    for (;;) {
+        bitmap.data[y0 * bitmap.width + x0] = 0;
+        if (x0 == x1 && y0 == y1)
+        break;
+        e2 = err;
+        if (e2 > -dx) {
+        err -= dy;
+        x0 += sx;
+        }
+        if (e2 < dy) {
+        err += dx;
+        y0 += sy;
+        }
+    }
+}
+
+void bitmap_draw_box(Bitmap bitmap, Rect rect)
+{
+    Line left = {{rect.tl.x, rect.tl.y}, {rect.tl.x, rect.br.y - 1}};
+    Line top = {{rect.tl.x, rect.tl.y}, {rect.br.x - 1, rect.tl.y}};
+    Line right = {{rect.br.x - 1, rect.tl.y}, {rect.br.x - 1, rect.br.y - 1}};
+    Line bottom = {{rect.tl.x, rect.br.y - 1}, {rect.br.x - 1, rect.br.y - 1}};
+
+    bitmap_draw_line(bitmap, left);
+    bitmap_draw_line(bitmap, top);
+    bitmap_draw_line(bitmap, right);
+    bitmap_draw_line(bitmap, bottom);
 }

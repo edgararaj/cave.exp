@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "state.h": "c",
-        "random": "c",
-        "term.h": "c",
-        "objects.h": "c"
-    }
-}

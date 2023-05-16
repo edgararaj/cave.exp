@@ -11,11 +11,12 @@ void draw_menu(StartMenuState* sms, State* state, int choice)
         case KEY_UP:
             --sms->highlight;
             if (sms->highlight < 0) {
-                sms->highlight = n_choices - 5- 1;
+                sms->highlight = n_choices - 5 - 1;
             }
             break;
         case KEY_DOWN:
-            sms->highlight = ++sms->highlight % 3;
+            ++sms->highlight;
+            sms->highlight %= 3;
             break;
         default:
             break;

@@ -9,3 +9,4 @@ void print_ellipse(WINDOW *win, Vec2i, int y, int x, int r1, int r2);
 void print_circle(WINDOW *win, Vec2i, Circle);
 void print_rectangle(WINDOW *win, Rect rect);
 void print_line(WINDOW *win, Line line);
+void print_pixel_custom(WINDOW *win, int x, int y, char* c);
