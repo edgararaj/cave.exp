@@ -11,6 +11,7 @@
 #include "inventory.h"
 #include "state.h"
 #include "player.h"
+#include "items.h"
 
 #include "movimento.c"
 #include "objects.c"
@@ -25,6 +26,7 @@
 #include "inventory.c"
 #include "menu.c"
 #include "hud.c"
+#include "items.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -240,11 +242,12 @@ int main(int argv, char **argc)
     create_torches(pixmap, torches, MAX_TORCHES);
 
     init_inventory(&inventory, 10);
+    noecho();
 
-    Item item1 = {"Sword", 'S', COLOR_WHITE};
-    Item item2 = {"Potion", 'P', COLOR_RED};
-    add_item(&inventory, item1);
-    add_item(&inventory, item2);
+//    Item item1 = {"Sword", 'S', COLOR_WHITE};
+//    Item item2 = {"Potion", 'P', COLOR_RED};
+//    add_item(&inventory, item1);
+//    add_item(&inventory, item2);
 
     player_stats.lives = 5;
     player_stats.maxLives = 5;
