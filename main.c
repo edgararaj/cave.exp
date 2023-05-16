@@ -23,6 +23,7 @@
 #include "light.c"
 #include "inventory.c"
 #include "menu.c"
+#include "info.c"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -85,7 +86,7 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3], int num
     }
 }
 
-void draw_game(GameState* gs, Vec2i window_size, int key)
+void draw_game(GameState *gs, Vec2i window_size, int key)
 {
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
@@ -180,6 +181,7 @@ int main(int argv, char **argc)
     WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    WINDOW *win_info = newwin(30, 20, 0, INGAME_TERM_SIZE);
 
     init_pair(0, COLOR_WHITE, COLOR_BLACK);
     init_pair(1, COLOR_CYAN, COLOR_CYAN);
@@ -277,9 +279,14 @@ int main(int argv, char **argc)
         {
             draw_game(&gs, window_size, key);
         }
-        else 
+        else if (state == State_Menu)
         {
             draw_menu(&sms, &state, key);
+            
+        }
+        else if (state == State_Info)
+        {
+            draw_info(&state, win_info, key);
         }
 
         render_term(win);

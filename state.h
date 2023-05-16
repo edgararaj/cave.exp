@@ -3,9 +3,11 @@
 #include "objects.h"
 #include <ncurses.h>
 
-typedef enum {
+typedef enum
+{
     State_Game,
-    State_Menu
+    State_Menu,
+    State_Info,
 } State;
 
 typedef struct
@@ -24,3 +26,5 @@ typedef struct
     WINDOW *win;
     int highlight;
 } StartMenuState;
+
+

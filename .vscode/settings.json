@@ -3,6 +3,7 @@
         "state.h": "c",
         "random": "c",
         "term.h": "c",
-        "objects.h": "c"
+        "objects.h": "c",
+        "string.h": "c"
     }
 }
