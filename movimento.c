@@ -23,7 +23,7 @@ void update(Rect *st, int key)
         do_movement_action(st, -1, -1);
         break;
     case KEY_UP:
-    case '8':
+    case 'w':
         do_movement_action(st, -1, +0);
         break;
     case KEY_A3:
@@ -31,14 +31,14 @@ void update(Rect *st, int key)
         do_movement_action(st, -1, +1);
         break;
     case KEY_LEFT:
-    case '4':
+    case 'a':
         do_movement_action(st, +0, -1);
         break;
     case KEY_B2:
     case '5':
         break;
     case KEY_RIGHT:
-    case '6':
+    case 'd':
         do_movement_action(st, +0, +1);
         break;
     case KEY_C1:
@@ -46,7 +46,7 @@ void update(Rect *st, int key)
         do_movement_action(st, +1, -1);
         break;
     case KEY_DOWN:
-    case '2':
+    case 's':
         do_movement_action(st, +1, +0);
         break;
     case KEY_C3:
