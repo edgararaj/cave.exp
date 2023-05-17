@@ -1,5 +1,6 @@
 #pragma once
 #include "objects.h"
+#include "camera.h"
 
 #define MAX_TORCHES 10
 #define LIGHT_RADIUS 20

@@ -1,9 +1,7 @@
 #pragma once
 #include "objects.h"
-#include "state.h"
 
-typedef struct
-{
+typedef struct {
     RectFloat rect;
     Vec2f velocity;
     int hp;

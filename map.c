@@ -1,3 +1,7 @@
+#include <math.h>
+#include <assert.h>
+
+#include "utils.h"
 #include "map.h"
 #include "camera.h"
 #include "colors.h"
@@ -5,10 +9,8 @@
 #include "light.h"
 #include "objects.h"
 #include "term.h"
-#include <math.h>
 
-uint32_t dist_map_encode(int value)
-{
+uint32_t dist_map_encode(int value) {
     return (value & PARTITION_MASK) << DIST_MAP_SHIFT;
 }
 

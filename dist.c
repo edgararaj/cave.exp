@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "map.h"
 #include "objects.h"
 

@@ -1,5 +1,11 @@
-all:
-	gcc main.c -ggdb -O0 -std=gnu11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable -lm -lncurses
+LIBS  = -lm -lncurses -lc
+CFLAGS = -std=gnu11 -ggdb -O0 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
+
+# Should be equivalent to your list of C files, if you don't build selectively
+SRC=$(wildcard *.c)
+
+all: $(SRC)
+	gcc $^ $(CFLAGS) $(LIBS)
 
 run:
-	make && ./a.out --setup && uxterm -e ./a.out
+	make && ./a.out

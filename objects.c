@@ -1,5 +1,7 @@
 #include "objects.h"
 #include "screen.h"
+#include "map.h"
+
 Vec2i get_center(Rect rect)
 {
     Vec2i center;

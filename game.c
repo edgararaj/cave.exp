@@ -1,3 +1,8 @@
+#include <ncurses.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
 #include "camera.h"
 #include "colors.h"
 #include "combat.h"
@@ -6,11 +11,7 @@
 #include "objects.h"
 #include "state.h"
 #include "term.h"
-#include <curses.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
+#include "light.h"
 
 void warrior_attack(Warrior *a, Warrior *b)
 {

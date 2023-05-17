@@ -1,7 +1,3 @@
-#include "inventory.h"
-#include "objects.h"
-#include "state.h"
-#include "utils.h"
 #include <assert.h>
 #include <math.h>
 #include <ncurses.h>
@@ -10,22 +6,13 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "camera.c"
-#include "collide.c"
-#include "dist.c"
-#include "draw.c"
-#include "game.c"
-#include "info.c"
-#include "inventory.c"
-#include "light.c"
-#include "map.c"
-#include "menu.c"
-#include "mobs.c"
-#include "movimento.c"
-#include "objects.c"
-#include "term.c"
-#include "utils.c"
-#include "xterm.c"
+#include "screen.h"
+#include "map.h"
+#include "colors.h"
+#include "inventory.h"
+#include "objects.h"
+#include "state.h"
+#include "utils.h"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;

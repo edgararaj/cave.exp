@@ -1,6 +1,8 @@
-#include "screen.h"
 #include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
+#include "screen.h"
+#include "utils.h"
 
 #define XSTR(s) STR(s)
 #define STR(s) #s

@@ -1,3 +1,4 @@
+#include <math.h>
 #include "collide.h"
 #include "map.h"
 
