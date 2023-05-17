@@ -3,16 +3,19 @@
 
 #include <ncurses.h>
 
-typedef struct Item {
+typedef struct Item
+{
     char *name;
     char symbol;
     int color;
 } Item;
 
-typedef struct Inventory {
+typedef struct Inventory
+{
     Item *items;
     int size;
     int capacity;
+    int gold;
 } Inventory;
 
 void init_inventory(Inventory *inventory, int capacity);

@@ -2,7 +2,8 @@
 #include "map.h"
 #include "screen.h"
 
-void ensure_camera_inside_map(Camera *camera) {
+void ensure_camera_inside_map(Camera *camera)
+{
     // Garante que a câmera não sai dos limites do mapa
     if (camera->x < 0)
         camera->x = 0;
@@ -14,23 +15,35 @@ void ensure_camera_inside_map(Camera *camera) {
         camera->y = MAP_HEIGHT - camera->height;
 }
 
-void update_camera(Camera *camera, int player_x, int player_y) {
+void update_camera(Camera *camera, Vec2i player)
+{
+    int player_x = player.x;
+    int player_y = player.y;
     // Verifica se o jogador está perto das bordas da câmera
-    if (player_x - camera->x < camera->margin) {
+    if (player_x - camera->x < camera->margin)
+    {
         camera->x = player_x - camera->margin;
-    } else if (player_x - camera->x > camera->width - camera->margin) {
+    }
+    else if (player_x - camera->x > camera->width - camera->margin)
+    {
         camera->x = player_x - camera->width + camera->margin;
     }
-    if (player_y - camera->y < camera->margin) {
+    if (player_y - camera->y < camera->margin)
+    {
         camera->y = player_y - camera->margin;
-    } else if (player_y - camera->y > camera->height - camera->margin) {
+    }
+    else if (player_y - camera->y > camera->height - camera->margin)
+    {
         camera->y = player_y - camera->height + camera->margin;
     }
 
     ensure_camera_inside_map(camera);
 }
 
-void center_camera(Camera *camera, int x, int y) {
+void center_camera(Camera *camera, Vec2i player)
+{
+    int x = player.x;
+    int y = player.y;
     camera->x = x - camera->width / 2;
     camera->y = y - camera->height / 2;
 

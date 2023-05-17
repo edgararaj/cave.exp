@@ -1,10 +1,12 @@
 #pragma once
 #include "objects.h"
 
-typedef struct {
+typedef struct
+{
     union {
         Vec2i offset;
-        struct {
+        struct
+        {
             int x, y; // Coordenadas da câmera
         };
     };
@@ -12,10 +14,12 @@ typedef struct {
     int margin;        // Margem nas bordas da câmera
 } Camera;
 
-typedef enum {
+typedef enum
+{
     CameraMode_Margin,
     CameraMode_Follow,
     CameraMode__Size
 } CameraMode;
 
-void update_camera(Camera *camera, int player_x, int player_y);
+void update_camera(Camera *camera, Vec2i player);
+void center_camera(Camera *camera, Vec2i player);

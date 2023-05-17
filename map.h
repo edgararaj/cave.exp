@@ -9,6 +9,8 @@
 #define WALKABLE 1
 #define SHINE 2
 
+#define PARTITION_MASK 0xFF
+
 #define NORMAL_MAP_SHIFT 0
 #define NORMAL_MAP_MASK (0xFF << NORMAL_MAP_SHIFT)
 
@@ -21,10 +23,8 @@
 #define LIGHT_MAP_MAX LIGHT_RADIUS
 
 int map_is_wall(Bitmap pixmap, Vec2f pos);
-void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
-                Bitmap illuminated);
-void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size,
-                    Vec2i player_pos);
+void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
+void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos);
 int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc);
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 

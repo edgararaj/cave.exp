@@ -33,25 +33,41 @@ int fps = 20;
 int fps_limit = 60;
 int sleep_time = 10000;
 
-void limit_fps() {
-    time_t current;
-    time(&current);
-    if (current > fps_timestamp) {
-        fps = fps_frame_counter;
-        fps_frame_counter = 0;
-        fps_timestamp = current;
-        if (fps < fps_limit)
-            sleep_time /= 2;
-        if (fps > fps_limit + 2)
-            sleep_time += 50 * (fps - fps_limit);
+/* Subtract the `struct timeval' values X and Y,
+   storing the result in RESULT.
+   Return 1 if the difference is negative, otherwise 0.  */
+
+int timeval_subtract(result, x, y)
+struct timeval *result, *x, *y;
+{
+    /* Perform the carry for the later subtraction by updating y. */
+    if (x->tv_usec < y->tv_usec)
+    {
+        int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+        y->tv_usec -= 1000000 * nsec;
+        y->tv_sec += nsec;
     }
-    fps_frame_counter++;
-    usleep(sleep_time);
+    if (x->tv_usec - y->tv_usec > 1000000)
+    {
+        int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+        y->tv_usec += 1000000 * nsec;
+        y->tv_sec -= nsec;
+    }
+
+    /* Compute the time remaining to wait.
+       tv_usec is certainly positive. */
+    result->tv_sec = x->tv_sec - y->tv_sec;
+    result->tv_usec = x->tv_usec - y->tv_usec;
+
+    /* Return 1 if result is negative. */
+    return x->tv_sec < y->tv_sec;
 }
 
-int main(int argv, char **argc) {
+int main(int argv, char **argc)
+{
     char *flag = argc[1];
-    if (argc[1] && strcmp(argc[1], "--setup") == 0) {
+    if (argc[1] && strcmp(argc[1], "--setup") == 0)
+    {
         printf("Setting up Xresources\n");
         setup_xresources();
         system("xrdb ~/.Xresources");
@@ -77,7 +93,7 @@ int main(int argv, char **argc) {
     WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_info = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient + LIGHT_RADIUS - 1));
+    wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient));
 
     setup_colors();
     wattrset(win, COLOR_PAIR(0));
@@ -90,30 +106,36 @@ int main(int argv, char **argc) {
     window.br.y = MAP_HEIGHT;
 
     Rect rects[20];
-    int rects_count =
-        generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
+    int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     Rect ordered_rects[ARRAY_SIZE(rects)];
     order_rects(rects, rects_count);
 
-    for (int i = 0; i < rects_count; i++) {
+    for (int i = 0; i < rects_count; i++)
+    {
         rects[i].color = 1;
     }
 
     Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
-    for (int i = 0; i < rects_count; i++) {
+    for (int i = 0; i < rects_count; i++)
+    {
         generate_obstacles(pixmap, rects[i]);
     }
     bitmap_draw_box(pixmap, window);
 
-    int illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap illuminated = {(int *)illuminated_data, {MAP_WIDTH, MAP_HEIGHT}};
+    uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
+    Bitmap illuminated = {(uint32_t *)illuminated_data, {MAP_WIDTH, MAP_HEIGHT}};
 
     Vec2i first_rect_center = get_center(rects[0]);
-    Rect player = {{first_rect_center.x, first_rect_center.y},
-                   {first_rect_center.x, first_rect_center.y},
-                   2};
+    Warrior player;
+    player.rect =
+        (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
+    player.dmg = 5;
+    player.hp = 100;
+    player.kills = 0;
+    player.weight = 3;
+    player.velocity = (Vec2f){0, 0};
 
     Camera camera = {{0, 0}, 0, 0, 10};
 
@@ -144,6 +166,7 @@ int main(int argv, char **argc) {
     gs.win_inventory = win_inventory;
     gs.illuminated = illuminated;
     gs.inventory = inventory;
+    gs.player_attacking = 0;
 
     State state = State_Menu;
 
@@ -151,7 +174,11 @@ int main(int argv, char **argc) {
     sms.win = win_menu;
     sms.highlight = 0;
 
-    while (1) {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    int delta_ms = 0;
+    while (1)
+    {
         getmaxyx(stdscr, window_size.y, window_size.x);
 
         window_size.x -= INGAME_TERM_SIZE;
@@ -165,11 +192,16 @@ int main(int argv, char **argc) {
         // add_term_line("%d, %d\n", window_size.x, window_size.y);
         int key = getch();
 
-        if (state == State_Game) {
-            draw_game(&gs, window_size, key);
-        } else if (state == State_Menu) {
+        if (state == State_Game)
+        {
+            draw_game(&gs, window_size, key, delta_ms);
+        }
+        else if (state == State_Menu)
+        {
             draw_menu(&sms, &state, key);
-        } else if (state == State_Info) {
+        }
+        else if (state == State_Info)
+        {
             draw_info(&state, win_info, key);
         }
 
@@ -177,6 +209,14 @@ int main(int argv, char **argc) {
         box(win, 0, 0);
 
         wrefresh(win);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+        struct timeval result;
+        timeval_subtract(&result, &end, &start);
+        delta_ms = result.tv_usec * 1e-4;
+        int fps = 1e8 / result.tv_usec;
+        start = end;
+
+        // add_term_line("%d\n", fps);
     }
 
     endwin();
