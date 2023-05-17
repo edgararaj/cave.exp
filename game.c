@@ -179,6 +179,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key) {
                     rect_float_to_rect(gs->mobs[i].rect));
     }
 
+    // ! PERCEBER ISTO
     // Check if the player is on a spike tile
     int player_x = gs->player.tl.x;
     int player_y = gs->player.tl.y;
