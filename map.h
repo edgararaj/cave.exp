@@ -20,6 +20,13 @@
 #define LIGHT_MAP_MASK (0xFF << LIGHT_MAP_SHIFT)
 #define LIGHT_MAP_MAX LIGHT_RADIUS
 
+#define HIGH_RESOLUTION 1.3
+#define DEFAULT_RESOLUTION 8
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+bool minimap_maximized = false;
+
 int map_is_wall(Bitmap pixmap, Vec2f pos);
 void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
                 Bitmap illuminated);

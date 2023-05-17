@@ -105,8 +105,8 @@ int main(int argv, char **argc) {
         rects[i].color = 1;
     }
 
-    int data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap pixmap = {(int *)data, {MAP_WIDTH, MAP_HEIGHT}};
+    uint32_t data[MAP_WIDTH][MAP_HEIGHT] = {};
+    Bitmap pixmap = {(uint32_t *)data, {{MAP_WIDTH, MAP_HEIGHT}}};
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
     for (int i = 0; i < rects_count; i++) {
@@ -114,15 +114,16 @@ int main(int argv, char **argc) {
     }
     bitmap_draw_box(pixmap, window);
 
-    int illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap illuminated = {(int *)illuminated_data, {MAP_WIDTH, MAP_HEIGHT}};
+    uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
+    Bitmap illuminated = {(uint32_t *)illuminated_data,
+                          {{MAP_WIDTH, MAP_HEIGHT}}};
 
     Vec2i first_rect_center = get_center(rects[0]);
     Rect player = {{first_rect_center.x, first_rect_center.y},
                    {first_rect_center.x, first_rect_center.y},
                    2};
 
-    Camera camera = {{0, 0}, 0, 0, 10};
+    Camera camera = {{{0, 0}}, 0, 0, 10};
 
     CameraMode cam_mode = CameraMode_Follow;
 

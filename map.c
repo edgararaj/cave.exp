@@ -256,10 +256,12 @@ int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc) {
 }
 
 int cap_between(int value, int min, int max) {
-    if (value < min)
+    if (value < min) {
         return min;
-    else if (value > max)
+    } else if (value > max) {
         return max;
+    }
+    return value;
 }
 
 void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
@@ -299,12 +301,23 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
 
 void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size,
                     Vec2i player_pos) {
-    int scale = 8;
+    float scale = minimap_maximized ? HIGH_RESOLUTION : DEFAULT_RESOLUTION;
     int minimap_width = illuminated.width / scale;
     int minimap_height = illuminated.height / scale;
 
-    int trans_x = window_size.x - minimap_width - 1;
-    int trans_y = 1;
+    int trans_x, trans_y;
+
+    // Verifique se o minimapa está maximizado
+    if (minimap_maximized) {
+        // Se estiver maximizado, centralize-o na janela
+        trans_x = (window_size.x - minimap_width) / 2;
+        trans_y = (window_size.y - minimap_height) / 2;
+    } else {
+        // Se não estiver maximizado, coloque-o no canto superior direito
+        trans_x = window_size.x - minimap_width - 1;
+        trans_y = 1;
+    }
+
     wattrset(win, COLOR_PAIR(3));
     print_rectangleu(win, 0, trans_x - 1, trans_y + minimap_height + 1,
                      trans_x + minimap_width - 1);

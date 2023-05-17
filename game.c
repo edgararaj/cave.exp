@@ -114,6 +114,10 @@ void draw_game(GameState *gs, Vec2i window_size, int key) {
         }
     }
 
+    if (key == 'm') {
+        minimap_maximized = !minimap_maximized;
+    }
+
     Rect prev_player = gs->player;
     update_player(&gs->player, key);
     if (collide_rect_bitmap(gs->player, gs->pixmap)) {
