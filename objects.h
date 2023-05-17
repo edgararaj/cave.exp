@@ -66,3 +66,5 @@ float vec2i_sqrdistance(Vec2i a);
 Vec2i vec2i_add(Vec2i a, Vec2i b);
 Vec2i vec2i_sub(Vec2i a, Vec2i b);
 Vec2i vec2i_mul_const(Vec2i a, int b);
+Bitmap alloc_bitmap(int width, int height);
+void free_bitmap(Bitmap bitmap);

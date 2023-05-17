@@ -45,3 +45,4 @@ uint32_t normal_map_encode(int value);
 void set_normal_map_value(Bitmap bitmap, Vec2i pos, int value);
 void set_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value);
+int get_light_map_value(Bitmap bitmap, Vec2i pos);

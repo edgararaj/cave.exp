@@ -105,8 +105,7 @@ int main(int argv, char **argc) {
         rects[i].color = 1;
     }
 
-    uint32_t data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap pixmap = {(uint32_t *)data, {{MAP_WIDTH, MAP_HEIGHT}}};
+    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
     for (int i = 0; i < rects_count; i++) {

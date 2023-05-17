@@ -1,6 +1,8 @@
 #include "map.h"
 #include "camera.h"
+#include "colors.h"
 #include "draw.h"
+#include "light.h"
 #include "objects.h"
 #include "term.h"
 #include <math.h>
@@ -33,9 +35,18 @@ void set_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
     bitmap.data[pos.y * bitmap.width + pos.x] |= light_map_encode(value);
 }
 
+int get_light_map_value(Bitmap bitmap, Vec2i pos) {
+    return light_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
+}
+
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
-    set_light_map_value(bitmap, pos, value);
-    // + light_map_decode(bitmap.data[pos.y * bitmap.width + pos.x])
+    int result = value + get_light_map_value(bitmap, pos);
+    if (result > LIGHT_RADIUS) {
+        add_term_line("%d\n", result);
+    }
+    // if (result > LIGHT_RADIUS)
+    //     result = LIGHT_RADIUS;
+    set_light_map_value(bitmap, pos, result);
 }
 
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value) {
@@ -295,6 +306,12 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
                                                 LIGHT_RADIUS - 1)));
                 print_pixel(window, x, y);
             }
+            // if (light_map_decode(data)) {
+            //     wattrset(win_game, COLOR_PAIR(Culur_Default));
+            //     char s[] = "0";
+            //     s[0] = '0' + light_map_decode(data);
+            //     print_pixel_custom(window, x, y, s);
+            // }
 
             if (normal_map_decode(data) == SHINE) {
                 wattrset(win_game, COLOR_PAIR(Culur_Shine));
