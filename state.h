@@ -1,17 +1,17 @@
 #pragma once
 #include "camera.h"
-#include "objects.h"
-#include "mobs.h"
 #include "light.h"
+#include "mobs.h"
+#include "objects.h"
 #include <ncurses.h>
 
 typedef enum {
     State_Game,
-    State_Menu
+    State_Menu,
+    State_Info,
 } State;
 
-typedef struct
-{
+typedef struct {
     Camera camera;
     CameraMode cam_mode;
     Rect player;
@@ -21,10 +21,10 @@ typedef struct
     Torch *torches;
     Mob *mobs;
     Bitmap illuminated;
+    Inventory inventory;
 } GameState;
 
-typedef struct
-{
+typedef struct {
     WINDOW *win;
     int highlight;
 } StartMenuState;

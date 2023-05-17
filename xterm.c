@@ -1,6 +1,6 @@
 #include "screen.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define XSTR(s) STR(s)
 #define STR(s) #s
@@ -10,17 +10,13 @@ typedef struct {
     char *value;
 } Xresource;
 
-char *get_xresource(char *start, char *end)
-{
-    Xresource resources[] = {
-        {"FONTSIZE", XSTR(FONT_SIZE)},
-        {"WIDTH", XSTR(TERM_WIDTH)},
-        {"HEIGHT", XSTR(TERM_HEIGHT)}};
+char *get_xresource(char *start, char *end) {
+    Xresource resources[] = {{"FONTSIZE", XSTR(FONT_SIZE)},
+                             {"WIDTH", XSTR(TERM_WIDTH)},
+                             {"HEIGHT", XSTR(TERM_HEIGHT)}};
 
-    for (size_t i = 0; i < ARRAY_SIZE(resources); i++)
-    {
-        if (strncmp(start, resources[i].name, end - start) == 0)
-        {
+    for (size_t i = 0; i < ARRAY_SIZE(resources); i++) {
+        if (strncmp(start, resources[i].name, end - start) == 0) {
             return resources[i].value;
         }
     }
@@ -28,8 +24,7 @@ char *get_xresource(char *start, char *end)
     return 0;
 }
 
-void setup_xresources()
-{
+void setup_xresources() {
     char file[256];
     strcat(strcpy(file, getenv("HOME")), "/.Xresources");
     FILE *w = fopen(file, "w");
@@ -42,8 +37,7 @@ void setup_xresources()
     fread(temp, fsize, 1, f);
 
     char *find = temp;
-    while (1)
-    {
+    while (1) {
         char *start = strstr(find, "<!");
         if (start == NULL)
             break;
