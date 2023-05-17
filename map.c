@@ -1,6 +1,8 @@
 #include "map.h"
 #include "camera.h"
+#include "colors.h"
 #include "draw.h"
+#include "light.h"
 #include "objects.h"
 #include "term.h"
 #include <math.h>
@@ -38,7 +40,13 @@ int get_light_map_value(Bitmap bitmap, Vec2i pos) {
 }
 
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
-    set_light_map_value(bitmap, pos, value + get_light_map_value(bitmap, pos));
+    int result = value + get_light_map_value(bitmap, pos);
+    if (result > LIGHT_RADIUS) {
+        add_term_line("%d\n", result);
+    }
+    // if (result > LIGHT_RADIUS)
+    //     result = LIGHT_RADIUS;
+    set_light_map_value(bitmap, pos, result);
 }
 
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value) {
@@ -273,19 +281,19 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
             int map_y = y + camera.y;
             uint32_t data = map.data[map_y * map.width + map_x];
 
-            // if (light_map_decode(data)) {
-            //     wattrset(win_game,
-            //              COLOR_PAIR(Culur_Light_Gradient +
-            //                         cap_between(light_map_decode(data), 0,
-            //                                     LIGHT_RADIUS - 1)));
-            //     print_pixel(window, x, y);
-            // }
             if (light_map_decode(data)) {
-                wattrset(win_game, COLOR_PAIR(Culur_Default));
-                char s[] = "0";
-                s[0] = '0' + light_map_decode(data);
-                print_pixel_custom(window, x, y, s);
+                wattrset(win_game,
+                         COLOR_PAIR(Culur_Light_Gradient +
+                                    cap_between(light_map_decode(data), 0,
+                                                LIGHT_RADIUS - 1)));
+                print_pixel(window, x, y);
             }
+            // if (light_map_decode(data)) {
+            //     wattrset(win_game, COLOR_PAIR(Culur_Default));
+            //     char s[] = "0";
+            //     s[0] = '0' + light_map_decode(data);
+            //     print_pixel_custom(window, x, y, s);
+            // }
 
             if (normal_map_decode(data) == SHINE) {
                 wattrset(win_game, COLOR_PAIR(Culur_Shine));

@@ -24,26 +24,30 @@ void light_pass(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect,
     Vec2f center = rect_center(rect);
     Vec2f light_pos_screen = {center.x - camera.x + 0.5f,
                               center.y - camera.y + 0.5f};
+    // Vec2f light_pos_screen = {x - camera.x + 0.5f, y - camera.y + 0.5f};
 
     for (float theta = 0; theta < 2 * M_PI; theta += inc) {
         Vec2f vec = {cos(theta), sin(theta)};
         Vec2f line_pos = light_pos_screen;
-        Vec2f abs_pos = center;
 
         for (int k = 0; k < r; k++) {
-            if (!map_is_walkable(normalmap, camera, line_pos, vec)) {
-                break;
-            }
-            line_pos = vec2f_add(line_pos, vec);
-            abs_pos = vec2f_add(abs_pos, vec);
-
             // add_term_line("%d\n", LIGHT_BASE + k);
             int value = LIGHT_RADIUS - 1 - r + k;
             if (t == LightType_Vision)
                 value = k;
 
-            add_term_line("%.2f %.2f => %d\n", abs_pos.x, abs_pos.y, value + 1);
-            set_light_map_value(pixmap, vec2f_to_i(abs_pos), value + 1);
+            if (line_pos.x < 0 || line_pos.x >= pixmap.width ||
+                line_pos.y < 0 || line_pos.y >= pixmap.height)
+                break;
+
+            // wattrset(win_game, COLOR_PAIR(Culur_Light_Gradient + k));
+            // print_pixel(win_game, line_pos.x, line_pos.y);
+            set_light_map_value(pixmap, vec2f_to_i(line_pos), value + 1);
+
+            if (!map_is_walkable(normalmap, camera, line_pos, vec)) {
+                break;
+            }
+            line_pos = vec2f_add(line_pos, vec);
         }
     }
 }
