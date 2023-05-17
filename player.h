@@ -1,8 +1,8 @@
 #pragma once
 
 typedef struct {
-    int lives;
-    int maxLives;
+    int hp;
+    int maxHP;
     int mana;
     int maxMana;
     int level;
@@ -12,3 +12,5 @@ typedef struct {
     float speed;
     int gold;
 } Player_Stats;
+
+Player_Stats player_stats;

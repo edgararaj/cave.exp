@@ -354,6 +354,8 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size,
         trans_y = 1;
     }
 
+    trans_y += 1; // Desce o minimapa 1 character quando maximizado
+
     wattrset(win, COLOR_PAIR(3));
     print_rectangleu(win, 0, trans_x - 1, trans_y + minimap_height + 1,
                      trans_x + minimap_width - 1);
