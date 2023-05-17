@@ -9,6 +9,7 @@ typedef enum {
     State_Game,
     State_Menu,
     State_Info,
+    State_Niveis,
 } State;
 
 typedef struct {
@@ -28,3 +29,8 @@ typedef struct {
     WINDOW *win;
     int highlight;
 } StartMenuState;
+
+typedef struct {
+    WINDOW *win;
+    int highlight;
+} StartNiveisState;

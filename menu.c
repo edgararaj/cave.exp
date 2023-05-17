@@ -3,6 +3,7 @@
 #include <string.h>
 
 void draw_menu(StartMenuState *sms, State *state, int choice) {
+    werase(sms->win);
     char *choices[] = {
         "START",         "INFO",         "WORK DONE BY:",  "Afonso Martins",
         "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
@@ -12,7 +13,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
         case KEY_UP:
             --sms->highlight;
             if (sms->highlight < 0) {
-                sms->highlight = n_choices - 5 - 1;
+                sms->highlight = n_choices - 6;
             }
             break;
         case KEY_DOWN:
@@ -34,7 +35,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
 
     if (choice == 10) {
         if (sms->highlight == 0) {
-            *state = State_Game;
+            *state = State_Niveis;
         }
         mvwprintw(sms->win, 10, 1, "%d", sms->highlight);
         if (sms->highlight == 1) {

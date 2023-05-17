@@ -22,6 +22,7 @@
 #include "menu.c"
 #include "mobs.c"
 #include "movimento.c"
+#include "niveis.c"
 #include "objects.c"
 #include "term.c"
 #include "utils.c"
@@ -151,6 +152,10 @@ int main(int argv, char **argc) {
     sms.win = win_menu;
     sms.highlight = 0;
 
+    StartNiveisState smsm;
+    smsm.win = win_menu;
+    smsm.highlight = 1;
+
     while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
 
@@ -171,6 +176,8 @@ int main(int argv, char **argc) {
             draw_menu(&sms, &state, key);
         } else if (state == State_Info) {
             draw_info(&state, win_info, key);
+        } else if (state == State_Niveis) {
+            draw_niveis(&smsm, &state, key);
         }
 
         render_term(win);

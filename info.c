@@ -13,6 +13,7 @@ void draw_info(State *state, WINDOW *win, int key) {
     noecho();
 
     if (key == 'q') {
+
         *state = State_Menu;
         clear();
     }
