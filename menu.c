@@ -9,6 +9,11 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
         "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
+    int max_y, max_x;
+    getmaxyx(sms->win, max_y, max_x);
+
+    int start_y = (max_y - n_choices) / 2; // Posição vertical inicial do menu
+
     switch (choice) {
         case KEY_UP:
             --sms->highlight;
@@ -24,13 +29,26 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
             break;
     }
 
+    int box_width = max_x - 2;
+    int text_width, text_x;
+
     for (int i = 0; i < n_choices; i++) {
+        int y = start_y + i;
         if (i == sms->highlight) {
             wattron(sms->win, A_REVERSE);
         }
-        mvwprintw(sms->win, i + 1, 1, "%s", choices[i]);
+
+        text_width = strlen(choices[i]);
+        text_x = (box_width - text_width) / 2; // Posição horizontal centralizada
+
+        mvwprintw(sms->win, y, text_x + 1, "%s", choices[i]); // +1 para compensar a borda esquerda da box
+
         wattroff(sms->win, A_REVERSE);
     }
+        // Reposiciona a janela centralizada horizontalmente
+    int start_x = (max_x - sms->win->_maxx) / 2;
+    mvwin(sms->win, start_y - 1, start_x - 1);
+
     box(sms->win, 0, 0);
 
     if (choice == 10) {
@@ -45,3 +63,5 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
 
     wrefresh(sms->win);
 }
+
+
