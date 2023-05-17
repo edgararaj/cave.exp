@@ -3,7 +3,7 @@
 
 void displayHUD(Player_Stats *player) {
     // Limpar a linha de status
-    move(0, 0);
+    move(37, 20);
     clrtoeol();
 
     // Imprimir informações do jogador

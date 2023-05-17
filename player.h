@@ -1,4 +1,5 @@
 #pragma once
+#include <sys/time.h>
 
 typedef struct {
     int hp;
@@ -11,6 +12,7 @@ typedef struct {
     int defense;
     float speed;
     int gold;
+    struct timeval lastDamageTime;
 } Player_Stats;
 
 Player_Stats player_stats;

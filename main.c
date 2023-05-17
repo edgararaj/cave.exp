@@ -142,7 +142,7 @@ int main(int argv, char **argc) {
     //    add_item(&inventory, item2);
 
     player_stats.hp = 100;
-    player_stats.maxHP = 5;
+    player_stats.maxHP = 100;
     player_stats.mana = 50;
     player_stats.maxMana = 50;
     player_stats.level = 1;

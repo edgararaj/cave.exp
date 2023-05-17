@@ -184,8 +184,19 @@ void draw_game(GameState *gs, Vec2i window_size, int key) {
     int player_y = gs->player.tl.y;
     uint32_t data = gs->pixmap.data[player_y * gs->pixmap.width + player_x];
     if (normal_map_decode(data) == SPIKE) {
-        // The player is on a spike tile, reduce their hp
-        player_stats.hp -= SPIKE_DAMAGE;
+        // The player is on a spike tile, check the time of the last damage
+        struct timeval currentTime;
+        gettimeofday(&currentTime, NULL);
+        double secondsElapsed =
+            (currentTime.tv_sec - player_stats.lastDamageTime.tv_sec) +
+            (currentTime.tv_usec - player_stats.lastDamageTime.tv_usec) /
+                1000000.0;
+        if (secondsElapsed >= SPIKE_DAMAGE_COOLDOWN) {
+            // Enough time has passed since the last damage, so reduce their hp
+            player_stats.hp -= SPIKE_DAMAGE;
+            gettimeofday(&player_stats.lastDamageTime,
+                         NULL); // Update the time of the last damage
+        }
     }
 
     render_hp(gs->win_game, gs->camera, gs->player, &player_stats);
