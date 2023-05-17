@@ -10,7 +10,8 @@
 #include "objects.h"
 #include "term.h"
 
-uint32_t dist_map_encode(int value) {
+uint32_t dist_map_encode(int value)
+{
     return (value & PARTITION_MASK) << DIST_MAP_SHIFT;
 }
 
