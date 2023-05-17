@@ -259,7 +259,7 @@ void generate_spikes(Bitmap pixmap, Rect rect2) {
     Rect rect = expand_rect(rect2, -5);
     for (int x = rect.tl.x; x < rect.br.x; x++) {
         for (int y = rect.tl.y; y < rect.br.y; y++) {
-            if (rand() % 100 < 2.5) { // 5% chance to place a spike
+            if (rand() % 100 < 3.5) { // 3.5% chance to place a spike
                 set_normal_map_value(pixmap, (Vec2i){x, y}, SPIKE);
             }
         }
