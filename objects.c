@@ -132,3 +132,10 @@ Rect expand_rect(Rect rect, int amount) {
     result.tl.y = rect.tl.y - amount;
     return result;
 }
+
+Bitmap alloc_bitmap(int width, int height) {
+    return (Bitmap){(int *)malloc(width * height * sizeof(uint32_t)),
+                    {MAP_WIDTH, MAP_HEIGHT}};
+}
+
+void free_bitmap(Bitmap bitmap) { free(bitmap.data); }

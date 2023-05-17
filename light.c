@@ -18,7 +18,7 @@ void create_torches(Bitmap pixmap, Torch *torches, int num_torches) {
 }
 
 void light_pass(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect,
-                int r, LightType t) {
+                int r, LightType t, Bitmap normalmap) {
     float inc = M_PI / 720.f;
     // Atualizar a posição da luz para levar em conta a posição da câmera
     Vec2f center = rect_center(rect);
@@ -31,7 +31,7 @@ void light_pass(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect,
         Vec2f abs_pos = center;
 
         for (int k = 0; k < r; k++) {
-            if (!map_is_walkable(pixmap, camera, line_pos, vec)) {
+            if (!map_is_walkable(normalmap, camera, line_pos, vec)) {
                 break;
             }
             line_pos = vec2f_add(line_pos, vec);
@@ -42,7 +42,8 @@ void light_pass(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect,
             if (t == LightType_Vision)
                 value = k;
 
-            add_light_map_value(pixmap, vec2f_to_i(abs_pos), value + 1);
+            add_term_line("%.2f %.2f => %d\n", abs_pos.x, abs_pos.y, value + 1);
+            set_light_map_value(pixmap, vec2f_to_i(abs_pos), value + 1);
         }
     }
 }
