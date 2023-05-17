@@ -5,16 +5,54 @@
 #include "term.h"
 #include <math.h>
 
+uint32_t dist_map_encode(int value) { return value << DIST_MAP_SHIFT; }
+
+uint32_t light_map_encode(int value) { return value << LIGHT_MAP_SHIFT; }
+
+int light_map_decode(uint32_t value) {
+    return (value & LIGHT_MAP_MASK) >> LIGHT_MAP_SHIFT;
+}
+
+int dist_map_decode(uint32_t value) {
+    return (value & DIST_MAP_MASK) >> DIST_MAP_SHIFT;
+}
+
+int normal_map_decode(uint32_t value) {
+    return (value & NORMAL_MAP_MASK) >> NORMAL_MAP_SHIFT;
+}
+
+uint32_t normal_map_encode(int value) { return value << NORMAL_MAP_SHIFT; }
+
+void set_normal_map_value(Bitmap bitmap, Vec2i pos, int value) {
+    bitmap.data[pos.y * bitmap.width + pos.x] &= (~NORMAL_MAP_MASK);
+    bitmap.data[pos.y * bitmap.width + pos.x] |= normal_map_encode(value);
+}
+
+void set_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
+    bitmap.data[pos.y * bitmap.width + pos.x] &= (~LIGHT_MAP_MASK);
+    bitmap.data[pos.y * bitmap.width + pos.x] |= light_map_encode(value);
+}
+
+void add_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
+    set_light_map_value(bitmap, pos, value);
+    // + light_map_decode(bitmap.data[pos.y * bitmap.width + pos.x])
+}
+
+void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value) {
+    bitmap.data[pos.y * bitmap.width + pos.x] &= (~DIST_MAP_MASK);
+    bitmap.data[pos.y * bitmap.width + pos.x] |= dist_map_encode(value);
+}
+
 void apply_horizontal_tunnel(int x1, int x2, int y, Bitmap bitmap) {
     int start = x1 < x2 ? x1 : x2;
     int end = x1 > x2 ? x1 : x2;
 
     for (int x = start; x <= end; x++) {
-        bitmap.data[y * bitmap.width + x] = 1;
+        set_normal_map_value(bitmap, (Vec2i){x, y}, WALKABLE);
         if (y + 1 <
             bitmap.height) // Verifica se não estamos no limite do bitmap
         {
-            bitmap.data[(y + 1) * bitmap.width + x] = 1;
+            set_normal_map_value(bitmap, (Vec2i){x, y + 1}, WALKABLE);
         }
     }
 }
@@ -24,10 +62,10 @@ void apply_vertical_tunnel(int y1, int y2, int x, Bitmap bitmap) {
     int end = y1 > y2 ? y1 : y2;
 
     for (int y = start; y <= end; y++) {
-        bitmap.data[y * bitmap.width + x] = 1;
+        set_normal_map_value(bitmap, (Vec2i){x, y}, WALKABLE);
         if (x + 1 < bitmap.width) // Verifica se não estamos no limite do bitmap
         {
-            bitmap.data[y * bitmap.width + x + 1] = 1;
+            set_normal_map_value(bitmap, (Vec2i){x + 1, y}, WALKABLE);
         }
     }
 }
@@ -41,7 +79,7 @@ int radius_count(Bitmap bitmap, int x, int y, int r) {
         int ymin = MAX(y - r, 0);
         int ymax = MIN(y + r, bitmap.height - 1);
         for (int j = ymin; j <= ymax; j++) {
-            if (bitmap.data[j * bitmap.width + i] == WALL)
+            if (normal_map_decode(bitmap.data[j * bitmap.width + i]) == WALL)
                 result++;
         }
     }
@@ -53,7 +91,7 @@ void generate_obstacles(Bitmap bitmap, Rect rect2) {
     for (int x = rect.tl.x; x < rect.br.x; x++) {
         for (int y = rect.tl.y; y < rect.br.y; y++) {
             if (rand() % 100 < 10 && radius_count(bitmap, x, y, 4) <= 10) {
-                bitmap.data[y * bitmap.width + x] = WALL;
+                set_normal_map_value(bitmap, (Vec2i){x, y}, WALL);
             }
         }
     }
@@ -61,7 +99,7 @@ void generate_obstacles(Bitmap bitmap, Rect rect2) {
         for (int x = rect.tl.x; x < rect.br.x; x++) {
             for (int y = rect.tl.y; y < rect.br.y; y++) {
                 if (radius_count(bitmap, x, y, 1) >= 4) {
-                    bitmap.data[y * bitmap.width + x] = WALL;
+                    set_normal_map_value(bitmap, (Vec2i){x, y}, WALL);
                 }
             }
         }
@@ -69,8 +107,8 @@ void generate_obstacles(Bitmap bitmap, Rect rect2) {
     for (int x = rect.tl.x; x < rect.br.x; x++) {
         for (int y = rect.tl.y; y < rect.br.y; y++) {
             if (radius_count(bitmap, x, y, 2) <= 4 &&
-                bitmap.data[y * bitmap.width + x] == WALL) {
-                bitmap.data[y * bitmap.width + x] = WALKABLE;
+                normal_map_decode(bitmap.data[y * bitmap.width + x]) == WALL) {
+                set_normal_map_value(bitmap, (Vec2i){x, y}, WALKABLE);
             }
         }
     }
@@ -151,7 +189,7 @@ void erode(Bitmap bitmap, int iterations) {
         int open_tile_count = 0;
 
         for (int j = 0; j < bitmap.width * bitmap.height; j++) {
-            if (bitmap.data[j] == 1) { // Supondo que 1 seja o código para '#'
+            if (normal_map_decode(bitmap.data[j]) == WALKABLE) {
                 open_tiles[open_tile_count++] = j;
             }
         }
@@ -165,7 +203,8 @@ void erode(Bitmap bitmap, int iterations) {
         // Enquanto a célula escolhida ainda for um '#', escolha uma direção
         // aleatória e mova o "digger"
         int cap = 1000;
-        while (bitmap.data[digger] == 1 && cap-- > 0) {
+        while (normal_map_decode(bitmap.data[digger]) == WALKABLE &&
+               cap-- > 0) {
             int direction = rand() % 4;
 
             switch (direction) {
@@ -195,12 +234,13 @@ void erode(Bitmap bitmap, int iterations) {
         }
 
         // Marque a nova célula como um '#'
-        bitmap.data[digger] = 1;
+        set_normal_map_value(bitmap, (Vec2i){digger_x, digger_y}, WALKABLE);
     }
 }
 
 int map_is_wall(Bitmap pixmap, Vec2f pos) {
-    int data = pixmap.data[(int)pos.y * pixmap.width + (int)pos.x];
+    int data =
+        normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
     return data == WALL || data == SHINE;
 }
 
@@ -215,28 +255,41 @@ int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc) {
                                           vec2i_to_f(camera.offset)));
 }
 
-void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window) {
+int cap_between(int value, int min, int max) {
+    if (value < min)
+        return min;
+    else if (value > max)
+        return max;
+}
+
+void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
+                Bitmap illuminated) {
     for (int x = 0; x < camera.width; ++x) {
         for (int y = 0; y < camera.height; ++y) {
             int map_x = x + camera.x;
             int map_y = y + camera.y;
-            int data = map.data[map_y * map.width + map_x];
-            if (!map_is_wall(map, (Vec2f){map_x, map_y})) {
-                wattrset(win_game, COLOR_PAIR(10));
+            uint32_t data = map.data[map_y * map.width + map_x];
+
+            if (light_map_decode(data)) {
+                wattrset(win_game,
+                         COLOR_PAIR(Culur_Light_Gradient +
+                                    cap_between(light_map_decode(data), 0,
+                                                LIGHT_RADIUS - 1)));
                 print_pixel(window, x, y);
             }
-            if (data == SHINE) {
-                wattrset(win_game, COLOR_PAIR(3));
+
+            if (normal_map_decode(data) == SHINE) {
+                wattrset(win_game, COLOR_PAIR(Culur_Shine));
                 print_pixel(window, x, y);
+            } else {
+                data = normal_map_decode(
+                    illuminated.data[map_y * map.width + map_x]);
+                if (data == SHINE) {
+                    wattrset(win_game, COLOR_PAIR(Culur_Shine_Dimmed));
+                    print_pixel(window, x, y);
+                }
             }
-            // if (data > DIST_BASE && data < MAX_DIST)
-            // {
-            //   wattrset(win_game, COLOR_PAIR(0));
-            //   char s[] = "0";
-            //   s[0] += (data - DIST_BASE);
-            //   print_pixel_custom(window, x, y, s);
-            // }
-            if (data == DIST_BASE) {
+            if (dist_map_decode(data) == 1) {
                 wattrset(win_game, COLOR_PAIR(2));
                 print_pixel(window, x, y);
             }

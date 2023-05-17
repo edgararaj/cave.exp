@@ -10,7 +10,8 @@ void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs) {
         do {
             x = random_between(0, pixmap.width - width);
             y = random_between(0, pixmap.height - height);
-        } while (pixmap.data[y * pixmap.width + x] != WALKABLE);
+        } while (normal_map_decode(pixmap.data[y * pixmap.width + x]) !=
+                 WALKABLE);
 
         mobs[i].type = random_between(0, MobType__Size);
         mobs[i].rect = (RectFloat){{x, y}, {x + width - 1, y + height - 1}, 6};
@@ -21,8 +22,8 @@ void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs) {
 }
 
 void update_mob(Mob *mob, Bitmap map) {
-    if (map.data[(int)mob->rect.tl.y * map.width + (int)mob->rect.tl.x] >=
-        DIST_BASE) {
+    if (dist_map_decode(
+            map.data[(int)mob->rect.tl.y * map.width + (int)mob->rect.tl.x])) {
         int smallest = MAX_DIST;
         Vec2i smallest_add = {0, 0};
         for (int i = -1; i < 2; i++) {
@@ -32,11 +33,10 @@ void update_mob(Mob *mob, Bitmap map) {
                     RectFloat rect =
                         rect_float_translate(mob->rect, vec2i_to_f(add));
                     int data =
-                        map.data[(int)(rect.tl.y) * map.width + (int)rect.tl.x];
-                    if (data < smallest && data >= DIST_BASE &&
-                        data < MAX_DIST) {
-                        smallest = map.data[(int)(rect.tl.y) * map.width +
-                                            (int)rect.tl.x];
+                        dist_map_decode(map.data[(int)(rect.tl.y) * map.width +
+                                                 (int)rect.tl.x]);
+                    if (data < smallest && data && data < MAX_DIST) {
+                        smallest = data;
                         smallest_add = add;
                     }
                 }

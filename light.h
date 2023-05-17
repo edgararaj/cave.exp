@@ -6,8 +6,11 @@
 
 typedef struct {
     Rect position;
-    int intensitiy;
+    int radius;
 } Torch;
 
-void render_light(WINDOW *win_game, Camera camera, Bitmap pixmap, int x, int y,
-                  int r, Bitmap *illuminated);
+typedef enum { LightType_Vision, LightType_Torch } LightType;
+
+void light_pass(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect,
+                int r, LightType t);
+void light_reset(Bitmap distmap);

@@ -39,7 +39,7 @@ typedef struct {
 } Ellipse;
 
 typedef struct {
-    int *data;
+    uint32_t *data;
     union {
         Vec2i size;
         struct {
@@ -53,6 +53,7 @@ Rect gen_random_subrect(Rect container);
 Vec2i get_center(Rect rect);
 Rect expand_rect(Rect rect, int amount);
 Vec2i rect_size(Rect rect);
+Vec2f rect_center(Rect rect);
 Rect subdivide_rect(Rect container, int div, int index);
 Rect rect_translate(Rect rect, Vec2i trans);
 RectFloat rect_float_translate(RectFloat rect, Vec2f trans);
@@ -64,3 +65,4 @@ Vec2i vec2i_add(Vec2i a, Vec2i b);
 float vec2i_sqrdistance(Vec2i a);
 Vec2i vec2i_add(Vec2i a, Vec2i b);
 Vec2i vec2i_sub(Vec2i a, Vec2i b);
+Vec2i vec2i_mul_const(Vec2i a, int b);
