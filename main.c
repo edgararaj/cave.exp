@@ -110,6 +110,7 @@ int main(int argv, char **argc) {
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
     for (int i = 0; i < rects_count; i++) {
+        generate_spikes(pixmap, rects[i]);
         generate_obstacles(pixmap, rects[i]);
     }
     bitmap_draw_box(pixmap, window);
