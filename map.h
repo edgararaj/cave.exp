@@ -8,6 +8,7 @@
 #define WALL 0
 #define WALKABLE 1
 #define SHINE 2
+#define SPIKE 3
 
 #define NORMAL_MAP_SHIFT 0
 #define NORMAL_MAP_MASK (0xFF << NORMAL_MAP_SHIFT)
@@ -19,6 +20,13 @@
 #define LIGHT_MAP_SHIFT 16
 #define LIGHT_MAP_MASK (0xFF << LIGHT_MAP_SHIFT)
 #define LIGHT_MAP_MAX LIGHT_RADIUS
+
+#define HIGH_RESOLUTION 2.6
+#define DEFAULT_RESOLUTION 9
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+bool minimap_maximized = false;
 
 int map_is_wall(Bitmap pixmap, Vec2f pos);
 void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
@@ -37,3 +45,4 @@ uint32_t normal_map_encode(int value);
 void set_normal_map_value(Bitmap bitmap, Vec2i pos, int value);
 void set_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value);
+int get_light_map_value(Bitmap bitmap, Vec2i pos);

@@ -1,6 +1,8 @@
 #include "map.h"
 #include "camera.h"
+#include "colors.h"
 #include "draw.h"
+#include "light.h"
 #include "objects.h"
 #include "term.h"
 #include <math.h>
@@ -33,9 +35,18 @@ void set_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
     bitmap.data[pos.y * bitmap.width + pos.x] |= light_map_encode(value);
 }
 
+int get_light_map_value(Bitmap bitmap, Vec2i pos) {
+    return light_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
+}
+
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
-    set_light_map_value(bitmap, pos, value);
-    // + light_map_decode(bitmap.data[pos.y * bitmap.width + pos.x])
+    int result = value + get_light_map_value(bitmap, pos);
+    if (result > LIGHT_RADIUS) {
+        add_term_line("%d\n", result);
+    }
+    // if (result > LIGHT_RADIUS)
+    //     result = LIGHT_RADIUS;
+    set_light_map_value(bitmap, pos, result);
 }
 
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value) {
@@ -244,9 +255,25 @@ int map_is_wall(Bitmap pixmap, Vec2f pos) {
     return data == WALL || data == SHINE;
 }
 
+void generate_spikes(Bitmap pixmap, Rect rect2) {
+    Rect rect = expand_rect(rect2, -5);
+    for (int x = rect.tl.x; x < rect.br.x; x++) {
+        for (int y = rect.tl.y; y < rect.br.y; y++) {
+            if (rand() % 100 < 2.5) { // 5% chance to place a spike
+                set_normal_map_value(pixmap, (Vec2i){x, y}, SPIKE);
+            }
+        }
+    }
+}
+
 int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc) {
     Vec2f inc_x = {inc.x, 0};
     Vec2f inc_y = {0, inc.y};
+    int data =
+        normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
+    if (data == SPIKE) {
+        // Handle player stepping on a spike
+    }
     return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x),
                                            vec2i_to_f(camera.offset))) ||
             !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y),
@@ -256,10 +283,12 @@ int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc) {
 }
 
 int cap_between(int value, int min, int max) {
-    if (value < min)
+    if (value < min) {
         return min;
-    else if (value > max)
+    } else if (value > max) {
         return max;
+    }
+    return value;
 }
 
 void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
@@ -277,10 +306,19 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
                                                 LIGHT_RADIUS - 1)));
                 print_pixel(window, x, y);
             }
+            // if (light_map_decode(data)) {
+            //     wattrset(win_game, COLOR_PAIR(Culur_Default));
+            //     char s[] = "0";
+            //     s[0] = '0' + light_map_decode(data);
+            //     print_pixel_custom(window, x, y, s);
+            // }
 
             if (normal_map_decode(data) == SHINE) {
                 wattrset(win_game, COLOR_PAIR(Culur_Shine));
                 print_pixel(window, x, y);
+            } else if (normal_map_decode(data) == SPIKE) { // Add this block
+                wattrset(win_game, COLOR_PAIR(Culur_Spike));
+                print_pixel_custom(window, x, y, "^");
             } else {
                 data = normal_map_decode(
                     illuminated.data[map_y * map.width + map_x]);
@@ -299,12 +337,23 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window,
 
 void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size,
                     Vec2i player_pos) {
-    int scale = 8;
+    float scale = minimap_maximized ? HIGH_RESOLUTION : DEFAULT_RESOLUTION;
     int minimap_width = illuminated.width / scale;
     int minimap_height = illuminated.height / scale;
 
-    int trans_x = window_size.x - minimap_width - 1;
-    int trans_y = 1;
+    int trans_x, trans_y;
+
+    // Verifique se o minimapa está maximizado
+    if (minimap_maximized) {
+        // Se estiver maximizado, centralize-o na janela
+        trans_x = (window_size.x - minimap_width) / 2;
+        trans_y = (window_size.y - minimap_height) / 2;
+    } else {
+        // Se não estiver maximizado, coloque-o no canto superior direito
+        trans_x = window_size.x - minimap_width - 1;
+        trans_y = 1;
+    }
+
     wattrset(win, COLOR_PAIR(3));
     print_rectangleu(win, 0, trans_x - 1, trans_y + minimap_height + 1,
                      trans_x + minimap_width - 1);

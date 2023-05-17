@@ -1,13 +1,9 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include <ncurses.h>
+#include "items.h"
 
-typedef struct Item {
-    char *name;
-    char symbol;
-    int color;
-} Item;
+#include <ncurses.h>
 
 typedef struct Inventory {
     Item *items;

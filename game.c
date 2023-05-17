@@ -89,6 +89,16 @@ void shine_reset(Bitmap distmap) {
     }
 }
 
+void mix_lightmap(Bitmap distmap, Bitmap lightmap, Camera camera) {
+    for (int x = 0; x < lightmap.width; x++) {
+        for (int y = 0; y < lightmap.height; y++) {
+            int value = get_light_map_value(lightmap, (Vec2i){x, y});
+            add_light_map_value(distmap,
+                                vec2i_add((Vec2i){x, y}, camera.offset), value);
+        }
+    }
+}
+
 void draw_game(GameState *gs, Vec2i window_size, int key) {
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
@@ -114,6 +124,10 @@ void draw_game(GameState *gs, Vec2i window_size, int key) {
         }
     }
 
+    if (key == 'm') {
+        minimap_maximized = !minimap_maximized;
+    }
+
     Rect prev_player = gs->player;
     update_player(&gs->player, key);
     if (collide_rect_bitmap(gs->player, gs->pixmap)) {
@@ -133,19 +147,29 @@ void draw_game(GameState *gs, Vec2i window_size, int key) {
 
     light_reset(gs->pixmap);
     for (int i = 0; i < MAX_TORCHES; i++) {
-        light_pass(gs->win_game, gs->camera, gs->pixmap,
-                   gs->torches[i].position, gs->torches[i].radius,
-                   LightType_Torch);
+        Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+        light_reset(lightmap);
+        light_pass(gs->win_game, gs->camera, lightmap, gs->torches[i].position,
+                   gs->torches[i].radius, LightType_Torch, gs->pixmap);
+        mix_lightmap(gs->pixmap, lightmap, gs->camera);
+        free_bitmap(lightmap);
+    }
+
+    Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    light_reset(lightmap);
+    light_pass(gs->win_game, gs->camera, lightmap, gs->player, LIGHT_RADIUS,
+               LightType_Vision, gs->pixmap);
+    mix_lightmap(gs->pixmap, lightmap, gs->camera);
+    free_bitmap(lightmap);
+
+    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game,
+               gs->illuminated);
+
+    for (int i = 0; i < MAX_TORCHES; i++) {
         wattrset(gs->win_game, COLOR_PAIR(3));
         print_pixel(gs->win_game, gs->torches[i].position.tl.x - gs->camera.x,
                     gs->torches[i].position.tl.y - gs->camera.y);
     }
-
-    light_pass(gs->win_game, gs->camera, gs->pixmap, gs->player, LIGHT_RADIUS,
-               LightType_Vision);
-
-    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game,
-               gs->illuminated);
 
     for (int i = 0; i < MAX_MOBS; i++) {
         render_rect(gs->win_game, gs->camera,
