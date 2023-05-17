@@ -3,8 +3,6 @@
 #include <ncurses.h>
 #include <stdlib.h>
 
-#define LIGHT_BASE 11
-
 // Função para interpolação linear entre duas cores
 void lerp_color(short start_color[3], short end_color[3], float t,
                 short *result_color) {
@@ -40,15 +38,21 @@ typedef enum {
     Color_Magenta,
     Color_Cyan,
     Color_White,
-    Color__Size,
+    Culur_Black,
+    Culur_Shine,
+    Culur_Shine_Dimmed,
+    Color__RGBSize,
     Culur_Default,
-    Culur_Black
+    Culur_Light_Gradient,
+    // ... LIGHT_RADIUS reserved
 } Color;
 
 void setup_colors() {
     init_color(Culur_Black, 0, 0, 0);
+    init_color(Culur_Shine, 900, 0, 0);
+    init_color(Culur_Shine_Dimmed, 200, 0, 0);
     int i;
-    for (i = 0; i < Color__Size; i++) {
+    for (i = 0; i < Color__RGBSize; i++) {
         init_pair(i, i, i);
     }
     init_pair(Culur_Default, COLOR_WHITE, COLOR_BLACK);
@@ -75,10 +79,8 @@ void setup_colors() {
     short start_color[3] = {700, 500, 20}; // preto
     short end_color[3] = {0, 0, 0};        // branco
 
-    // Número de cores intermediárias para gerar
-    int num_pairs = LIGHT_RADIUS;
-
     // Verificar se o terminal suporta cores e o número mínimo de pares de cores
     // necessários
-    init_gradient_color_pairs(start_color, end_color, num_pairs, LIGHT_BASE);
+    init_gradient_color_pairs(start_color, end_color, LIGHT_RADIUS,
+                              Culur_Light_Gradient + 1);
 }

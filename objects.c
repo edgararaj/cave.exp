@@ -66,6 +66,12 @@ Vec2i rect_size(Rect rect) {
     return r;
 }
 
+Vec2f rect_center(Rect rect) {
+    Vec2f r = vec2f_add(vec2f_div_const(vec2i_to_f(rect_size(rect)), 2),
+                        vec2i_to_f(rect.tl));
+    return r;
+}
+
 Rect rect_translate(Rect rect, Vec2i trans) {
     Rect result;
     result.color = rect.color;
