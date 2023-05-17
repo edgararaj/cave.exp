@@ -20,8 +20,8 @@
 #define LIGHT_MAP_MASK (0xFF << LIGHT_MAP_SHIFT)
 #define LIGHT_MAP_MAX LIGHT_RADIUS
 
-#define HIGH_RESOLUTION 1.3
-#define DEFAULT_RESOLUTION 8
+#define HIGH_RESOLUTION 2.6
+#define DEFAULT_RESOLUTION 9
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
