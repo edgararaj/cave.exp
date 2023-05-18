@@ -14,8 +14,6 @@
 #include <time.h>
 #include <unistd.h>
 
-extern Player_Stats player_stats;
-
 void warrior_attack(Warrior *a, Warrior *b)
 {
     if (vec2f_sqrdistance(vec2f_sub(rect_float_center(a->rect), rect_float_center(b->rect))) <= a->weight * a->weight)
@@ -45,14 +43,14 @@ int char_width_int(int value)
     return snprintf(NULL, 0, "%d", value);
 }
 
-void render_hp(WINDOW *win_game, Camera camera, Rect rect, Player_Stats *player_stats)
+void render_hp(WINDOW *win_game, Camera camera, Rect rect, int hp)
 {
     Vec2i size = rect_size(rect);
     Rect translated_rect = rect_translate(rect, vec2i_mul_const(camera.offset, -1));
-    int char_width = char_width_int(player_stats->hp);
+    int char_width = char_width_int(hp);
     int new_x = (int)(translated_rect.tl.x * X_SCALE + (size.x * X_SCALE) / 2.f - (char_width / 2.f)) + 1;
     wattrset(win_game, COLOR_PAIR(Culur_Default));
-    mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d", player_stats->hp);
+    mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d", hp);
 }
 
 void update_player(RectFloat *st, int key)
@@ -199,7 +197,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
 
     if (key == 'm')
     {
-        minimap_maximized = !minimap_maximized;
+        gs->minimap_maximized = !gs->minimap_maximized;
     }
 
     RectFloat prev_player = gs->player.rect;
@@ -257,7 +255,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
         if (gs->mobs[i].warrior.hp <= 0)
             continue;
         render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect));
-        // render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].warrior.hp, 0);
+        render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].warrior.hp);
     }
 
     if (gs->player_attacking)
@@ -276,21 +274,21 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
         // The player is on a spike tile, check the time of the last damage
         struct timeval currentTime;
         gettimeofday(&currentTime, NULL);
-        double secondsElapsed = (currentTime.tv_sec - player_stats.lastDamageTime.tv_sec) +
-                                (currentTime.tv_usec - player_stats.lastDamageTime.tv_usec) / 1000000.0;
+        double secondsElapsed = (currentTime.tv_sec - gs->player_stats.lastDamageTime.tv_sec) +
+                                (currentTime.tv_usec - gs->player_stats.lastDamageTime.tv_usec) / 1000000.0;
         if (secondsElapsed >= SPIKE_DAMAGE_COOLDOWN)
         {
             // Enough time has passed since the last damage, so reduce their hp
-            player_stats.hp -= SPIKE_DAMAGE;
-            gettimeofday(&player_stats.lastDamageTime,
+            gs->player_stats.hp -= SPIKE_DAMAGE;
+            gettimeofday(&gs->player_stats.lastDamageTime,
                          NULL); // Update the time of the last damage
         }
     }
 
-    render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), &player_stats);
+    render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), &gs->player_stats);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
-    render_minimap(gs->win_game, gs->illuminated, window_size, player_center);
+    render_minimap(gs->win_game, gs->illuminated, window_size, player_center, gs->minimap_maximized);
 
     wrefresh(gs->win_game);
 }

@@ -1,7 +1,8 @@
-#include "player.h" // A presumir que a struct do Player esteja definida neste ficheiro
+#include "combat.h"
+#include "player.h"
 #include <ncurses.h>
 
-void displayHUD(Player_Stats *player)
+void displayHUD(Warrior *warrior, Player_Stats *player)
 {
     // Limpar a linha de status
     move(37, 20);

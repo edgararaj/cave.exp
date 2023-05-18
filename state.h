@@ -20,11 +20,13 @@ typedef struct
     WINDOW *win_inventory;
     WINDOW *win_game;
     Bitmap pixmap;
+    Player_Stats player_stats;
     Torch *torches;
     Mob *mobs;
     Bitmap illuminated;
     Inventory inventory;
     int player_attacking;
+    int minimap_maximized;
 } GameState;
 
 typedef struct

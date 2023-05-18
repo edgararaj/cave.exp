@@ -400,7 +400,7 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bit
     }
 }
 
-void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos)
+void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos, int minimap_maximized)
 {
     float scale = minimap_maximized ? HIGH_RESOLUTION : DEFAULT_RESOLUTION;
     int minimap_width = illuminated.width / scale;

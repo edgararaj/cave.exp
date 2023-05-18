@@ -15,15 +15,6 @@
 #include "state.h"
 #include "utils.h"
 
-time_t fps_timestamp;
-int fps_frame_counter = 0;
-int fps = 20;
-int fps_limit = 60;
-int sleep_time = 10000;
-Inventory inventory;
-Player_Stats player_stats;
-bool minimap_maximized = false;
-
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
    Return 1 if the difference is negative, otherwise 0.  */
@@ -66,7 +57,6 @@ int main(int argv, char **argc)
     }
 
     srand(time(NULL));
-    time(&fps_timestamp);
     cbreak();
     noecho();
     nonl();
@@ -148,6 +138,7 @@ int main(int argv, char **argc)
     //    add_item(&inventory, item1);
     //    add_item(&inventory, item2);
 
+    Player_Stats player_stats;
     player_stats.hp = 100;
     player_stats.maxHP = 100;
     player_stats.mana = 50;
@@ -171,6 +162,8 @@ int main(int argv, char **argc)
     gs.illuminated = illuminated;
     gs.inventory = inventory;
     gs.player_attacking = 0;
+    gs.minimap_maximized = false;
+    gs.player_stats = player_stats;
 
     State state = State_Menu;
 

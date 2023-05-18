@@ -30,11 +30,9 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-extern bool minimap_maximized;
-
 int map_is_wall(Bitmap pixmap, Vec2f pos);
 void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
-void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos);
+void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos, int);
 int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc);
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 
