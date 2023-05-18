@@ -1,9 +1,10 @@
-#include <math.h>
 #include "light.h"
 #include "camera.h"
 #include "colors.h"
-#include "objects.h"
 #include "map.h"
+#include "objects.h"
+#include "utils.h"
+#include <math.h>
 
 void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
 {

@@ -1,6 +1,9 @@
 #include "camera.h"
+#include "collide.h"
 #include "colors.h"
 #include "combat.h"
+#include "dist.h"
+#include "draw.h"
 #include "light.h"
 #include "map.h"
 #include "mobs.h"
@@ -201,7 +204,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
     }
 
     RectFloat prev_player = gs->player.rect;
-    update_player(&gs->player, key);
+    update_player(&gs->player.rect, key);
     if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->pixmap))
     {
         gs->player.rect = prev_player;

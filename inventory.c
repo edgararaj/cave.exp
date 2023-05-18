@@ -1,4 +1,5 @@
 #include "inventory.h"
+#include <stdlib.h>
 
 void init_inventory(Inventory *inventory, int capacity) {
     inventory->items = malloc(capacity * sizeof(Item));
