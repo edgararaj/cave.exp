@@ -1,7 +1,7 @@
-#include <ncurses.h>
-#include <math.h>
 #include "draw.h"
 #include "utils.h"
+#include <math.h>
+#include <ncurses.h>
 
 void print_pixel(WINDOW *win, int x, int y)
 {

@@ -1,3 +1,9 @@
+#include <ncurses.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
 #include "camera.h"
 #include "collide.h"
 #include "colors.h"
@@ -11,11 +17,7 @@
 #include "player.h"
 #include "state.h"
 #include "term.h"
-#include <ncurses.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
+#include "utils.h"
 
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_ms)
 {

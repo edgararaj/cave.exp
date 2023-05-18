@@ -50,7 +50,8 @@ void update_mob(Mob *mob, Bitmap map, Warrior *player, int delta_ms)
             }
         }
     }
-    mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(smallest_add), mob->speed * 10));
+    mob->warrior.rect =
+        rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(smallest_add), mob->speed * 10));
     warrior_attack(&mob->warrior, player, delta_ms);
 }
 

@@ -1,4 +1,6 @@
 #include "combat.h"
+#include "term.h"
+#include "utils.h"
 
 void warrior_attack(Warrior *a, Warrior *b, int delta_ms)
 {
