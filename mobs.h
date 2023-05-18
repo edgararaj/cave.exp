@@ -20,3 +20,4 @@ typedef struct
 } Mob;
 
 void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player);
+void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs);

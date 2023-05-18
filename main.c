@@ -6,14 +6,21 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "collide.h"
 #include "colors.h"
+#include "draw.h"
+#include "game.h"
+#include "hud.h"
 #include "inventory.h"
+#include "items.h"
+#include "light.h"
 #include "map.h"
 #include "objects.h"
 #include "player.h"
 #include "screen.h"
 #include "state.h"
 #include "utils.h"
+#include "xterm.h"
 
 time_t fps_timestamp;
 int fps_frame_counter = 0;
@@ -198,7 +205,7 @@ int main(int argv, char **argc)
 
         if (state == State_Game)
         {
-            draw_game(&gs, window_size, key);
+            draw_game(&gs, window_size, key, delta_ms);
             displayHUD(&player_stats);
         }
         else if (state == State_Menu)
