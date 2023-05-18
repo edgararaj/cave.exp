@@ -2,7 +2,8 @@
 #include <ncurses.h>
 #include <string.h>
 
-void draw_info(State *state, WINDOW *win, int key) {
+void draw_info(State *state, WINDOW *win, int key)
+{
     werase(win);
     mvprintw(10, 60, " ---------------------------------");
     mvprintw(11, 60, "|           Roguelite             |");
@@ -12,7 +13,8 @@ void draw_info(State *state, WINDOW *win, int key) {
     wrefresh(win);
     noecho();
 
-    if (key == 'q') {
+    if (key == 'q')
+    {
         *state = State_Menu;
         clear();
     }
