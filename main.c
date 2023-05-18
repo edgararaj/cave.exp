@@ -197,6 +197,7 @@ int main(int argv, char **argc) {
         } else if (state == State_Menu) {
             draw_menu(&sms, &state, key);
         } else if (state == State_Info) {
+            
             draw_info(win_info, key, &state);
         } else if (state == State_Niveis) {
             draw_niveis(&smsm, &state, key);

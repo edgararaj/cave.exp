@@ -31,6 +31,9 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
 
     int box_width = max_x - 2;
     int text_width, text_x;
+    
+    WINDOW *menuwin = newwin(20, max_x - 6, max_y - 20, 5);
+    box(menuwin, 20, 0);
 
     for (int i = 0; i < n_choices; i++) {
         int y = start_y + i;
@@ -39,17 +42,17 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
         }
 
         text_width = strlen(choices[i]);
-        text_x = (box_width - text_width) / 2; // Posição horizontal centralizada
+        text_x =
+            (box_width - text_width) / 2; // Posição horizontal centralizada
 
-        mvwprintw(sms->win, y, text_x + 1, "%s", choices[i]); // +1 para compensar a borda esquerda da box
+        mvwprintw(sms->win, y, text_x + 1, "%s",
+                  choices[i]); // +1 para compensar a borda esquerda da box
 
         wattroff(sms->win, A_REVERSE);
     }
-        // Reposiciona a janela centralizada horizontalmente
+    // Reposiciona a janela centralizada horizontalmente
     int start_x = (max_x - sms->win->_maxx) / 2;
-    mvwin(sms->win, start_y - 1, start_x - 1);
-
-    box(sms->win, 0, 0);
+    mvwin(sms->win, start_y - 1, start_x + 110);
 
     if (choice == 10) {
         if (sms->highlight == 0) {
@@ -57,11 +60,10 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
         }
         mvwprintw(sms->win, 10, 1, "%d", sms->highlight);
         if (sms->highlight == 1) {
+            clear();
             *state = State_Info;
         }
     }
 
     wrefresh(sms->win);
 }
-
-

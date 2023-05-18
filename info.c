@@ -9,20 +9,19 @@
 
 void draw_info(WINDOW *win, int key, State *state) {
     setlocale(LC_ALL, ""); // Configuração para suporte a caracteres amplos
-
     werase(win);
-    mvprintw(10, 60, " ---------------------------------");
-    mvprintw(11, 60, "|-----------Roguelite--------------|");
-    mvprintw(12, 60, "|------q para voltar ao Menu-------|");
-    mvprintw(13, 60, "|----------------------------------|");
-    mvprintw(14, 60, "|---------Teclas de Atalho---------|");
-    mvprintw(15, 60, "|-----KEY_UP - Andar para cima-----|");
-    mvprintw(16, 60, "|---KEY_DOWN - Andar para baixo----|");
-    mvprintw(17, 60, "|-KEY_LEFT - Andar para a esquerda-|");
-    mvprintw(18, 60, "|-KEY_RIGHT - Andar para a direita-|");
-    mvprintw(19, 60, "|--------T - Centrar o ecrã--------|");
-    mvprintw(20, 60, "|-------M - Abre o mini-mapa-------|");
-    mvprintw(21, 60, " --------------------------------- ");
+    mvprintw(20, 102, " ---------------------------------");
+    mvprintw(21, 102, "|-----------Roguelite--------------|");
+    mvprintw(22, 102, "|------q para voltar ao Menu-------|");
+    mvprintw(23, 102, "|----------------------------------|");
+    mvprintw(24, 102, "|---------Teclas de Atalho---------|");
+    mvprintw(25, 102, "|-----KEY_UP - Andar para cima-----|");
+    mvprintw(26, 102, "|---KEY_DOWN - Andar para baixo----|");
+    mvprintw(27, 102, "|-KEY_LEFT - Andar para a esquerda-|");
+    mvprintw(28, 102, "|-KEY_RIGHT - Andar para a direita-|");
+    mvprintw(29, 102, "|--------T - Centrar o ecrã--------|");
+    mvprintw(30, 102, "|-------M - Abre o mini-mapa-------|");
+    mvprintw(31, 102, " --------------------------------- ");
 
     wrefresh(win);
     noecho();
