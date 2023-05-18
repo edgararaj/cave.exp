@@ -38,14 +38,14 @@ void remove_item_from_inventory(Player *player, int index)
 // Function to use a health potion
 void use_health_potion(Player_Stats *player, Item *item)
 {
-    if (player->lives < player->maxLives)
+    if (player->hp < player->maxHP)
     {
-        player->lives += 50; // Restore 50 HP
-        if (player->lives > player->maxLives)
+        player->hp += 50; // Restore 50 HP
+        if (player->hp > player->maxHP)
         {
-            player->lives = player->maxLives; // Cap the HP at maxLives
+            player->hp = player->maxHP; // Cap the HP at maxHP
         }
-        printf("%s used! HP is now %d.\n", item->name, player->lives);
+        printf("%s used! HP is now %d.\n", item->name, player->hp);
     }
     else
     {

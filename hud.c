@@ -4,11 +4,11 @@
 void displayHUD(Player_Stats *player)
 {
     // Limpar a linha de status
-    move(0, 0);
+    move(37, 20);
     clrtoeol();
 
     // Imprimir informações do jogador
-    printw("Lives: %d/%d  Mana: %d/%d  Level: %d  XP: %d  Gold: %d", player->lives, player->maxLives, player->mana,
+    printw("HP: %d/%d  Mana: %d/%d  Level: %d  XP: %d  Gold: %d", player->hp, player->maxHP, player->mana,
            player->maxMana, player->level, player->experience, player->gold);
 
     // Atualizar a tela

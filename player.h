@@ -1,9 +1,10 @@
 #pragma once
+#include <sys/time.h>
 
 typedef struct
 {
-    int lives;
-    int maxLives;
+    int hp;
+    int maxHP;
     int mana;
     int maxMana;
     int level;
@@ -12,4 +13,5 @@ typedef struct
     int defense;
     float speed;
     int gold;
+    struct timeval lastDamageTime;
 } Player_Stats;

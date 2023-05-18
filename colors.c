@@ -34,12 +34,15 @@ void setup_colors()
     init_color(Culur_Black, 0, 0, 0);
     init_color(Culur_Shine, 900, 0, 0);
     init_color(Culur_Shine_Dimmed, 200, 0, 0);
+    init_color(Culur_Spike_Front, 500, 500, 500);
+    init_color(Culur_Spike_Back, 100, 100, 100);
     int i;
     for (i = 0; i < Color__RGBSize; i++)
     {
         init_pair(i, i, i);
     }
     init_pair(Culur_Default, COLOR_WHITE, COLOR_BLACK);
+    init_pair(Culur_Spike, Culur_Spike_Front, Culur_Spike_Back);
 
     // Definir as cores base para o gradiente (valores entre 0 e 1000)
     short end_color[3] = {700, 500, 20}; // preto

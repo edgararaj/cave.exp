@@ -8,6 +8,9 @@
 #define WALL 0
 #define WALKABLE 1
 #define SHINE 2
+#define SPIKE 3
+#define SPIKE_DAMAGE 7
+#define SPIKE_DAMAGE_COOLDOWN 0.35
 
 #define PARTITION_MASK 0xFF
 
@@ -21,6 +24,13 @@
 #define LIGHT_MAP_SHIFT 16
 #define LIGHT_MAP_MASK (0xFF << LIGHT_MAP_SHIFT)
 #define LIGHT_MAP_MAX LIGHT_RADIUS
+
+#define HIGH_RESOLUTION 2.6
+#define DEFAULT_RESOLUTION 9
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+extern bool minimap_maximized;
 
 int map_is_wall(Bitmap pixmap, Vec2f pos);
 void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);

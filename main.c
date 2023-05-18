@@ -6,11 +6,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "screen.h"
-#include "map.h"
 #include "colors.h"
 #include "inventory.h"
+#include "map.h"
 #include "objects.h"
+#include "player.h"
+#include "screen.h"
 #include "state.h"
 #include "utils.h"
 
@@ -21,6 +22,7 @@ int fps_limit = 60;
 int sleep_time = 10000;
 Inventory inventory;
 Player_Stats player_stats;
+bool minimap_maximized = false;
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -109,12 +111,13 @@ int main(int argv, char **argc)
     erode(pixmap, 2200);
     for (int i = 0; i < rects_count; i++)
     {
+        generate_spikes(pixmap, rects[i]);
         generate_obstacles(pixmap, rects[i]);
     }
     bitmap_draw_box(pixmap, window);
 
     uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap illuminated = {(uint32_t *)illuminated_data, {MAP_WIDTH, MAP_HEIGHT}};
+    Bitmap illuminated = {(uint32_t *)illuminated_data, {{MAP_WIDTH, MAP_HEIGHT}}};
 
     Vec2i first_rect_center = get_center(rects[0]);
     Warrior player;
@@ -126,7 +129,7 @@ int main(int argv, char **argc)
     player.weight = 3;
     player.velocity = (Vec2f){0, 0};
 
-    Camera camera = {{0, 0}, 0, 0, 10};
+    Camera camera = {{{0, 0}}, 0, 0, 10};
 
     CameraMode cam_mode = CameraMode_Follow;
 
@@ -145,8 +148,8 @@ int main(int argv, char **argc)
     //    add_item(&inventory, item1);
     //    add_item(&inventory, item2);
 
-    player_stats.lives = 5;
-    player_stats.maxLives = 5;
+    player_stats.hp = 100;
+    player_stats.maxHP = 100;
     player_stats.mana = 50;
     player_stats.maxMana = 50;
     player_stats.level = 1;
