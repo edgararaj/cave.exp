@@ -1,0 +1,21 @@
+name: Clang Format Check
+
+on: [push, pull_request]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Install clang-format
+      run: sudo apt-get install -y clang-format-10
+      
+    - name: Run clang-format
+      run: find . -regex '.*\.\(cpp\|hpp\|cc\|cxx\)' -exec clang-format-10 -style=file -i {} \;
+
+    - name: Check for modifications
+      run: |
+        git diff --exit-code || (echo "Code is not formatted properly" && exit 1)

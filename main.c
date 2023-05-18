@@ -19,6 +19,8 @@ int fps_frame_counter = 0;
 int fps = 20;
 int fps_limit = 60;
 int sleep_time = 10000;
+Inventory inventory;
+Player_Stats player_stats;
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -136,11 +138,23 @@ int main(int argv, char **argc)
 
     Inventory inventory;
     init_inventory(&inventory, 10);
+    noecho();
 
-    Item item1 = {"Sword", 'S', COLOR_WHITE};
-    Item item2 = {"Potion", 'P', COLOR_RED};
-    add_item(&inventory, item1);
-    add_item(&inventory, item2);
+    //    Item item1 = {"Sword", 'S', COLOR_WHITE};
+    //    Item item2 = {"Potion", 'P', COLOR_RED};
+    //    add_item(&inventory, item1);
+    //    add_item(&inventory, item2);
+
+    player_stats.lives = 5;
+    player_stats.maxLives = 5;
+    player_stats.mana = 50;
+    player_stats.maxMana = 50;
+    player_stats.level = 1;
+    player_stats.experience = 0;
+    player_stats.attackPower = 10;
+    player_stats.defense = 5;
+    player_stats.speed = 1.0f;
+    player_stats.gold = 0;
 
     GameState gs;
     gs.cam_mode = cam_mode;
@@ -181,7 +195,8 @@ int main(int argv, char **argc)
 
         if (state == State_Game)
         {
-            draw_game(&gs, window_size, key, delta_ms);
+            draw_game(&gs, window_size, key);
+            displayHUD(&player_stats);
         }
         else if (state == State_Menu)
         {
