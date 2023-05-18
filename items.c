@@ -1,5 +1,5 @@
-#include "player.h"
 #include "items.h"
+#include "player.h"
 
 #include <ncurses.h>
 
@@ -30,12 +30,12 @@ void remove_item_from_inventory(Player *player, int index) {
 
 // Function to use a health potion
 void use_health_potion(Player_Stats *player, Item *item) {
-    if (player->lives < player->maxLives) {
-        player->lives += 50; // Restore 50 HP
-        if (player->lives > player->maxLives) {
-            player->lives = player->maxLives; // Cap the HP at maxLives
+    if (player->hp < player->maxHP) {
+        player->hp += 50; // Restore 50 HP
+        if (player->hp > player->maxHP) {
+            player->hp = player->maxHP; // Cap the HP at maxHP
         }
-        printf("%s used! HP is now %d.\n", item->name, player->lives);
+        printf("%s used! HP is now %d.\n", item->name, player->hp);
     } else {
         printf("HP is full, cannot use %s.\n", item->name);
     }
@@ -57,14 +57,14 @@ void use_mana_potion(Player_Stats *player, Item *item) {
 // Function to use an item
 void use_item(Player_Stats *player, Item *item) {
     switch (item->type) {
-    case ITEM_TYPE_HEALTH_POTION:
-        use_health_potion(player, item);
-        break;
-    case ITEM_TYPE_MANA_POTION:
-        use_mana_potion(player, item);
-        break;
-    default:
-        printf("Unknown item type!\n");
-        break;
+        case ITEM_TYPE_HEALTH_POTION:
+            use_health_potion(player, item);
+            break;
+        case ITEM_TYPE_MANA_POTION:
+            use_mana_potion(player, item);
+            break;
+        default:
+            printf("Unknown item type!\n");
+            break;
     }
 }

@@ -9,6 +9,8 @@
 #define WALKABLE 1
 #define SHINE 2
 #define SPIKE 3
+#define SPIKE_DAMAGE 7
+#define SPIKE_DAMAGE_COOLDOWN 0.35
 
 #define NORMAL_MAP_SHIFT 0
 #define NORMAL_MAP_MASK (0xFF << NORMAL_MAP_SHIFT)

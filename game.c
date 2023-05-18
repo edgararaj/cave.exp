@@ -3,6 +3,7 @@
 #include "map.h"
 #include "mobs.h"
 #include "objects.h"
+#include "player.h"
 #include "state.h"
 #include "term.h"
 #include <curses.h>
@@ -13,16 +14,18 @@
 
 int char_width_int(int value) { return snprintf(NULL, 0, "%d", value); }
 
-void render_life(WINDOW *win_game, Camera camera, Rect rect, int life) {
+void render_hp(WINDOW *win_game, Camera camera, Rect rect,
+               Player_Stats *player_stats) {
     Vec2i size = rect_size(rect);
     Rect translated_rect =
         rect_translate(rect, vec2i_mul_const(camera.offset, -1));
-    int char_width = char_width_int(life);
+    int char_width = char_width_int(player_stats->hp);
     int new_x = (int)(translated_rect.tl.x * X_SCALE +
                       (size.x * X_SCALE) / 2.f - (char_width / 2.f)) +
                 1;
     wattrset(win_game, COLOR_PAIR(Culur_Default));
-    mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d", life);
+    mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d",
+              player_stats->hp);
 }
 
 void update_player(Rect *st, int key) {
@@ -176,7 +179,28 @@ void draw_game(GameState *gs, Vec2i window_size, int key) {
                     rect_float_to_rect(gs->mobs[i].rect));
     }
 
-    render_life(gs->win_game, gs->camera, gs->player, 100);
+    // ! PERCEBER ISTO
+    // Check if the player is on a spike tile
+    int player_x = gs->player.tl.x;
+    int player_y = gs->player.tl.y;
+    uint32_t data = gs->pixmap.data[player_y * gs->pixmap.width + player_x];
+    if (normal_map_decode(data) == SPIKE) {
+        // The player is on a spike tile, check the time of the last damage
+        struct timeval currentTime;
+        gettimeofday(&currentTime, NULL);
+        double secondsElapsed =
+            (currentTime.tv_sec - player_stats.lastDamageTime.tv_sec) +
+            (currentTime.tv_usec - player_stats.lastDamageTime.tv_usec) /
+                1000000.0;
+        if (secondsElapsed >= SPIKE_DAMAGE_COOLDOWN) {
+            // Enough time has passed since the last damage, so reduce their hp
+            player_stats.hp -= SPIKE_DAMAGE;
+            gettimeofday(&player_stats.lastDamageTime,
+                         NULL); // Update the time of the last damage
+        }
+    }
+
+    render_hp(gs->win_game, gs->camera, gs->player, &player_stats);
 
     render_rect(gs->win_game, gs->camera, gs->player);
     render_minimap(gs->win_game, gs->illuminated, window_size, gs->player.tl);
