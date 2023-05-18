@@ -3,6 +3,7 @@
 #include "map.h"
 #include "objects.h"
 #include "state.h"
+#include "utils.h"
 
 void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
 {
@@ -22,10 +23,13 @@ void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
         mobs[i].warrior.dmg = random_between(2, 20);
         mobs[i].speed = random_between(1, 5);
         mobs[i].warrior.hp = random_between(10, 100);
+        mobs[i].warrior.maxHP = 100;
+        mobs[i].warrior.weight = 2;
+        mobs[i].warrior.dmg_cooldown = 1000;
     }
 }
 
-void update_mob(Mob *mob, Bitmap map, Warrior *player)
+void update_mob(Mob *mob, Bitmap map, Warrior *player, int delta_ms)
 {
     int smallest = MAX_DIST;
     Vec2i smallest_add = {0, 0};
@@ -46,17 +50,16 @@ void update_mob(Mob *mob, Bitmap map, Warrior *player)
             }
         }
     }
-    mob->warrior.rect =
-        rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(smallest_add), mob->speed * 10));
-    warrior_attack(&mob->warrior, player);
+    mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(smallest_add), mob->speed * 10));
+    warrior_attack(&mob->warrior, player, delta_ms);
 }
 
-void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player)
+void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, int delta_ms)
 {
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
             continue;
-        update_mob(&mobs[i], map, player);
+        update_mob(&mobs[i], map, player, delta_ms);
     }
 }

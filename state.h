@@ -17,16 +17,17 @@ typedef struct
     Camera camera;
     CameraMode cam_mode;
     Warrior player;
+    Player_Stats player_stats;
     WINDOW *win_inventory;
     WINDOW *win_game;
     Bitmap pixmap;
-    Player_Stats player_stats;
     Torch *torches;
     Mob *mobs;
     Bitmap illuminated;
     Inventory inventory;
     int player_attacking;
     int minimap_maximized;
+    int player_spike_damage_cooldown;
 } GameState;
 
 typedef struct

@@ -1,5 +1,7 @@
 #include <ncurses.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define TERM_BUFFER 40
 int term_line_index = 0;

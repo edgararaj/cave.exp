@@ -10,7 +10,7 @@
 #define SHINE 2
 #define SPIKE 3
 #define SPIKE_DAMAGE 7
-#define SPIKE_DAMAGE_COOLDOWN 0.35
+#define SPIKE_DAMAGE_COOLDOWN 1200
 
 #define PARTITION_MASK 0xFF
 
@@ -46,6 +46,7 @@ void set_normal_map_value(Bitmap bitmap, Vec2i pos, int value);
 void set_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value);
 int get_light_map_value(Bitmap bitmap, Vec2i pos);
+int get_normal_map_value(Bitmap bitmap, Vec2i pos);
 int generate_rects(Rect window, Rect *rects, int rects_max);
 void order_rects(Rect *rects, int rects_count);
 void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count);

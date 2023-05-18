@@ -1,14 +1,15 @@
 #include <math.h>
 #include <assert.h>
 
-#include "utils.h"
-#include "map.h"
 #include "camera.h"
+#include "collide.h"
 #include "colors.h"
 #include "draw.h"
 #include "light.h"
+#include "map.h"
 #include "objects.h"
 #include "term.h"
+#include "utils.h"
 
 uint32_t dist_map_encode(int value)
 {
@@ -56,6 +57,11 @@ void set_light_map_value(Bitmap bitmap, Vec2i pos, int value)
 int get_light_map_value(Bitmap bitmap, Vec2i pos)
 {
     return light_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
+}
+
+int get_normal_map_value(Bitmap bitmap, Vec2i pos)
+{
+    return normal_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
 }
 
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value)

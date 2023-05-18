@@ -17,27 +17,14 @@
 #include <time.h>
 #include <unistd.h>
 
-void warrior_attack(Warrior *a, Warrior *b)
-{
-    if (vec2f_sqrdistance(vec2f_sub(rect_float_center(a->rect), rect_float_center(b->rect))) <= a->weight * a->weight)
-    {
-        // add_term_line("HP: %d, -%d\n", mobs[i].hp, mobs[i].dmg);
-        b->hp -= a->dmg;
-        if (b->hp <= 0)
-        {
-            a->kills += 1;
-        }
-    }
-}
-
-void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player)
+void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_ms)
 {
     gs->player_attacking = 200;
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
             return;
-        warrior_attack(player, &mobs[i].warrior);
+        warrior_attack(player, &mobs[i].warrior, delta_ms);
     }
 }
 
@@ -160,13 +147,6 @@ void render_player_attack(GameState *gs, Rect player, Mob *mobs, int num_mobs, V
     print_circumference(gs->win_game, window_size, c);
 }
 
-void timer_update(int *left, int delta)
-{
-    *left -= delta;
-    if (*left < 0)
-        *left = 0;
-}
-
 void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
 {
     gs->camera.width = window_size.x;
@@ -210,7 +190,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
         gs->player.rect = prev_player;
     }
 
-    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player);
+    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, delta_ms);
 
     if (gs->cam_mode == CameraMode_Margin)
         update_camera(&gs->camera, player_center);
@@ -243,7 +223,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
 
     if (key == 'j')
     {
-        player_attack(gs, gs->mobs, MAX_MOBS, &gs->player);
+        player_attack(gs, gs->mobs, MAX_MOBS, &gs->player, delta_ms);
     }
 
     for (int i = 0; i < MAX_TORCHES; i++)
@@ -267,28 +247,18 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
         render_player_attack(gs, rect_float_to_rect(gs->player.rect), gs->mobs, MAX_MOBS, window_size);
     }
 
-    // ! PERCEBER ISTO
-    // Check if the player is on a spike tile
-    int player_x = gs->player.rect.tl.x;
-    int player_y = gs->player.rect.tl.y;
-    uint32_t data = gs->pixmap.data[player_y * gs->pixmap.width + player_x];
-    if (normal_map_decode(data) == SPIKE)
+    if (get_normal_map_value(gs->pixmap, player_center) == SPIKE)
     {
-        // The player is on a spike tile, check the time of the last damage
-        struct timeval currentTime;
-        gettimeofday(&currentTime, NULL);
-        double secondsElapsed = (currentTime.tv_sec - gs->player_stats.lastDamageTime.tv_sec) +
-                                (currentTime.tv_usec - gs->player_stats.lastDamageTime.tv_usec) / 1000000.0;
-        if (secondsElapsed >= SPIKE_DAMAGE_COOLDOWN)
+        if (timer_update(&gs->player_spike_damage_cooldown, delta_ms))
         {
-            // Enough time has passed since the last damage, so reduce their hp
-            gs->player_stats.hp -= SPIKE_DAMAGE;
-            gettimeofday(&gs->player_stats.lastDamageTime,
-                         NULL); // Update the time of the last damage
+            gs->player_spike_damage_cooldown = SPIKE_DAMAGE_COOLDOWN;
+            gs->player.hp -= SPIKE_DAMAGE;
+            if (gs->player.hp < 0)
+                gs->player.hp = 0;
         }
     }
 
-    render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), &gs->player_stats);
+    render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_game, gs->illuminated, window_size, player_center, gs->minimap_maximized);

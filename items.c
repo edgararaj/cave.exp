@@ -3,6 +3,7 @@
 #include "combat.h"
 #include "items.h"
 #include "player.h"
+#include "term.h"
 
 // // Function to add an item to the player's inventory
 // void add_item_to_inventory(Inventory *inventory, Item item)
@@ -73,12 +74,12 @@ void use_mana_potion(Player_Stats *player, Item *item)
 }
 
 // Function to use an item
-void use_item(Player_Stats *player, Item *item)
+void use_item(Warrior *warrior, Player_Stats *player, Item *item)
 {
     switch (item->type)
     {
     case ITEM_TYPE_HEALTH_POTION:
-        use_health_potion(player, item);
+        use_health_potion(warrior, item);
         break;
     case ITEM_TYPE_MANA_POTION:
         use_mana_potion(player, item);

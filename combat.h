@@ -9,4 +9,7 @@ typedef struct {
     int dmg;
     int weight;
     int kills;
+    int dmg_cooldown;
 } Warrior;
+
+void warrior_attack(Warrior *a, Warrior *b, int delta_ms);

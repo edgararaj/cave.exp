@@ -11,23 +11,23 @@
 #include "draw.h"
 #include "game.h"
 #include "hud.h"
+#include "info.h"
 #include "inventory.h"
 #include "items.h"
 #include "light.h"
 #include "map.h"
+#include "menu.h"
 #include "objects.h"
 #include "player.h"
 #include "screen.h"
 #include "state.h"
 #include "utils.h"
-#include "xterm.h"
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
    Return 1 if the difference is negative, otherwise 0.  */
 
-int timeval_subtract(result, x, y)
-struct timeval *result, *x, *y;
+int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *y)
 {
     /* Perform the carry for the later subtraction by updating y. */
     if (x->tv_usec < y->tv_usec)
@@ -52,17 +52,8 @@ struct timeval *result, *x, *y;
     return x->tv_sec < y->tv_sec;
 }
 
-int main(int argv, char **argc)
+int main()
 {
-    char *flag = argc[1];
-    if (argc[1] && strcmp(argc[1], "--setup") == 0)
-    {
-        printf("Setting up Xresources\n");
-        setup_xresources();
-        system("xrdb ~/.Xresources");
-        return 0;
-    }
-
     srand(time(NULL));
     cbreak();
     noecho();
@@ -122,9 +113,11 @@ int main(int argv, char **argc)
         (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
     player.dmg = 5;
     player.hp = 100;
+    player.maxHP = 100;
     player.kills = 0;
     player.weight = 3;
     player.velocity = (Vec2f){0, 0};
+    player.dmg_cooldown = 0;
 
     Camera camera = {{{0, 0}}, 0, 0, 10};
 
@@ -199,7 +192,7 @@ int main(int argv, char **argc)
         if (state == State_Game)
         {
             draw_game(&gs, window_size, key, delta_ms);
-            displayHUD(&player_stats);
+            displayHUD(&player, &player_stats);
         }
         else if (state == State_Menu)
         {
@@ -216,7 +209,7 @@ int main(int argv, char **argc)
         wrefresh(win);
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
         struct timeval result;
-        timeval_subtract(&result, &end, &start);
+        timeval_subtract(&result, (struct timeval *)&end, (struct timeval *)&start);
         delta_ms = result.tv_usec * 1e-4;
         int fps = 1e8 / result.tv_usec;
         start = end;

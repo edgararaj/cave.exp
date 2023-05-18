@@ -1,6 +1,6 @@
-#include "state.h"
 #include <ncurses.h>
 #include <string.h>
+#include "state.h"
 
 void draw_menu(StartMenuState *sms, State *state, int choice) {
     char *choices[] = {

@@ -1,1 +1,2 @@
-void displayHUD(Player_Stats *player);
+#pragma once
+void displayHUD(Warrior *warrior, Player_Stats *player);
