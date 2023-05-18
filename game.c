@@ -9,6 +9,7 @@
 #include "mobs.h"
 #include "objects.h"
 #include "player.h"
+#include "utils.h"
 #include "state.h"
 #include "term.h"
 #include <ncurses.h>
