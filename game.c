@@ -15,7 +15,7 @@
 
 void warrior_attack(Warrior *a, Warrior *b)
 {
-    if (vec2f_sqrdistance(vec2f_sub(rect_float_center(a->rect), rect_float_center(b->rect))) < a->weight * a->weight)
+    if (vec2f_sqrdistance(vec2f_sub(rect_float_center(a->rect), rect_float_center(b->rect))) <= a->weight * a->weight)
     {
         // add_term_line("HP: %d, -%d\n", mobs[i].hp, mobs[i].dmg);
         b->hp -= a->dmg;
