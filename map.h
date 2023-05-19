@@ -63,3 +63,4 @@ void erode(Bitmap bitmap, int iterations);
 void generate_spikes(Bitmap pixmap, Rect rect2);
 void generate_obstacles(Bitmap bitmap, Rect rect2);
 void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2);
+void generate_portal(GameState* gs, Bitmap pixmap, Rect rect2);

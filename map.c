@@ -359,6 +359,35 @@ void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
     }
 }
 
+void generate_portal(GameState* gs, Bitmap pixmap, Rect rect2)
+{
+    Rect rect = expand_rect(rect2, -5);
+    for (int x = rect.tl.x; x < rect.br.x - 3; x++) // -3 to avoid going out of bounds
+    {
+        for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
+        {
+            if (rand() % 1000 < 1000) // 0.5% chance to place a chest
+            {
+                // Place the chest pattern
+                for (int dx = 0; dx < 4; dx++)
+                {
+                    for (int dy = 0; dy < 3; dy++)
+                    {
+                        if (dy == 1 && (dx == 1 || dx == 2)) // Place the yellow 'O's
+                        {
+                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, PORTAL);
+                        }
+                        else // Place the brown 'C's
+                        {
+                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, PORTAL);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 int has_item(Inventory *inventory, ItemType type)
 {
     for (int i = 0; i < inventory->size; i++)
@@ -369,11 +398,6 @@ int has_item(Inventory *inventory, ItemType type)
         }
     }
     return 0;
-}
-
-void generate_portal(Bitmap pixmap, Vec2i location)
-{
-    set_normal_map_value(pixmap, location, PORTAL);
 }
 
 // int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player, Inventory *inventory) {
@@ -466,9 +490,13 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
             }
             else if (normal_map_decode(data) == CHESTIN)
             {
-                
                 wattrset(win_game, COLOR_PAIR(Culur_Chest_Front));
                 print_pixel_custom(window, x, y, "O");
+            }
+            else if (normal_map_decode(data) == PORTAL)
+            {
+                wattrset(win_game, COLOR_PAIR(Culur_Portal));
+                print_pixel_custom(window, x, y, "P");
             }
             else
             {

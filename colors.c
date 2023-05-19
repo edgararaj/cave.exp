@@ -43,7 +43,7 @@ void setup_colors()
     init_color(Culur_Hotbar_Back, 500, 500, 500);
     init_color(Culur_Hotbar_Front, 1000, 1000, 1000);
     init_color(Culur_Hotbar_Selected_Back, 500, 500, 0);
-    init_color(Culur_Hotbar_Selected_Front, 1000, 1000, 0);
+    init_color(Culur_Hotbar_Selected_Front, 0, 1000, 0);
     int i;
     for (i = 0; i < Color__RGBSize; i++)
     {

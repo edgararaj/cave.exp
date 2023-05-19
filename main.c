@@ -189,6 +189,7 @@ int main()
         generate_spikes(pixmap, rects[i]);
         generate_obstacles(pixmap, rects[i]);
         generate_chests(&gs, pixmap, rects[i]);
+        generate_portal(&gs, pixmap, rects[i]);
     }
 
     State state = State_Menu;
