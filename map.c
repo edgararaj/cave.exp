@@ -65,9 +65,13 @@ int get_normal_map_value(Bitmap bitmap, Vec2i pos)
     return normal_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
 }
 
-void add_light_map_value(Bitmap bitmap, Vec2i pos, int value)
-{
-    int result = get_light_map_value(bitmap, pos) + value;
+void add_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
+    int result = value + get_light_map_value(bitmap, pos);
+    // if (result > LIGHT_RADIUS) {
+        // add_term_line("%d\n", result);
+    // }
+    // if (result > LIGHT_RADIUS)
+    //     result = LIGHT_RADIUS;
     set_light_map_value(bitmap, pos, result);
 }
 
@@ -528,7 +532,7 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i pl
     if (minimap_maximized)
     {
         // Se estiver maximizado, centralize-o na janela
-        trans_x = (window_size.x - minimap_width) / 2;
+        trans_x = (window_size.x - minimap_width) / 2 - 2;
         trans_y = (window_size.y - minimap_height) / 2;
     }
     else

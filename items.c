@@ -47,11 +47,11 @@ void use_health_potion(Warrior *player, Item *item)
         {
             player->hp = player->maxHP; // Cap the HP at maxHP
         }
-        add_term_line("%s used! HP is now %d.\n", item->name, player->hp);
+        // add_term_line("%s used! HP is now %d.\n", item->name, player->hp);
     }
     else
     {
-        add_term_line("HP is full, cannot use %s.\n", item->name);
+        // add_term_line("HP is full, cannot use %s.\n", item->name);
     }
 }
 
@@ -65,16 +65,16 @@ void use_mana_potion(Player_Stats *player, Item *item)
         {
             player->mana = player->maxMana; // Cap the mana at maxMana
         }
-        add_term_line("%s used! Mana is now %d.\n", item->name, player->mana);
+        // add_term_line("%s used! Mana is now %d.\n", item->name, player->mana);
     }
     else
     {
-        add_term_line("Mana is full, cannot use %s.\n", item->name);
+        // add_term_line("Mana is full, cannot use %s.\n", item->name);
     }
 }
 
 // Function to use an item
-void use_item(Warrior *warrior, Player_Stats *player, Item *item)
+void use_item(Warrior* warrior, Player_Stats *player, Item *item)
 {
     switch (item->type)
     {
@@ -85,7 +85,7 @@ void use_item(Warrior *warrior, Player_Stats *player, Item *item)
         use_mana_potion(player, item);
         break;
     default:
-        add_term_line("Unknown item type!\n");
+        // add_term_line("Unknown item type!\n");
         break;
     }
 }
