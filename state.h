@@ -2,11 +2,15 @@
 #include "objects.h"
 #include "camera.h"
 #define MAX_CHESTS 100
+#define ITEM_GOLD 1
+#define ITEM_SWORD 2
+#define ITEM_POTION 3
+
 
 typedef struct
 {
     Vec2i position;
-    int isOpened;
+    bool isOpen;
     int item;
 } Chest;
 
@@ -33,7 +37,6 @@ typedef struct
     int selected;                  // The currently selected item
 } Hotbar;
 
-
 typedef struct
 {
     RectFloat rect;
@@ -46,6 +49,23 @@ typedef struct
     int dmg_cooldown;
     Hotbar hotbar;
 } Warrior;
+
+#define MAX_MOBS 10
+
+typedef enum
+{
+    MobType_Stupid,
+    MobType_Coward,
+    MobType_Intelligent,
+    MobType__Size
+} MobType;
+
+typedef struct
+{
+    float speed;
+    MobType type;
+    Warrior warrior;
+} Mob;
 
 typedef struct
 {
@@ -109,7 +129,7 @@ typedef struct
     WINDOW *win_game;
     Bitmap pixmap;
     Torch *torches;
-    struct Mob *mobs;
+    Mob *mobs;
     Bitmap illuminated;
     Inventory inventory;
     int player_attacking;

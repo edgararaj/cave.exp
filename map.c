@@ -330,7 +330,7 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
     }
 }
 
-void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
+void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
 {
     Rect rect = expand_rect(rect2, -5);
     for (int x = rect.tl.x; x < rect.br.x - 3; x++) // -3 to avoid going out of bounds
@@ -353,16 +353,6 @@ void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
                             set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, CHESTOUT);
                         }
                     }
-                }
-
-                // Store the chest in the game state
-                if (gs->chestCount < MAX_CHESTS)
-                {
-                    gs->chests[gs->chestCount].position = (Vec2i){x, y};
-                    gs->chests[gs->chestCount].isOpened = 0;
-                    gs->chests[gs->chestCount].item =
-                        (gs->chestCount == 0) ? 1 : 2; // first chest always contains a key
-                    gs->chestCount++;
                 }
             }
         }
@@ -405,35 +395,15 @@ void generate_portal(Bitmap pixmap, Vec2i location)
 //   vec2i_to_f(camera.offset)));
 // }
 
-#endif
-
-#endif {
+int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player,
+                    Inventory *inventory)
+{
 Vec2f inc_x = {inc.x, 0};
 Vec2f inc_y = {0, inc.y};
 int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
 if (data == CHEST)
 {
     // Handle player stepping on a chest
-    for (int i = 0; i < gs->chestCount; i++)
-    {
-        if (gs->chests[i].position.x == (int)pos.x && gs->chests[i].position.y == (int)pos.y)
-        {
-            if (!gs->chests[i].isOpened)
-            {
-                gs->chests[i].isOpened = 1;
-                // Give the player the item
-                if (gs->chests[i].item == 1)
-                {
-                    // Give player a key
-                }
-                else if (gs->chests[i].item == 2)
-                {
-                    // Give player other item
-                }
-            }
-            break;
-        }
-    }
 }
 if (data == SPIKE)
 {
@@ -491,49 +461,14 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
             }
             else if (normal_map_decode(data) == CHESTOUT)
             {
-                // Check if the chest is opened or not
-                int isOpened = 0;
-                for (int i = 0; i < gs->chestCount; i++)
-                {
-                    if (gs->chests[i].position.x == map_x && gs->chests[i].position.y == map_y)
-                    {
-                        isOpened = gs->chests[i].isOpened;
-                        break;
-                    }
-                }
-                if (isOpened)
-                {
-                    // Draw opened chest
-                }
-                else
-                {
-                    // Draw closed chest
-                    wattrset(win_game, COLOR_PAIR(Culur_Chest_Back));
-                    print_pixel_custom(window, x, y, "C");
-                }
+                wattrset(win_game, COLOR_PAIR(Culur_Chest_Back));
+                print_pixel_custom(window, x, y, "C");
             }
             else if (normal_map_decode(data) == CHESTIN)
             {
-                // Check if the chest is opened or not
-                int isOpened = 0;
-                for (int i = 0; i < gs->chestCount; i++)
-                {
-                    if (gs->chests[i].position.x == map_x && gs->chests[i].position.y == map_y)
-                    {
-                        isOpened = gs->chests[i].isOpened;
-                        break;
-                    }
-                }
-                if (isOpened)
-                {
-                    // Draw opened chest
-                }
-                else
-                {
-                    // Draw closed chest
-                    wattrset(win_game, COLOR_PAIR(Culur_Chest_Front));
-                    print_pixel_custom(window, x, y, "O");
-                }
+                
+                wattrset(win_game, COLOR_PAIR(Culur_Chest_Front));
+                print_pixel_custom(window, x, y, "O");
             }
             else
             {

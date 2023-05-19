@@ -82,7 +82,7 @@ void render_hotbar(WINDOW *win, Hotbar *hotbar, Vec2i window_size)
     }
 }
 
-void update_player(RectFloat *st, int key)
+void update_player(RectFloat *st, int key, GameState *gs)
 {
     switch (key)
     {
@@ -223,7 +223,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
     }
 
     RectFloat prev_player = gs->player.rect;
-    update_player(&gs->player.rect, key);
+    update_player(&gs->player.rect, key, gs);
     if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->pixmap))
     {
         gs->player.rect = prev_player;

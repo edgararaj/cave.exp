@@ -40,10 +40,9 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
 int map_is_wall(Bitmap pixmap, Vec2f pos);
-void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
+void render_map(WINDOW *win_game, GameState* gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
 void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos, int);
-int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player,
-                    Inventory *inventory);
+int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player, Inventory *inventory);
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 
 uint32_t dist_map_encode(int value);
@@ -63,4 +62,4 @@ void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count);
 void erode(Bitmap bitmap, int iterations);
 void generate_spikes(Bitmap pixmap, Rect rect2);
 void generate_obstacles(Bitmap bitmap, Rect rect2);
-void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2);
+void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2);

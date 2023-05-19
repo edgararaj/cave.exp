@@ -17,6 +17,7 @@
 #include "light.h"
 #include "map.h"
 #include "menu.h"
+#include "mobs.h"
 #include "objects.h"
 #include "player.h"
 #include "screen.h"
@@ -176,6 +177,12 @@ int main()
     gs.player_attacking = 0;
     gs.minimap_maximized = false;
     gs.player_stats = player_stats;
+    gs.chestCount = 3;
+    gs.chests[0] = (Chest){.position = {10, 10}, .isOpen = false, .item = ITEM_GOLD};
+    gs.chests[1] = (Chest){.position = {20, 20}, .isOpen = false, .item = ITEM_SWORD};
+    gs.chests[2] = (Chest){.position = {30, 30}, .isOpen = false, .item = ITEM_POTION};
+
+
 
     for (int i = 0; i < rects_count; i++)
     {
