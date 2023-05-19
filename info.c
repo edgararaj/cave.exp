@@ -2,13 +2,8 @@
 #include <ncurses.h>
 #include <string.h>
 
-#include "state.h"
-#include <locale.h>
-#include <ncurses.h>
-#include <string.h>
-
-void draw_info(WINDOW *win, int key, State *state) {
-    setlocale(LC_ALL, ""); // Configuração para suporte a caracteres amplos
+void draw_info(State *state, WINDOW *win, int key)
+{
     werase(win);
     mvprintw(20, 102, " -----------------------------------");
     mvprintw(21, 102, "| Bem vindo ao nosso jogo Cave.Exp  |");
@@ -28,7 +23,8 @@ void draw_info(WINDOW *win, int key, State *state) {
     wrefresh(win);
     noecho();
 
-    if (key == 'q') {
+    if (key == 'q')
+    {
         *state = State_Menu;
         clear();
     }

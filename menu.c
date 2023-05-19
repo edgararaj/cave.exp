@@ -60,11 +60,6 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
         }
         mvwprintw(sms->win, 10, 1, "%d", sms->highlight);
         if (sms->highlight == 1) {
-            clear();
-            *state = State_Controlos;
-        }
-        if (sms->highlight == 2) {
-            clear();
             *state = State_Info;
         }
     }

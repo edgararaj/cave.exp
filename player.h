@@ -1,7 +1,9 @@
-#pragma once
 #include <sys/time.h>
 
-typedef struct {
+#ifndef PLAYER_H
+#define PLAYER_H
+typedef struct
+{
     int hp;
     int maxHP;
     int mana;
@@ -15,4 +17,5 @@ typedef struct {
     struct timeval lastDamageTime;
 } Player_Stats;
 
-Player_Stats player_stats;
+
+#endif

@@ -1,11 +1,21 @@
 #pragma once
 #include "camera.h"
+#include "inventory.h"
 #include "light.h"
 #include "mobs.h"
 #include "objects.h"
-#include <ncurses.h>
 
-typedef enum {
+#define MAX_CHESTS 100
+
+typedef struct
+{
+    Vec2i position;
+    int isOpened;
+    int item;
+} Chest;
+
+typedef enum
+{
     State_Game,
     State_Menu,
     State_Controlos,
@@ -13,25 +23,35 @@ typedef enum {
     State_Info,
 } State;
 
-typedef struct {
+typedef struct
+{
     Camera camera;
     CameraMode cam_mode;
-    Rect player;
+    Warrior player;
+    Player_Stats player_stats;
     WINDOW *win_inventory;
     WINDOW *win_game;
+    WINDOW *vida;
     Bitmap pixmap;
     Torch *torches;
     Mob *mobs;
     Bitmap illuminated;
     Inventory inventory;
+    int player_attacking;
+    int minimap_maximized;
+    int player_spike_damage_cooldown;
+    Chest chests[MAX_CHESTS];
+    int chestCount;
 } GameState;
 
-typedef struct {
+typedef struct
+{
     WINDOW *win;
     int highlight;
 } StartMenuState;
 
-typedef struct {
+typedef struct
+{
     WINDOW *win;
     int highlight;
 } StartNiveisState;
