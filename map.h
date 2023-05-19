@@ -28,7 +28,7 @@
 
 #define DIST_MAP_SHIFT 8
 #define DIST_MAP_MASK (0xFF << DIST_MAP_SHIFT)
-#define MAX_DIST_CALC 50
+#define MAX_DIST_CALC 20
 #define MAX_DIST 20
 
 #define LIGHT_MAP_SHIFT 16

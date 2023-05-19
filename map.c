@@ -452,7 +452,6 @@ int cap_between(int value, int min, int max)
 }
 
 void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
-void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
 {
     for (int x = 0; x < camera.width; ++x)
     {
