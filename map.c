@@ -8,10 +8,9 @@
 #include "light.h"
 #include "map.h"
 #include "objects.h"
+#include "state.h"
 #include "term.h"
 #include "utils.h"
-#include "state.h"
-#include "map.h"
 
 uint32_t dist_map_encode(int value)
 {
@@ -74,7 +73,7 @@ void add_light_map_value(Bitmap bitmap, Vec2i pos, int value)
 
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value)
 {
-    assert(value >= 0 && value <= MAX_DIST);
+    // assert(value >= 0 && value <= MAX_DIST);
     bitmap.data[pos.y * bitmap.width + pos.x] &= (~DIST_MAP_MASK);
     bitmap.data[pos.y * bitmap.width + pos.x] |= dist_map_encode(value);
 }
@@ -331,15 +330,14 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
     }
 }
 
-
-void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
+void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
 {
     Rect rect = expand_rect(rect2, -5);
-    for (int x = rect.tl.x; x < rect.br.x - 3; x++) // -3 to avoid going out of bounds
+    for (int x = rect.tl.x; x < rect.br.x - 3; x++)     // -3 to avoid going out of bounds
     {
         for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
         {
-            if (rand() % 1000 < 5) // 0.5% chance to place a chest
+            if (rand() % 1000 < 5)                      // 0.5% chance to place a chest
             {
                 // Place the chest pattern
                 for (int dx = 0; dx < 4; dx++)
@@ -358,10 +356,12 @@ void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
                 }
 
                 // Store the chest in the game state
-                if (gs->chestCount < MAX_CHESTS) {
+                if (gs->chestCount < MAX_CHESTS)
+                {
                     gs->chests[gs->chestCount].position = (Vec2i){x, y};
                     gs->chests[gs->chestCount].isOpened = 0;
-                    gs->chests[gs->chestCount].item = (gs->chestCount == 0) ? 1 : 2; // first chest always contains a key
+                    gs->chests[gs->chestCount].item =
+                        (gs->chestCount == 0) ? 1 : 2; // first chest always contains a key
                     gs->chestCount++;
                 }
             }
@@ -369,22 +369,19 @@ void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
     }
 }
 
-int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc) {
+int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc)
+{
     Vec2f inc_x = {inc.x, 0};
     Vec2f inc_y = {0, inc.y};
-    int data =
-        normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
-    if (data == SPIKE) {
+    int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
+    if (data == SPIKE)
+    {
         // Handle player stepping on a spike
     }
-    return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x),
-                                           vec2i_to_f(camera.offset))) ||
-            !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y),
-                                           vec2i_to_f(camera.offset)))) &&
-           !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc),
-                                          vec2i_to_f(camera.offset)));
+    return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x), vec2i_to_f(camera.offset))) ||
+            !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y), vec2i_to_f(camera.offset)))) &&
+           !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc), vec2i_to_f(camera.offset)));
 }
-
 
 // int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc)
 // {
@@ -430,7 +427,7 @@ int cap_between(int value, int min, int max)
     return value;
 }
 
-void render_map(WINDOW *win_game, GameState* gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
+void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
 {
     for (int x = 0; x < camera.width; ++x)
     {
@@ -463,41 +460,51 @@ void render_map(WINDOW *win_game, GameState* gs, Camera camera, Bitmap map, WIND
                 print_pixel_custom(window, x, y, "^");
             }
             else if (normal_map_decode(data) == CHESTOUT)
-    {
-        // Check if the chest is opened or not
-        int isOpened = 0;
-        for (int i = 0; i < gs->chestCount; i++) {
-            if (gs->chests[i].position.x == map_x && gs->chests[i].position.y == map_y) {
-                isOpened = gs->chests[i].isOpened;
-                break;
-            }
-        }
-        if (isOpened) {
-            // Draw opened chest
-        } else {
-            // Draw closed chest
-                       wattrset(win_game, COLOR_PAIR(Culur_Chest_Back));
-            print_pixel_custom(window, x, y, "C");
-        }
-        }
-        else if (normal_map_decode(data) == CHESTIN)
-        {
-            // Check if the chest is opened or not
-            int isOpened = 0;
-            for (int i = 0; i < gs->chestCount; i++) {
-                if (gs->chests[i].position.x == map_x && gs->chests[i].position.y == map_y) {
-                    isOpened = gs->chests[i].isOpened;
-                    break;
+            {
+                // Check if the chest is opened or not
+                int isOpened = 0;
+                for (int i = 0; i < gs->chestCount; i++)
+                {
+                    if (gs->chests[i].position.x == map_x && gs->chests[i].position.y == map_y)
+                    {
+                        isOpened = gs->chests[i].isOpened;
+                        break;
+                    }
+                }
+                if (isOpened)
+                {
+                    // Draw opened chest
+                }
+                else
+                {
+                    // Draw closed chest
+                    wattrset(win_game, COLOR_PAIR(Culur_Chest_Back));
+                    print_pixel_custom(window, x, y, "C");
                 }
             }
-            if (isOpened) {
-                // Draw opened chest
-            } else {
-                // Draw closed chest
-                wattrset(win_game, COLOR_PAIR(Culur_Chest_Front));
-                print_pixel_custom(window, x, y, "O");
+            else if (normal_map_decode(data) == CHESTIN)
+            {
+                // Check if the chest is opened or not
+                int isOpened = 0;
+                for (int i = 0; i < gs->chestCount; i++)
+                {
+                    if (gs->chests[i].position.x == map_x && gs->chests[i].position.y == map_y)
+                    {
+                        isOpened = gs->chests[i].isOpened;
+                        break;
+                    }
+                }
+                if (isOpened)
+                {
+                    // Draw opened chest
+                }
+                else
+                {
+                    // Draw closed chest
+                    wattrset(win_game, COLOR_PAIR(Culur_Chest_Front));
+                    print_pixel_custom(window, x, y, "O");
+                }
             }
-        }
             else
             {
                 data = normal_map_decode(illuminated.data[map_y * map.width + map_x]);

@@ -3,6 +3,11 @@
 #include "inventory.h"
 #include "items.h"
 
+#define THREAT_RADIUS 10
+#define THREAT_RADIUS_SQR (THREAT_RADIUS * THREAT_RADIUS)
+#define VISION_RADIUS MAX_DIST
+#define VISION_RADIUS_SQR (VISION_RADIUS * VISION_RADIUS)
+
 typedef struct
 {
     RectFloat rect;
