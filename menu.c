@@ -4,9 +4,9 @@
 
 void draw_menu(StartMenuState *sms, State *state, int choice) {
     werase(sms->win);
-    char *choices[] = {
-        "START",         "INFO",         "WORK DONE BY:",  "Afonso Martins",
-        "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
+    char *choices[] = {"START",         "CONTROLOS",      "INFO",
+                       "WORK DONE BY:", "Afonso Martins", "Davide Santos",
+                       "Edgar Araujo",  "Goncalo Barroso"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
     int max_y, max_x;
@@ -23,7 +23,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
             break;
         case KEY_DOWN:
             ++sms->highlight;
-            sms->highlight %= 2;
+            sms->highlight %= 3;
             break;
         default:
             break;
@@ -31,7 +31,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
 
     int box_width = max_x - 2;
     int text_width, text_x;
-    
+
     WINDOW *menuwin = newwin(20, max_x - 6, max_y - 20, 5);
     box(menuwin, 20, 0);
 
@@ -60,6 +60,10 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
         }
         mvwprintw(sms->win, 10, 1, "%d", sms->highlight);
         if (sms->highlight == 1) {
+            clear();
+            *state = State_Controlos;
+        }
+        if (sms->highlight == 2) {
             clear();
             *state = State_Info;
         }

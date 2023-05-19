@@ -8,8 +8,9 @@
 typedef enum {
     State_Game,
     State_Menu,
-    State_Info,
+    State_Controlos,
     State_Niveis,
+    State_Info,
 } State;
 
 typedef struct {

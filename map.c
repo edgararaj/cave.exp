@@ -259,7 +259,7 @@ void generate_spikes(Bitmap pixmap, Rect rect2) {
     Rect rect = expand_rect(rect2, -5);
     for (int x = rect.tl.x; x < rect.br.x; x++) {
         for (int y = rect.tl.y; y < rect.br.y; y++) {
-            if (rand() % 100 < 3.5) { // 3.5% chance to place a spike
+            if (rand() % 100 < 2.5) { // 3.5% chance to place a spike
                 set_normal_map_value(pixmap, (Vec2i){x, y}, SPIKE);
             }
         }
@@ -346,7 +346,7 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size,
     // Verifique se o minimapa está maximizado
     if (minimap_maximized) {
         // Se estiver maximizado, centralize-o na janela
-        trans_x = (window_size.x - minimap_width) / 2;
+        trans_x = (window_size.x - minimap_width) / 2 - 2;
         trans_y = (window_size.y - minimap_height) / 2;
     } else {
         // Se não estiver maximizado, coloque-o no canto superior direito

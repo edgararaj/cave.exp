@@ -14,6 +14,7 @@
 
 #include "camera.c"
 #include "collide.c"
+#include "controlos.c"
 #include "dist.c"
 #include "draw.c"
 #include "game.c"
@@ -175,7 +176,6 @@ int main(int argv, char **argc) {
     smsm.win = win_menu;
     smsm.highlight = 1;
 
-
     while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
 
@@ -195,11 +195,13 @@ int main(int argv, char **argc) {
             displayHUD(&player_stats);
         } else if (state == State_Menu) {
             draw_menu(&sms, &state, key);
-        } else if (state == State_Info) {
-            
-            draw_info(win_info, key, &state);
+        } else if (state == State_Controlos) {
+
+            draw_controlos(win_info, key, &state);
         } else if (state == State_Niveis) {
             draw_niveis(&smsm, &state, key);
+        } else if (state == State_Info) {
+            draw_info(win_info, key, &state);
         }
 
         render_term(win);
