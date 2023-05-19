@@ -165,7 +165,7 @@ void generate_obstacles(Bitmap bitmap, Rect rect2)
     }
 }
 
-void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count)
+void generate_tunnels_and_rasterize(GameState* gs, Bitmap bitmap, Rect *rects, int rect_count)
 {
     bitmap_draw_rectangle(bitmap, rects[0]);
     for (int i = 1; i < rect_count; i++)
@@ -173,9 +173,6 @@ void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count)
         bitmap_draw_rectangle(bitmap, rects[i]);
         Vec2i prev_center = get_center(rects[i - 1]);
         Vec2i new_center = get_center(rects[i]);
-
-        // add_term_line("P:%d,%d N:%d,%d", prev_center.x, prev_center.y,
-        // new_center.x, new_center.y);
 
         if (rand() % 2 == 1)
         {
@@ -188,7 +185,11 @@ void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count)
             apply_horizontal_tunnel(prev_center.x, new_center.x, new_center.y, bitmap);
         }
     }
+
+    // Spawn the portal in the last room
+    generate_portal(gs, bitmap, rects[rect_count - 1]);
 }
+
 
 int generate_rects(Rect window, Rect *rects, int rects_max)
 {
@@ -361,32 +362,31 @@ void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
 
 void generate_portal(GameState* gs, Bitmap pixmap, Rect rect2)
 {
+    static int portalSpawned = 0; // Add this line to create a flag for portal creation
+
+    if (portalSpawned) // If the portal has already been created, return
+        return;
+
     Rect rect = expand_rect(rect2, -5);
     for (int x = rect.tl.x; x < rect.br.x - 3; x++) // -3 to avoid going out of bounds
     {
         for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
         {
-            if (rand() % 1000 < 1000) // 0.5% chance to place a chest
+            // Place the portal pattern
+            for (int dx = 0; dx < 2; dx++) // Change this from 4 to 2 for a 2x3 portal
             {
-                // Place the chest pattern
-                for (int dx = 0; dx < 4; dx++)
+                for (int dy = 0; dy < 3; dy++) // Change this from 3 to 2 for a 2x3 portal
                 {
-                    for (int dy = 0; dy < 3; dy++)
-                    {
-                        if (dy == 1 && (dx == 1 || dx == 2)) // Place the yellow 'O's
-                        {
-                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, PORTAL);
-                        }
-                        else // Place the brown 'C's
-                        {
-                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, PORTAL);
-                        }
-                    }
+                    set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, PORTAL);
                 }
             }
+            return; // Return after creating the portal
         }
     }
+    portalSpawned = 1; // Set the flag to true after creating the portal
 }
+
+
 
 int has_item(Inventory *inventory, ItemType type)
 {
@@ -422,20 +422,40 @@ int has_item(Inventory *inventory, ItemType type)
 int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player,
                     Inventory *inventory)
 {
-Vec2f inc_x = {inc.x, 0};
-Vec2f inc_y = {0, inc.y};
-int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
-if (data == CHEST)
-{
-    // Handle player stepping on a chest
-}
-if (data == SPIKE)
-{
-    // Handle player stepping on a spike
-}
-return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x), vec2i_to_f(camera.offset))) ||
-        !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y), vec2i_to_f(camera.offset)))) &&
-       !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc), vec2i_to_f(camera.offset)));
+    Vec2f inc_x = {inc.x, 0};
+    Vec2f inc_y = {0, inc.y};
+    int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
+    if (data == CHEST)
+    {
+        // Handle player stepping on a chest
+    }
+    if (data == SPIKE)
+    {
+        // Handle player stepping on a spike
+    }
+    if (data == PORTAL) {
+        if (has_item(inventory, ITEM_TYPE_KEY)) {
+            // Increment the round
+            player.round++;
+    
+            // Save the player's stats
+            Player_Stats saved_stats = player;
+    
+            // Generate a new map
+            
+    
+            // Load the player's stats
+            player = saved_stats;
+    
+            // Reset the player's position
+            player.rect.tl.x = 0;
+            player.rect.tl.y = 0;
+
+        }
+    }
+    return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x), vec2i_to_f(camera.offset))) ||
+            !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y), vec2i_to_f(camera.offset)))) &&
+            !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc), vec2i_to_f(camera.offset)));
 }
 
 int cap_between(int value, int min, int max)

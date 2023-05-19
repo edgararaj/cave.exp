@@ -96,14 +96,11 @@ int main()
         rects[i].color = 1;
     }
 
+    GameState gs;
     Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
+    generate_tunnels_and_rasterize(&gs, pixmap, rects, rects_count);
     erode(pixmap, 2200);
-    for (int i = 0; i < rects_count; i++)
-    {
-        generate_spikes(pixmap, rects[i]);
-        generate_obstacles(pixmap, rects[i]);
-    }
+
     bitmap_draw_box(pixmap, window);
 
     uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
@@ -167,7 +164,6 @@ int main()
     player_stats.speed = 1.0f;
     player_stats.gold = 0;
 
-    GameState gs;
     gs.cam_mode = cam_mode;
     gs.camera = camera;
     gs.player = player;
@@ -193,8 +189,8 @@ int main()
         generate_spikes(pixmap, rects[i]);
         generate_obstacles(pixmap, rects[i]);
         generate_chests(&gs, pixmap, rects[i]);
-        generate_portal(&gs, pixmap, rects[i]);
     }
+    generate_portal(&gs, pixmap, rects[rects_count - 1]);
 
     State state = State_Menu;
 

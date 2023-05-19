@@ -79,6 +79,8 @@ typedef struct
     int defense;
     float speed;
     int gold;
+    int round;
+    Rect rect;
 } Player_Stats;
 
 typedef struct
