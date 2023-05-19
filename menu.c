@@ -30,7 +30,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
         mvwprintw(sms->win, i + 1, 1, "%s", choices[i]);
         wattroff(sms->win, A_REVERSE);
     }
-    box(sms->win, 0, 0);
+    box(sms->win, 20,   0);
 
     if (choice == 10) {
         if (sms->highlight == 0) {
