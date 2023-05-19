@@ -2,6 +2,8 @@
 #include "camera.h"
 #include "objects.h"
 #include "screen.h"
+#include "state.h"
+
 #define MAP_WIDTH (2 * GAME_WIDTH)
 #define MAP_HEIGHT (2 * GAME_HEIGHT)
 
@@ -9,6 +11,11 @@
 #define WALKABLE 1
 #define SHINE 2
 #define SPIKE 3
+#define CHEST 4
+#define CHESTOUT 5
+#define CHESTIN 6
+#define MAX_CHESTS 100
+
 #define SPIKE_DAMAGE 7
 #define SPIKE_DAMAGE_COOLDOWN 1200
 
@@ -31,7 +38,7 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
 int map_is_wall(Bitmap pixmap, Vec2f pos);
-void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
+void render_map(WINDOW *win_game, GameState* gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
 void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos, int);
 int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc);
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value);
@@ -53,3 +60,4 @@ void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count);
 void erode(Bitmap bitmap, int iterations);
 void generate_spikes(Bitmap pixmap, Rect rect2);
 void generate_obstacles(Bitmap bitmap, Rect rect2);
+void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2);

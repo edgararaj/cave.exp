@@ -7,10 +7,14 @@
 // Define the item type
 typedef enum
 {
+    ITEM_TYPE_SWORD,
+    ITEM_TYPE_BLASTGUN,
     ITEM_TYPE_HEALTH_POTION,
     ITEM_TYPE_MANA_POTION,
-    // Add more types here as you develop your game
+    ITEM_TYPE_COINS,
+    ITEM_TYPE_KEY,
 } ItemType;
+
 
 // Define the item structure
 typedef struct
@@ -20,3 +24,5 @@ typedef struct
     char symbol;
     int color;
 } Item;
+
+

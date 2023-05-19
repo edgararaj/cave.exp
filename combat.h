@@ -1,5 +1,7 @@
 #pragma once
 #include "objects.h"
+#include "inventory.h"
+#include "items.h"
 
 typedef struct
 {
@@ -11,6 +13,7 @@ typedef struct
     int weight;
     int kills;
     int dmg_cooldown;
+    Hotbar hotbar;
 } Warrior;
 
 void warrior_attack(Warrior *a, Warrior *b, int delta_ms);

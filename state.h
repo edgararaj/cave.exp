@@ -5,6 +5,15 @@
 #include "mobs.h"
 #include "objects.h"
 
+#define MAX_CHESTS 100
+
+typedef struct {
+    Vec2i position;
+    int isOpened;
+    int item;
+} Chest;
+
+
 typedef enum
 {
     State_Game,
@@ -28,6 +37,8 @@ typedef struct
     int player_attacking;
     int minimap_maximized;
     int player_spike_damage_cooldown;
+    Chest chests[MAX_CHESTS];
+    int chestCount;
 } GameState;
 
 typedef struct

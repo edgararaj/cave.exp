@@ -4,10 +4,13 @@
 #include "combat.h"
 #include "dist.h"
 #include "draw.h"
+#include "hud.h"
 #include "light.h"
 #include "map.h"
 #include "mobs.h"
 #include "objects.h"
+#include "inventory.h"
+#include "items.h"
 #include "player.h"
 #include "utils.h"
 #include "state.h"
@@ -17,6 +20,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+
+Player_Stats player_stats;
 
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_ms)
 {
@@ -35,7 +40,7 @@ int char_width_int(int value)
     return snprintf(NULL, 0, "%d", value);
 }
 
-void render_hp(WINDOW *win_game, Camera camera, Rect rect, int hp)
+void render_hp(WINDOW *win_game, Camera camera, Rect rect, int hp) 
 {
     Vec2i size = rect_size(rect);
     Rect translated_rect = rect_translate(rect, vec2i_mul_const(camera.offset, -1));
@@ -43,6 +48,35 @@ void render_hp(WINDOW *win_game, Camera camera, Rect rect, int hp)
     int new_x = (int)(translated_rect.tl.x * X_SCALE + (size.x * X_SCALE) / 2.f - (char_width / 2.f)) + 1;
     wattrset(win_game, COLOR_PAIR(Culur_Default));
     mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d", hp);
+}
+
+void render_hotbar(WINDOW *win, Hotbar *hotbar, Vec2i window_size) {
+    // Calculate the position of the hotbar
+    int hotbar_x = (window_size.x - HOTBAR_SIZE) / 2;
+    int hotbar_y = window_size.y - 2;
+
+    // Draw the hotbar
+    wattrset(win, COLOR_PAIR(Culur_Hotbar));
+    for (int i = 0; i < HOTBAR_SIZE; i++) {
+        // Draw the hotbar slot
+        mvwprintw(win, hotbar_y, hotbar_x + i * 2, "[ ]");
+
+        // Draw the item in the slot
+        if (hotbar->items[i].count > 0) {
+            // This is just a placeholder, you'll need to replace 'I' with the actual item icon
+            mvwprintw(win, hotbar_y, hotbar_x + i * 2 + 1, "I");
+
+            // Draw the item count
+            mvwprintw(win, hotbar_y + 1, hotbar_x + i * 2, "%d", hotbar->items[i].count);
+        }
+
+        // Highlight the selected item
+        if (i == hotbar->selected) {
+            wattrset(win, COLOR_PAIR(Culur_Hotbar_Selected));
+            mvwprintw(win, hotbar_y, hotbar_x + i * 2, "[%c]", 'I'); // Replace 'I' with the actual item icon
+            wattrset(win, COLOR_PAIR(Culur_Hotbar));
+        }
+    }
 }
 
 void update_player(RectFloat *st, int key)
@@ -91,6 +125,7 @@ void update_player(RectFloat *st, int key)
     default:
         break;
     }
+    
 }
 
 Rect project_rect(WINDOW *win, Camera camera, Rect player)
@@ -221,7 +256,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
     mix_lightmap(gs->pixmap, lightmap, gs->camera);
     free_bitmap(lightmap);
 
-    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
+    render_map(gs->win_game, gs, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
 
     if (key == 'j')
     {
@@ -261,6 +296,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
     }
 
     render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
+    displayHUD(&player_stats);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_game, gs->illuminated, window_size, player_center, gs->minimap_maximized);
