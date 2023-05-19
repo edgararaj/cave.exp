@@ -11,7 +11,6 @@
 #include "draw.h"
 #include "game.h"
 #include "hud.h"
-#include "info.h"
 #include "inventory.h"
 #include "items.h"
 #include "light.h"
@@ -23,6 +22,8 @@
 #include "screen.h"
 #include "state.h"
 #include "utils.h"
+#include "menu.h"
+#include "info.h"
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -73,7 +74,6 @@ int main()
     WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
     WINDOW *win_info = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_hotbar = newwin(30, 20, 0, INGAME_TERM_SIZE);
     wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient));
 
     setup_colors();
@@ -99,7 +99,11 @@ int main()
     Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
-
+    for (int i = 0; i < rects_count; i++)
+    {
+        generate_spikes(pixmap, rects[i]);
+        generate_obstacles(pixmap, rects[i]);
+    }
     bitmap_draw_box(pixmap, window);
 
     uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
@@ -113,7 +117,7 @@ int main()
     player.hp = 100;
     player.maxHP = 100;
     player.kills = 0;
-    player.weight = 3;
+    player.weight = 5;
     player.velocity = (Vec2f){0, 0};
     player.dmg_cooldown = 0;
 
@@ -219,9 +223,6 @@ int main()
         if (state == State_Game)
         {
             draw_game(&gs, window_size, key, delta_ms);
-            draw_hotbar(win_hotbar, &gs.inventory);
-            displayHUD(&player_stats);
-            render_hotbar(win_game, &player.hotbar, window_size);
         }
         else if (state == State_Menu)
         {
@@ -238,7 +239,7 @@ int main()
         wrefresh(win);
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
         struct timeval result;
-        timeval_subtract(&result, (struct timeval *)&end, (struct timeval *)&start);
+        timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
         delta_ms = result.tv_usec * 1e-4;
         int fps = 1e8 / result.tv_usec;
         start = end;

@@ -4,7 +4,7 @@
 
 void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illuminated)
 {
-    if (value >= MAX_DIST)
+    if (value >= MAX_DIST_CALC)
         return;
     if (map_is_wall(distmap, vec2i_to_f(point)))
     {

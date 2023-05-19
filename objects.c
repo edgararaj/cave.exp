@@ -99,9 +99,9 @@ float vec2i_sqrdistance(Vec2i a)
     return vec2i_dot(a, a);
 }
 
-float vec2f_sqrdistance(Vec2f a)
+float vec2f_sqrdistance(Vec2f a, Vec2f b)
 {
-    return vec2f_dot(a, a);
+    return vec2f_dot(vec2f_sub(a, b), vec2f_sub(a, b));
 }
 
 Vec2i rect_size(Rect rect)

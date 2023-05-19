@@ -73,7 +73,7 @@ void add_light_map_value(Bitmap bitmap, Vec2i pos, int value)
 
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value)
 {
-    assert(value >= 0 && value <= MAX_DIST);
+    // assert(value >= 0 && value <= MAX_DIST);
     bitmap.data[pos.y * bitmap.width + pos.x] &= (~DIST_MAP_MASK);
     bitmap.data[pos.y * bitmap.width + pos.x] |= dist_map_encode(value);
 }
@@ -333,11 +333,11 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
 void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
 {
     Rect rect = expand_rect(rect2, -5);
-    for (int x = rect.tl.x; x < rect.br.x - 3; x++) // -3 to avoid going out of bounds
+    for (int x = rect.tl.x; x < rect.br.x - 3; x++)     // -3 to avoid going out of bounds
     {
         for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
         {
-            if (rand() % 1000 < 5) // 0.5% chance to place a chest
+            if (rand() % 1000 < 5)                      // 0.5% chance to place a chest
             {
                 // Place the chest pattern
                 for (int dx = 0; dx < 4; dx++)
@@ -451,6 +451,7 @@ int cap_between(int value, int min, int max)
     return value;
 }
 
+void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
 void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
 {
     for (int x = 0; x < camera.width; ++x)
