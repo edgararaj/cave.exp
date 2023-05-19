@@ -16,9 +16,9 @@
 #include "items.h"
 #include "light.h"
 #include "map.h"
-#include "player.h"
 #include "menu.h"
 #include "objects.h"
+#include "player.h"
 #include "screen.h"
 #include "state.h"
 #include "utils.h"
@@ -136,18 +136,19 @@ int main()
     Item health_potion = {ITEM_TYPE_HEALTH_POTION, "Health Potion", 'H', COLOR_WHITE};
     Item coins = {ITEM_TYPE_COINS, "Coins", 'C', COLOR_WHITE};
     Item key = {ITEM_TYPE_KEY, "Key", 'K', COLOR_WHITE};
-    
+
     // Add the items to the inventory
     add_item(&inventory, sword);
     add_item(&inventory, blastgun);
-    for (int i = 0; i < 5; i++) {
-    add_item(&inventory, health_potion);
+    for (int i = 0; i < 5; i++)
+    {
+        add_item(&inventory, health_potion);
     }
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++)
+    {
         add_item(&inventory, coins);
     }
     add_item(&inventory, key);
-
 
     Player_Stats player_stats;
     player_stats.hp = 100;
@@ -181,9 +182,8 @@ int main()
         generate_spikes(pixmap, rects[i]);
         generate_obstacles(pixmap, rects[i]);
         generate_chests(&gs, pixmap, rects[i]);
-
     }
-    
+
     State state = State_Menu;
 
     StartMenuState sms;
@@ -208,7 +208,8 @@ int main()
         // add_term_line("%d, %d\n", window_size.x, window_size.y);
         int key = getch();
 
-        if (state == State_Game) {
+        if (state == State_Game)
+        {
             draw_game(&gs, window_size, key, delta_ms);
             draw_hotbar(win_hotbar, &gs.inventory);
             displayHUD(&player_stats);

@@ -184,10 +184,12 @@ void bitmap_draw_box(Bitmap bitmap, Rect rect)
     bitmap_draw_line(bitmap, bottom);
 }
 
-void draw_hotbar(WINDOW *win, Inventory *inventory) {
+void draw_hotbar(WINDOW *win, Inventory *inventory)
+{
     werase(win);
     wprintw(win, "Hotbar:\n");
-    for (int i = 0; i < inventory->size; i++) {
+    for (int i = 0; i < inventory->size; i++)
+    {
         wprintw(win, "%d. %c x%d\n", i + 1, inventory->items[i].symbol, inventory->item_counts[i]);
     }
     wrefresh(win);

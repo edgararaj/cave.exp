@@ -15,7 +15,7 @@ void warrior_attack(Warrior *a, Warrior *b, int delta_ms)
             {
                 a->kills += 1;
             }
-            a->dmg_cooldown = 1000;  // Moved inside the if statement
+            a->dmg_cooldown = 1000; // Moved inside the if statement
         }
     }
 }

@@ -1,0 +1,1 @@
+gcc camera.c collide.c colors.c combat.c dist.c draw.c game.c hud.c info.c inventory.c items.c light.c main.c map.c menu.c mobs.c movimento.c objects.c term.c utils.c -std=gnu11 -ggdb -O0 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable -lm -lncurses -lc

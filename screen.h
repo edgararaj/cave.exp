@@ -1,3 +1,5 @@
+#pragma once
+
 #define FONT_SIZE 9
 #define TERM_WIDTH 250
 #define TERM_HEIGHT 70

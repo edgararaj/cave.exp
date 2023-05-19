@@ -1,7 +1,7 @@
 #pragma once
-#include "objects.h"
 #include "inventory.h"
 #include "items.h"
+#include "objects.h"
 #include "screen.h"
 
 void print_pixel(WINDOW *win, int x, int y);

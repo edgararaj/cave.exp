@@ -1,18 +1,14 @@
 #pragma once
-#include "camera.h"
-#include "inventory.h"
-#include "light.h"
-#include "mobs.h"
 #include "objects.h"
-
+#include "camera.h"
 #define MAX_CHESTS 100
 
-typedef struct {
+typedef struct
+{
     Vec2i position;
     int isOpened;
     int item;
 } Chest;
-
 
 typedef enum
 {
@@ -20,6 +16,88 @@ typedef enum
     State_Menu,
     State_Info,
 } State;
+
+
+typedef struct
+{
+    int type;
+    int count;
+} HotbarItem;
+
+
+#define HOTBAR_SIZE 9
+
+typedef struct
+{
+    HotbarItem items[HOTBAR_SIZE]; // The items in the hotbar
+    int selected;                  // The currently selected item
+} Hotbar;
+
+
+typedef struct
+{
+    RectFloat rect;
+    Vec2f velocity;
+    int hp;
+    int maxHP;
+    int dmg;
+    int weight;
+    int kills;
+    int dmg_cooldown;
+    Hotbar hotbar;
+} Warrior;
+
+typedef struct
+{
+    int hp;
+    int maxHP;
+    int mana;
+    int maxMana;
+    int level;
+    int experience;
+    int attackPower;
+    int defense;
+    float speed;
+    int gold;
+} Player_Stats;
+
+typedef struct
+{
+    Rect position;
+    int radius;
+} Torch;
+
+// Define the maximum number of items a player can carry
+#define MAX_INVENTORY_SIZE 10
+
+// Define the item type
+typedef enum
+{
+    ITEM_TYPE_SWORD,
+    ITEM_TYPE_BLASTGUN,
+    ITEM_TYPE_HEALTH_POTION,
+    ITEM_TYPE_MANA_POTION,
+    ITEM_TYPE_COINS,
+    ITEM_TYPE_KEY,
+} ItemType;
+
+// Define the item structure
+typedef struct
+{
+    ItemType type;
+    char *name;
+    char symbol;
+    int color;
+} Item;
+
+typedef struct Inventory
+{
+    Item *items;
+    int *item_counts; // Array to store the count of each item
+    int size;
+    int capacity;
+    int gold;
+} Inventory;
 
 typedef struct
 {
@@ -31,7 +109,7 @@ typedef struct
     WINDOW *win_game;
     Bitmap pixmap;
     Torch *torches;
-    Mob *mobs;
+    struct Mob *mobs;
     Bitmap illuminated;
     Inventory inventory;
     int player_attacking;

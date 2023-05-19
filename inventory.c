@@ -40,14 +40,11 @@ int add_item(Inventory *inventory, Item item)
     return 0;
 }
 
-
-
-
 int remove_item(Inventory *inventory, int index)
 {
     if (index < inventory->size)
     {
-        inventory->item_counts[index]--; // Decrease the count of the item
+        inventory->item_counts[index]--;        // Decrease the count of the item
         if (inventory->item_counts[index] == 0) // If the count of the item becomes 0
         {
             for (int i = index; i < inventory->size - 1; i++)
@@ -68,7 +65,8 @@ void draw_inventory(WINDOW *win, Inventory *inventory)
     wprintw(win, "Inventory:\n");
     for (int i = 0; i < inventory->size; i++)
     {
-        wprintw(win, "%d. %c - %s x%d\n", i + 1, inventory->items[i].symbol, inventory->items[i].name, inventory->item_counts[i]);
+        wprintw(win, "%d. %c - %s x%d\n", i + 1, inventory->items[i].symbol, inventory->items[i].name,
+                inventory->item_counts[i]);
     }
     wrefresh(win);
 }

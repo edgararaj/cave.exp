@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "light.h"
 #include "map.h"
 #include "screen.h"
 
