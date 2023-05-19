@@ -2,16 +2,27 @@
 #include "player.h"
 #include <ncurses.h>
 
-void displayHUD(Player_Stats *player)
-{
-    // Clear the status line
-    move(37, 20);
-    clrtoeol();
+void displayGameWindow(Player_Stats *player) {
 
-    // Print player information
-    printw("HP: %d/%d  Mana: %d/%d  Level: %d  XP: %d  Gold: %d", player->hp, player->maxHP, player->mana,
-           player->maxMana, player->level, player->experience, player->gold);
+    // Criar janela do mini-terminal
+    WINDOW *terminalWin = newwin(LINES, 20, 0, 0);
+    box(terminalWin, 0, 0);
 
-    // Update the screen
+    // Imprimir a vida do jogador na janela do mini-terminal
+    mvwprintw(terminalWin, 1, 1, "Stats: ");
+    mvwprintw(terminalWin, 2, 1, "Vida: %d/%d", player->hp, player->maxHP);
+    mvwprintw(terminalWin, 3, 1, "Mana: %d/%d", player->mana, player->maxMana);
+    mvwprintw(terminalWin, 4, 1, "Level: %d", player->level);
+    mvwprintw(terminalWin, 5, 1, "XP: %d", player->experience);
+    mvwprintw(terminalWin, 6, 1, "Gold: %d", player->gold);
+    //
+    // Atualizar as janelas
+
+    wrefresh(terminalWin);
+
+    // Limpar e restaurar configurações
+
+    //  delwin(terminalWin);
+    //   endwin();
     refresh();
 }

@@ -2,12 +2,17 @@
 #include <ncurses.h>
 #include <string.h>
 
-void draw_menu(StartMenuState *sms, State *state, int choice) {
-    werase(sms->win);
-    char *choices[] = {"START",         "CONTROLOS",     "INFO",
+#include "state.h"
+#include <locale.h>
+#include <ncurses.h>
+#include <string.h>
 
-                       "QUIT",          "WORK DONE BY:", "Afonso Martins",
-                       "Davide Santos", "Edgar Araujo",  "Goncalo Barroso"};
+void draw_pause(StartPauseState *sms, State *state, int choice) {
+    werase(sms->win);
+    char *choices[] = {
+        "RESTART",      "CONTINUE",       "CONTROLOS",      "INFO",
+        "QUIT",         "WORK DONE BY:",  "Afonso Martins", "Davide Santos",
+        "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
     int max_y, max_x;
@@ -24,7 +29,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
             break;
         case KEY_DOWN:
             ++sms->highlight;
-            sms->highlight %= 4;
+            sms->highlight %= 5;
             break;
         default:
             break;
@@ -57,18 +62,23 @@ void draw_menu(StartMenuState *sms, State *state, int choice) {
 
     if (choice == 10) {
         if (sms->highlight == 0) {
-            *state = State_Niveis;
+            *state = State_New_Game;
         }
         mvwprintw(sms->win, 10, 1, "%d", sms->highlight);
         if (sms->highlight == 1) {
             clear();
-            *state = State_Controlos;
+            *state = State_Game;
         }
         if (sms->highlight == 2) {
             clear();
-            *state = State_Info;
+            *state = State_Controlos;
         }
         if (sms->highlight == 3) {
+            clear();
+            *state = State_Info;
+        }
+
+        if (sms->highlight == 4) {
             clear();
             exit(0);
         }

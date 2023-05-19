@@ -1,5 +1,2 @@
 #pragma once
-
-#include "player.h"
-
-void displayHUD(Player_Stats *player);
+void displayGameWindow(Player_Stats *player);
