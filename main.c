@@ -192,7 +192,7 @@ int main()
         if (state == State_Game)
         {
             draw_game(&gs, window_size, key, delta_ms);
-            displayHUD(&player, &player_stats);
+            displayHUD(&player_stats);
         }
         else if (state == State_Menu)
         {

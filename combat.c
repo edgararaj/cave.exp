@@ -11,12 +11,11 @@ void warrior_attack(Warrior *a, Warrior *b, int delta_ms)
         {
             add_term_line("HP: %d, -%d\n", b->hp, a->dmg);
             b->hp -= a->dmg;
-            a->dmg_cooldown = 1000;
             if (b->hp <= 0)
             {
                 a->kills += 1;
             }
+            a->dmg_cooldown = 1000;  // Moved inside the if statement
         }
-        a->dmg_cooldown = 1000;
     }
 }

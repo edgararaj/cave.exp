@@ -1,9 +1,3 @@
-#include <ncurses.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
-
 #include "camera.h"
 #include "collide.h"
 #include "colors.h"
@@ -18,7 +12,11 @@
 #include "utils.h"
 #include "state.h"
 #include "term.h"
-#include "utils.h"
+#include <ncurses.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
 
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_ms)
 {
@@ -26,10 +24,11 @@ void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int 
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
-            return;
+            continue;
         warrior_attack(player, &mobs[i].warrior, delta_ms);
     }
 }
+
 
 int char_width_int(int value)
 {
