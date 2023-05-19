@@ -102,7 +102,7 @@ void mix_lightmap(Bitmap distmap, Bitmap lightmap, Camera camera) {
     }
 }
 
-void draw_game(GameState *gs, Vec2i window_size, int key) {
+void draw_game(GameState *gs, Vec2i window_size, int key, State *state) {
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
     if (key == 't') {
@@ -204,6 +204,11 @@ void draw_game(GameState *gs, Vec2i window_size, int key) {
 
     render_rect(gs->win_game, gs->camera, gs->player);
     render_minimap(gs->win_game, gs->illuminated, window_size, gs->player.tl);
+
+    if (key == 27) {
+        clear();
+        *state = State_Pause;
+    }
 
     wrefresh(gs->win_game);
 }

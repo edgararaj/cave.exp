@@ -7,7 +7,7 @@
 #include <ncurses.h>
 #include <string.h>
 
-void draw_info(WINDOW *win, int key, State *state) {
+void draw_info(WINDOW *win, int key, State *state, int contador) {
     setlocale(LC_ALL, ""); // Configuração para suporte a caracteres amplos
     werase(win);
     mvprintw(20, 102, " -----------------------------------");
@@ -29,7 +29,11 @@ void draw_info(WINDOW *win, int key, State *state) {
     noecho();
 
     if (key == 'q') {
-        *state = State_Menu;
+        if (contador == 0) {
+            *state = State_Menu;
+            clear();
+        } else
+            *state = State_Pause;
         clear();
     }
 }

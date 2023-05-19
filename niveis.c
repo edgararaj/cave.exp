@@ -52,7 +52,7 @@ void draw_niveis(StartNiveisState *sms, State *state, int choice) {
     }
 
     if (choice == 10) {
-        if (sms->highlight == 3) {
+        if (sms->highlight == 3 || sms->highlight == 2 || sms->highlight == 1) {
             *state = State_Game;
         }
         if (sms->highlight == 4) {

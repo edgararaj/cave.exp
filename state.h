@@ -11,6 +11,8 @@ typedef enum {
     State_Controlos,
     State_Niveis,
     State_Info,
+    State_Pause,
+    State_New_Game
 } State;
 
 typedef struct {
@@ -19,6 +21,7 @@ typedef struct {
     Rect player;
     WINDOW *win_inventory;
     WINDOW *win_game;
+    WINDOW *terminalwin;
     Bitmap pixmap;
     Torch *torches;
     Mob *mobs;
@@ -35,3 +38,8 @@ typedef struct {
     WINDOW *win;
     int highlight;
 } StartNiveisState;
+
+typedef struct {
+    WINDOW *win;
+    int highlight;
+} StartPauseState;
