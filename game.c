@@ -187,6 +187,12 @@ void render_player_attack(GameState *gs, Rect player, Mob *mobs, int num_mobs, V
 }
 
 void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_ms) {
+    window_size.x -= INGAME_TERM_SIZE;
+    wresize(gs->win_game, window_size.y, window_size.x);
+    window_size.x /= X_SCALE;
+    werase(gs->win_game);
+    wattrset(gs->win_game, COLOR_PAIR(0));
+
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
     if (key == 't')
@@ -298,7 +304,6 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     }
 
     render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
-    // displayHUD(&player_stats);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_game, gs->illuminated, window_size, player_center, gs->minimap_maximized);
@@ -307,6 +312,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
         clear();
         *state = State_Pause;
     }
+    displayGameWindow(gs->terminalwin, &gs->player_stats);
 
     wrefresh(gs->win_game);
 }

@@ -143,13 +143,15 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     gs->mobs = mobs;
     gs->pixmap = pixmap;
     gs->illuminated = illuminated;
+    gs->player_attacking = 0;
+    gs->minimap_maximized = false;
 
     for (int i = 0; i < rects_count; i++)
     {
         generate_spikes(pixmap, rects[i]);
         generate_obstacles(pixmap, rects[i]);
-        generate_chests(&gs, pixmap, rects[i]);
-        generate_portal(&gs, pixmap, rects[i]);
+        // generate_chests(&gs, pixmap, rects[i]);
+        // generate_portal(&gs, pixmap, rects[i]);
     }
 }
 
@@ -168,11 +170,10 @@ int main()
 
     Vec2i window_size;
 
-    // WINDOW *win = newwin(30, INGAME_TERM_SIZE, 0, 0);
     WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_info = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    WINDOW *win_inventory = newwin(30, 20, 0, 0);
+    WINDOW *win_menu = newwin(30, 20, 0, 0);
+    WINDOW *win_info = newwin(30, 20, 0, 0);
     WINDOW *terminalWin = newwin(30, 20, 0, 0);
     wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient + LIGHT_RADIUS - 1));
 
@@ -185,16 +186,11 @@ int main()
     window.tl.y = 0;
     window.br.x = MAP_WIDTH;
     window.br.y = MAP_HEIGHT;
+
     GameState gs;
     gs.win_game = win_game;
     gs.win_inventory = win_inventory;
     gs.terminalwin = terminalWin;
-    gs.player_attacking = 0;
-    gs.minimap_maximized = false;
-    gs.chestCount = 3;
-    gs.chests[0] = (Chest){.position = {10, 10}, .isOpen = false, .item = ITEM_GOLD};
-    gs.chests[1] = (Chest){.position = {20, 20}, .isOpen = false, .item = ITEM_SWORD};
-    gs.chests[2] = (Chest){.position = {30, 30}, .isOpen = false, .item = ITEM_POTION};
 
     StartMenuState sms;
     sms.win = win_menu;
@@ -211,33 +207,28 @@ int main()
     State state = State_Menu;
     init_game(&gs, window, win_menu);
 
-    int contador = 0;
-
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     int delta_ms = 0;
     while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
 
-        window_size.x -= INGAME_TERM_SIZE;
-        // wresize(win, window_size.y, INGAME_TERM_SIZE);
-        wresize(win_game, window_size.y, window_size.x);
-        window_size.x /= X_SCALE;
-        // werase(win);
-        werase(win_game);
-        wattrset(win_game, COLOR_PAIR(0));
+        wresize(win_menu, window_size.y, window_size.x);
+        // window_size.x -= INGAME_TERM_SIZE;
+        // wresize(win_game, window_size.y, window_size.x);
+        // wresize(win_menu, window_size.y, window_size.x);
+        // window_size.x /= X_SCALE;
+        // werase(win_game);
+        // wattrset(win_game, COLOR_PAIR(0));
 
-        // add_term_line("%d, %d\n", window_size.x, window_size.y);
         int key = getch();
 
         if (state == State_Game) {
             draw_game(&gs, window_size, key, &state, delta_ms);
-            contador++;
-            displayGameWindow(&gs.player_stats);
         } else if (state == State_Menu) {
-            draw_menu(&sms, &state, key);
+            draw_menu(&sms, &state, key, window_size);
         } else if (state == State_Controlos) {
-            draw_controlos(win_info, key, &state, contador);
+            draw_controlos(win_info, key, &state);
         } else if (state == State_Niveis) {
             draw_niveis(&smsm, &state, key);
         } else if (state == State_Info) {
@@ -247,7 +238,6 @@ int main()
         } else if (state == State_New_Game) {
             state = State_Game;
             init_game(&gs, window, win_menu);
-            displayGameWindow(&gs.player_stats);
         }
 
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);

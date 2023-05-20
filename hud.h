@@ -1,2 +1,2 @@
 #pragma once
-void displayGameWindow(Player_Stats *player);
+void displayGameWindow(WINDOW* terminalWin, Player_Stats *player);

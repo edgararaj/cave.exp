@@ -2,10 +2,9 @@
 #include "player.h"
 #include <ncurses.h>
 
-void displayGameWindow(Player_Stats *player) {
+void displayGameWindow(WINDOW* terminalWin, Player_Stats *player) {
 
     // Criar janela do mini-terminal
-    WINDOW *terminalWin = newwin(LINES, 20, 0, 0);
     box(terminalWin, 0, 0);
 
     // Imprimir a vida do jogador na janela do mini-terminal
@@ -19,10 +18,4 @@ void displayGameWindow(Player_Stats *player) {
     // Atualizar as janelas
 
     wrefresh(terminalWin);
-
-    // Limpar e restaurar configurações
-
-    //  delwin(terminalWin);
-    //   endwin();
-    refresh();
 }
