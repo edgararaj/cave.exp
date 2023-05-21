@@ -1,8 +1,8 @@
 #pragma once
 #include "objects.h"
 
-#define MAX_DIST_CALC 30
-#define MAX_DIST_SHINE 20
+#define MAX_DIST_CALC 10
+#define MAX_DIST_SHINE 5
 
 void dist_pass(Bitmap distmap, Vec2i point, Bitmap illuminated);
 void dist_reset(Bitmap distmap);

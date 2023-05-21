@@ -333,13 +333,18 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     else
         center_camera(&gs->camera, player_center);
 
-    shine_reset(gs->pixmap);
-    // shine_pass(gs->pixmap, player_center);
-
-    dist_reset(gs->pixmap);
+    for (int x = 0; x < gs->pixmap.width; x++)
+    {
+        for (int y = 0; y < gs->pixmap.height; y++)
+        {
+            if (get_normal_map_value(gs->pixmap, (Vec2i){x, y}) == SHINE)
+                set_normal_map_value(gs->pixmap, (Vec2i){x, y}, WALL);
+            set_dist_map_value(gs->pixmap, (Vec2i){x, y}, 0);
+        }
+    }
+    light_reset(gs->pixmap);
     dist_pass(gs->pixmap, player_center, gs->illuminated);
 
-    light_reset(gs->pixmap);
     for (int i = 0; i < MAX_TORCHES; i++)
     {
         Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);

@@ -470,7 +470,7 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
             }
             else
             {
-                data = normal_map_decode(illuminated.data[map_y * map.width + map_x]);
+                data = illuminated.data[map_y * map.width + map_x];
                 if (data == SHINE)
                 {
                     wattrset(win_game, COLOR_PAIR(Culur_Shine_Dimmed));
@@ -479,7 +479,7 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
             }
             if (dist_map_decode(data) == 1)
             {
-                wattrset(win_game, COLOR_PAIR(2));
+                wattrset(win_game, COLOR_PAIR(COLOR_GREEN));
                 print_pixel(window, x, y);
             }
         }
@@ -499,7 +499,7 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i pl
             int map_x = x * scale_x;
             int map_y = y * scale_y;
 
-            if (illuminated.data[map_y * illuminated.width + map_x])
+            if (illuminated.data[map_y * illuminated.width + map_x] == WALKABLE)
             {
                 print_pixel(win, x, y);
             }

@@ -9,8 +9,6 @@ void shine_reset(Bitmap distmap)
     {
         for (int y = 0; y < distmap.height; y++)
         {
-            if (get_normal_map_value(distmap, (Vec2i){x, y}) == SHINE)
-                set_normal_map_value(distmap, (Vec2i){x, y}, WALL);
         }
     }
 }
@@ -22,6 +20,7 @@ void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illumina
     if (map_is_wall(distmap, vec2i_to_f(point)) && value <= MAX_DIST_SHINE)
     {
         set_normal_map_value(distmap, point, SHINE);
+        illuminated.data[point.y * illuminated.width + point.x] = SHINE;
         return;
     }
     int data = get_dist_map_value(distmap, point);
@@ -29,7 +28,7 @@ void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illumina
         return;
 
     set_dist_map_value(distmap, point, value);
-    illuminated.data[point.y * illuminated.width + point.x] = dist_map_encode(value);
+    illuminated.data[point.y * illuminated.width + point.x] = WALKABLE;
     for (int i = -1; i < 2; i++)
     {
         for (int j = -1; j < 2; j++)
