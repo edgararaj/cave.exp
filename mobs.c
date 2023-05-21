@@ -4,6 +4,7 @@
 #include "objects.h"
 #include "state.h"
 #include "utils.h"
+#include "dist.h"
 
 void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
 {
@@ -31,7 +32,7 @@ void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
 
 Vec2i step_to_player(Bitmap map, Mob* mob)
 {
-    int smallest = MAX_DIST;
+    int smallest = MAX_DIST_CALC;
     Vec2i smallest_add = {0, 0};
     for (int i = -1; i < 2; i++)
     {
@@ -42,7 +43,7 @@ Vec2i step_to_player(Bitmap map, Mob* mob)
                 Vec2i add = {i, j};
                 RectFloat rect = rect_float_translate(mob->warrior.rect, vec2i_to_f(add));
                 int data = dist_map_decode(map.data[(int)(rect.tl.y) * map.width + (int)rect.tl.x]);
-                if (data < smallest && data && data <= MAX_DIST)
+                if (data < smallest && data && data <= MAX_DIST_CALC)
                 {
                     smallest = data;
                     smallest_add = add;
@@ -53,7 +54,7 @@ Vec2i step_to_player(Bitmap map, Mob* mob)
     return smallest_add;
 }
 
-void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, int delta_ms)
+void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, int delta_us)
 {
     Mob* mob = &mobs[ii];
     if (mob->type == MobType_Stupid)
@@ -66,7 +67,7 @@ void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
 
             Vec2i step = step_to_player(map, mob);
             mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed * 10));
-            warrior_attack(&mob->warrior, player, delta_ms);
+            warrior_attack(&mob->warrior, player, delta_us);
         }
         else {
             mob->warrior.rect.color = COLOR_BLUE;
@@ -107,7 +108,7 @@ void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
                     mob->warrior.rect.color = COLOR_GREEN;
                     Vec2i step = step_to_player(map, &mobs[i]);
                     mobs[i].warrior.rect = rect_float_translate(mobs[i].warrior.rect, vec2f_div_const(vec2i_to_f(step), mobs[i].speed * 10));
-                    warrior_attack(&mobs[i].warrior, player, delta_ms);
+                    warrior_attack(&mobs[i].warrior, player, delta_us);
                 }
             }
         }
@@ -124,12 +125,12 @@ void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
     // }
 }
 
-void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, int delta_ms)
+void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, int delta_us)
 {
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
             continue;
-        update_mob(mobs, num_mobs, i, map, player, delta_ms);
+        update_mob(mobs, num_mobs, i, map, player, delta_us);
     }
 }

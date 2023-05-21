@@ -1,2 +1,2 @@
 #pragma once
-void draw_info(State *state, WINDOW *win, int key);
+void draw_info(WINDOW *win, int key, State *state, Vec2i window_size);

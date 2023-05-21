@@ -28,8 +28,6 @@
 
 #define DIST_MAP_SHIFT 8
 #define DIST_MAP_MASK (0xFF << DIST_MAP_SHIFT)
-#define MAX_DIST_CALC 20
-#define MAX_DIST 20
 
 #define LIGHT_MAP_SHIFT 16
 #define LIGHT_MAP_MASK (0xFF << LIGHT_MAP_SHIFT)
@@ -42,8 +40,8 @@
 
 int map_is_wall(Bitmap pixmap, Vec2f pos);
 void render_map(WINDOW *win_game, GameState* gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
-void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos, int);
-int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player, Inventory *inventory);
+void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos);
+int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc);
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 
 uint32_t dist_map_encode(int value);
@@ -57,6 +55,7 @@ void set_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value);
 int get_light_map_value(Bitmap bitmap, Vec2i pos);
 int get_normal_map_value(Bitmap bitmap, Vec2i pos);
+int get_dist_map_value(Bitmap bitmap, Vec2i pos);
 int generate_rects(Rect window, Rect *rects, int rects_max);
 void order_rects(Rect *rects, int rects_count);
 void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count);

@@ -131,6 +131,8 @@ typedef struct
     Player_Stats player_stats;
     WINDOW *win_inventory;
     WINDOW *win_game;
+    WINDOW *win_log;
+    WINDOW *win_minimap;
     WINDOW *terminalwin;
     Bitmap pixmap;
     Torch *torches;

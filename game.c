@@ -21,16 +21,113 @@
 #include <time.h>
 #include <unistd.h>
 
+void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
+    Rect rects[20];
+    int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
+    Rect ordered_rects[ARRAY_SIZE(rects)];
+    order_rects(rects, rects_count);
+
+    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
+    erode(pixmap, 2200);
+    for (int i = 0; i < rects_count; i++)
+    {
+        generate_spikes(pixmap, rects[i]);
+        generate_obstacles(pixmap, rects[i]);
+        // generate_chests(&gs, pixmap, rects[i]);
+        // generate_portal(&gs, pixmap, rects[i]);
+    }
+    bitmap_draw_box(pixmap, window);
+
+    uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
+    Bitmap illuminated = {(uint32_t *)illuminated_data, {{MAP_WIDTH, MAP_HEIGHT}}};
+
+    Vec2i first_rect_center = get_center(rects[0]);
+    // for (int i = 0; i < 500; i++)
+    // {
+    //     first_rect_center = get_center(rects[0]);
+    //     if (get_normal_map_value(pixmap, first_rect_center) == WALKABLE)
+    //         return;
+    // }
+    Warrior player;
+    player.rect =
+        (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
+    player.dmg = 5;
+    player.hp = 100;
+    player.maxHP = 100;
+    player.kills = 0;
+    player.weight = 5;
+    player.velocity = (Vec2f){0, 0};
+    player.dmg_cooldown = 0;
+
+    Camera camera = {{{0, 0}}, 0, 0, 10};
+
+    CameraMode cam_mode = CameraMode_Follow;
+
+    Torch torches[MAX_TORCHES];
+    create_torches(pixmap, torches, MAX_TORCHES);
+
+    Mob mobs[MAX_MOBS];
+    create_mobs(pixmap, mobs, MAX_MOBS);
+
+    Inventory inventory;
+    init_inventory(&inventory, 10);
+    noecho();
+
+    // Define the items
+    Item sword = {ITEM_TYPE_SWORD, "Sword", 'S', COLOR_WHITE};
+    Item blastgun = {ITEM_TYPE_BLASTGUN, "Blastgun", 'B', COLOR_WHITE};
+    Item health_potion = {ITEM_TYPE_HEALTH_POTION, "Health Potion", 'H', COLOR_WHITE};
+    Item coins = {ITEM_TYPE_COINS, "Coins", 'C', COLOR_WHITE};
+    Item key = {ITEM_TYPE_KEY, "Key", 'K', COLOR_WHITE};
+
+    // Add the items to the inventory
+    add_item(&inventory, sword);
+    add_item(&inventory, blastgun);
+    for (int i = 0; i < 5; i++)
+    {
+        add_item(&inventory, health_potion);
+    }
+    for (int i = 0; i < 20; i++)
+    {
+        add_item(&inventory, coins);
+    }
+    add_item(&inventory, key);
+
+    Player_Stats player_stats;
+    player_stats.hp = 100;
+    player_stats.maxHP = 100;
+    player_stats.mana = 50;
+    player_stats.maxMana = 50;
+    player_stats.level = 1;
+    player_stats.experience = 0;
+    player_stats.attackPower = 10;
+    player_stats.defense = 5;
+    player_stats.speed = 1.0f;
+    player_stats.gold = 0;
+
+    gs->cam_mode = cam_mode;
+    gs->camera = camera;
+    gs->player = player;
+    gs->torches = torches;
+    gs->mobs = mobs;
+    gs->pixmap = pixmap;
+    gs->illuminated = illuminated;
+    gs->player_attacking = 0;
+    gs->minimap_maximized = false;
+}
+
+
 Player_Stats player_stats;
 
-void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_ms)
+void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
 {
-    gs->player_attacking = 200;
+    gs->player_attacking = 1 * 1e6;
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
             continue;
-        warrior_attack(player, &mobs[i].warrior, delta_ms);
+        warrior_attack(player, &mobs[i].warrior, delta_us);
     }
 }
 
@@ -148,18 +245,6 @@ Rect rect_float_to_rect(RectFloat rect)
     return result;
 }
 
-void shine_reset(Bitmap distmap)
-{
-    for (int x = 0; x < distmap.width; x++)
-    {
-        for (int y = 0; y < distmap.height; y++)
-        {
-            if (normal_map_decode(distmap.data[y * distmap.width + x]) == SHINE)
-                set_normal_map_value(distmap, (Vec2i){x, y}, WALL);
-        }
-    }
-}
-
 void mix_lightmap(Bitmap output, Bitmap input, Camera camera)
 {
     for (int x = 0; x < input.width; x++)
@@ -186,12 +271,20 @@ void render_player_attack(GameState *gs, Rect player, Mob *mobs, int num_mobs, V
     print_circumference(gs->win_game, window_size, c);
 }
 
-void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_ms) {
-    window_size.x -= INGAME_TERM_SIZE;
+void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us) {
+    int minimap_height = 20;
+    int sidebar_width = minimap_height;
+    wresize(gs->win_log, window_size.y - minimap_height, sidebar_width * X_SCALE);
+    wresize(gs->win_minimap, minimap_height, sidebar_width * X_SCALE);
+    mvwin(gs->win_minimap, window_size.y - minimap_height, 0);
+    window_size.x -= sidebar_width;
     wresize(gs->win_game, window_size.y, window_size.x);
-    window_size.x /= X_SCALE;
+
     werase(gs->win_game);
-    wattrset(gs->win_game, COLOR_PAIR(0));
+    werase(gs->win_log);
+    werase(gs->win_minimap);
+
+    window_size.x /= X_SCALE; // A partir daqui nao mexer com janelas
 
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
@@ -233,15 +326,17 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
         gs->player.rect = prev_player;
     }
 
-    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, delta_ms);
+    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, delta_us);
 
     if (gs->cam_mode == CameraMode_Margin)
         update_camera(&gs->camera, player_center);
     else
         center_camera(&gs->camera, player_center);
 
-    dist_reset(gs->pixmap);
     shine_reset(gs->pixmap);
+    // shine_pass(gs->pixmap, player_center);
+
+    dist_reset(gs->pixmap);
     dist_pass(gs->pixmap, player_center, gs->illuminated);
 
     light_reset(gs->pixmap);
@@ -268,7 +363,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
 
     if (key == 'j')
     {
-        player_attack(gs, gs->mobs, MAX_MOBS, &gs->player, delta_ms);
+        player_attack(gs, gs->mobs, MAX_MOBS, &gs->player, delta_us);
     }
 
     for (int i = 0; i < MAX_TORCHES; i++)
@@ -288,13 +383,13 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
 
     if (gs->player_attacking)
     {
-        timer_update(&gs->player_attacking, delta_ms);
+        timer_update(&gs->player_attacking, delta_us);
         render_player_attack(gs, rect_float_to_rect(gs->player.rect), gs->mobs, MAX_MOBS, window_size);
     }
 
     if (get_normal_map_value(gs->pixmap, player_center) == SPIKE)
     {
-        if (timer_update(&gs->player_spike_damage_cooldown, delta_ms))
+        if (timer_update(&gs->player_spike_damage_cooldown, delta_us))
         {
             gs->player_spike_damage_cooldown = SPIKE_DAMAGE_COOLDOWN;
             gs->player.hp -= SPIKE_DAMAGE;
@@ -306,13 +401,15 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
-    render_minimap(gs->win_game, gs->illuminated, window_size, player_center, gs->minimap_maximized);
+    render_minimap(gs->win_minimap, gs->illuminated, (Vec2i){sidebar_width, minimap_height}, player_center);
 
-    if (key == 27) {
-        clear();
+    if (key == 27 || key == 'p') {
         *state = State_Pause;
     }
-    displayGameWindow(gs->terminalwin, &gs->player_stats);
+    render_term(gs->win_log);
+    // displayGameWindow(gs->terminalwin, &gs->player_stats);
 
     wrefresh(gs->win_game);
+    wrefresh(gs->win_log);
+    wrefresh(gs->win_minimap);
 }

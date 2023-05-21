@@ -1,14 +1,16 @@
-#include "state.h"
-#include "utils.h"
 #include <ncurses.h>
+#include <stdlib.h>
 #include <string.h>
 
-void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size) {
-    werase(sms->win);
-    char* choices[] = {"START",         "CONTROLOS",     "INFO",
+#include "state.h"
+#include "utils.h"
 
-                       "QUIT",          "WORK DONE BY:", "Afonso Martins",
-                       "Davide Santos", "Edgar Araujo",  "Goncalo Barroso"};
+void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
+{
+    werase(sms->win);
+    char *choices[] = {"START", "CONTROLOS",     "INFO",
+
+                       "QUIT",  "WORK DONE BY:", "Afonso Martins", "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = ARRAY_SIZE(choices);
 
     int max_x = window_size.x;
@@ -16,46 +18,55 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
 
     int start_y = (max_y - n_choices) / 2; // Posição vertical inicial do menu
 
-    switch (choice) {
-        case KEY_UP:
-            --sms->highlight;
-            if (sms->highlight < 0) {
-                sms->highlight = n_choices - 6;
-            }
-            break;
-        case KEY_DOWN:
-            ++sms->highlight;
-            sms->highlight %= 4;
-            break;
-        default:
-            break;
+    switch (choice)
+    {
+    case KEY_UP:
+        --sms->highlight;
+        if (sms->highlight < 0)
+        {
+            sms->highlight = n_choices - 6;
+        }
+        break;
+    case KEY_DOWN:
+        ++sms->highlight;
+        sms->highlight %= 4;
+        break;
+    default:
+        break;
     }
 
-    for (int i = 0; i < n_choices; i++) {
+    for (int i = 0; i < n_choices; i++)
+    {
         int y = start_y + i;
-        if (i == sms->highlight) {
+        if (i == sms->highlight)
+        {
             wattron(sms->win, A_REVERSE);
         }
 
         int text_width = strlen(choices[i]);
-        int text_x = (max_x - text_width) / 2; // Posição horizontal centralizada
+        int text_x = (max_x - text_width) / 2;            // Posição horizontal centralizada
 
-        mvwprintw(sms->win, start_y++, text_x, "%s", choices[i]); // +1 para compensar a borda esquerda da box
+        mvwprintw(sms->win, y, text_x, "%s", choices[i]); // +1 para compensar a borda esquerda da box
 
         wattroff(sms->win, A_REVERSE);
     }
 
-    if (choice == 10) {
-        if (sms->highlight == 0) {
+    if (choice == 10)
+    {
+        if (sms->highlight == 0)
+        {
             *state = State_Niveis;
         }
-        if (sms->highlight == 1) {
+        if (sms->highlight == 1)
+        {
             *state = State_Controlos;
         }
-        if (sms->highlight == 2) {
+        if (sms->highlight == 2)
+        {
             *state = State_Info;
         }
-        if (sms->highlight == 3) {
+        if (sms->highlight == 3)
+        {
             exit(0);
         }
     }

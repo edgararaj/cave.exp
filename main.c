@@ -24,6 +24,9 @@
 #include "utils.h"
 #include "menu.h"
 #include "info.h"
+#include "controls.h"
+#include "niveis.h"
+#include "pause.h"
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -54,107 +57,6 @@ int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *
     return x->tv_sec < y->tv_sec;
 }
 
-void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
-    Rect rects[20];
-    int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
-    Rect ordered_rects[ARRAY_SIZE(rects)];
-    order_rects(rects, rects_count);
-
-    for (int i = 0; i < rects_count; i++)
-    {
-        rects[i].color = 1;
-    }
-
-    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 2200);
-    for (int i = 0; i < rects_count; i++)
-    {
-        generate_spikes(pixmap, rects[i]);
-        generate_obstacles(pixmap, rects[i]);
-    }
-    bitmap_draw_box(pixmap, window);
-
-    uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap illuminated = {(uint32_t *)illuminated_data, {{MAP_WIDTH, MAP_HEIGHT}}};
-
-    Vec2i first_rect_center = get_center(rects[0]);
-    Warrior player;
-    player.rect =
-        (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
-    player.dmg = 5;
-    player.hp = 100;
-    player.maxHP = 100;
-    player.kills = 0;
-    player.weight = 5;
-    player.velocity = (Vec2f){0, 0};
-    player.dmg_cooldown = 0;
-
-    Camera camera = {{{0, 0}}, 0, 0, 10};
-
-    CameraMode cam_mode = CameraMode_Follow;
-
-    Torch torches[MAX_TORCHES];
-    create_torches(pixmap, torches, MAX_TORCHES);
-
-    Mob mobs[MAX_MOBS];
-    create_mobs(pixmap, mobs, MAX_MOBS);
-
-    Inventory inventory;
-    init_inventory(&inventory, 10);
-    noecho();
-
-    // Define the items
-    Item sword = {ITEM_TYPE_SWORD, "Sword", 'S', COLOR_WHITE};
-    Item blastgun = {ITEM_TYPE_BLASTGUN, "Blastgun", 'B', COLOR_WHITE};
-    Item health_potion = {ITEM_TYPE_HEALTH_POTION, "Health Potion", 'H', COLOR_WHITE};
-    Item coins = {ITEM_TYPE_COINS, "Coins", 'C', COLOR_WHITE};
-    Item key = {ITEM_TYPE_KEY, "Key", 'K', COLOR_WHITE};
-
-    // Add the items to the inventory
-    add_item(&inventory, sword);
-    add_item(&inventory, blastgun);
-    for (int i = 0; i < 5; i++)
-    {
-        add_item(&inventory, health_potion);
-    }
-    for (int i = 0; i < 20; i++)
-    {
-        add_item(&inventory, coins);
-    }
-    add_item(&inventory, key);
-
-    Player_Stats player_stats;
-    player_stats.hp = 100;
-    player_stats.maxHP = 100;
-    player_stats.mana = 50;
-    player_stats.maxMana = 50;
-    player_stats.level = 1;
-    player_stats.experience = 0;
-    player_stats.attackPower = 10;
-    player_stats.defense = 5;
-    player_stats.speed = 1.0f;
-    player_stats.gold = 0;
-
-    gs->cam_mode = cam_mode;
-    gs->camera = camera;
-    gs->player = player;
-    gs->torches = torches;
-    gs->mobs = mobs;
-    gs->pixmap = pixmap;
-    gs->illuminated = illuminated;
-    gs->player_attacking = 0;
-    gs->minimap_maximized = false;
-
-    for (int i = 0; i < rects_count; i++)
-    {
-        generate_spikes(pixmap, rects[i]);
-        generate_obstacles(pixmap, rects[i]);
-        // generate_chests(&gs, pixmap, rects[i]);
-        // generate_portal(&gs, pixmap, rects[i]);
-    }
-}
-
 int main()
 {
     srand(time(NULL));
@@ -170,12 +72,17 @@ int main()
 
     Vec2i window_size;
 
-    WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
+    int minimap_height = 20;
+    int sidebar_width = minimap_height * X_SCALE;
+    WINDOW *win_game = newwin(30, 20, 0, sidebar_width);
     WINDOW *win_inventory = newwin(30, 20, 0, 0);
+    WINDOW *win_minimap = newwin(30, sidebar_width, 0, 0);
+    WINDOW *win_log = newwin(minimap_height, sidebar_width, 0, 0);
     WINDOW *win_menu = newwin(30, 20, 0, 0);
-    WINDOW *win_info = newwin(30, 20, 0, 0);
     WINDOW *terminalWin = newwin(30, 20, 0, 0);
-    wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient + LIGHT_RADIUS - 1));
+    wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient));
+    wbkgd(win_minimap, COLOR_PAIR(Culur_Light_Gradient + 10));
+    wbkgd(win_log, COLOR_PAIR(Culur_Light_Gradient + 5));
 
     setup_colors();
     // wattrset(win, COLOR_PAIR(0));
@@ -190,6 +97,8 @@ int main()
     GameState gs;
     gs.win_game = win_game;
     gs.win_inventory = win_inventory;
+    gs.win_log = win_log;
+    gs.win_minimap = win_minimap;
     gs.terminalwin = terminalWin;
 
     StartMenuState sms;
@@ -207,9 +116,11 @@ int main()
     State state = State_Menu;
     init_game(&gs, window, win_menu);
 
+    int start_menu = 1;
+
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-    int delta_ms = 0;
+    int delta_us = 0;
     while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
 
@@ -224,17 +135,21 @@ int main()
         int key = getch();
 
         if (state == State_Game) {
-            draw_game(&gs, window_size, key, &state, delta_ms);
+            draw_game(&gs, window_size, key, &state, delta_us);
         } else if (state == State_Menu) {
-            draw_menu(&sms, &state, key, window_size);
+            if (start_menu)
+                draw_menu(&sms, &state, key, window_size);
+            else 
+                draw_pause(&smsms, &state, key, window_size);
         } else if (state == State_Controlos) {
-            draw_controlos(win_info, key, &state);
+            draw_controls(win_menu, key, &state, window_size);
         } else if (state == State_Niveis) {
-            draw_niveis(&smsm, &state, key);
+            draw_niveis(&smsm, &state, key, window_size);
         } else if (state == State_Info) {
-            draw_info(win_info, key, &state);
+            draw_info(win_menu, key, &state, window_size);
         } else if (state == State_Pause) {
-            draw_pause(&smsms, &state, key);
+            draw_pause(&smsms, &state, key, window_size);
+            start_menu = 0;
         } else if (state == State_New_Game) {
             state = State_Game;
             init_game(&gs, window, win_menu);
@@ -243,7 +158,7 @@ int main()
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
         struct timeval result;
         timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
-        delta_ms = result.tv_usec * 1e-4;
+        delta_us = result.tv_usec * 1e-1;
         int fps = 1e8 / result.tv_usec;
         start = end;
     }

@@ -50,7 +50,7 @@ void light_pass(GameState *gs, WINDOW *win_game, Camera camera, Bitmap pixmap, R
             // print_pixel(win_game, line_pos.x, line_pos.y);
             set_light_map_value(pixmap, vec2f_to_i(line_pos), value + 1);
 
-            if (!map_is_walkable(gs, normalmap, camera, line_pos, vec, player, inventory))
+            if (!map_is_walkable(normalmap, vec2f_add(line_pos, vec2i_to_f(camera.offset)), vec))
             {
                 break;
             }

@@ -7,33 +7,30 @@
 #include <ncurses.h>
 #include <string.h>
 
-void draw_info(WINDOW *win, int key, State *state, int contador) {
-    setlocale(LC_ALL, ""); // Configuração para suporte a caracteres amplos
+void draw_info(WINDOW *win, int key, State *state, Vec2i window_size)
+{
     werase(win);
-    mvprintw(20, 102, " -----------------------------------");
-    mvprintw(21, 102, "| Bem vindo ao nosso jogo Cave.Exp  |");
-    mvprintw(22, 102, "| um jogo onde o objetivo do player |");
-    mvprintw(23, 102, "| é procurar chaves escondidas pelo |");
-    mvprintw(24, 102, "| mapa inteiro dentro de baús, onde |");
-    mvprintw(25, 102, "| estas vão ser precisas para abrir |");
-    mvprintw(26, 102, "| portais para niveis subsequentes  |");
-    mvprintw(27, 102, "| sendo que em cada nível existente |");
-    mvprintw(28, 102, "|  irão ter obstaculos pela frente  |");
-    mvprintw(29, 102, "| e terão pela frente, uns temíveis |");
-    mvprintw(30, 102, "|  monstros que habitam na caverna  |");
-    mvprintw(31, 102, "|      Boa sorte na exploracao      |");
-    mvprintw(32, 102, "|     Esperamos que se divirtam!    |");
-    mvprintw(33, 102, " -----------------------------------");
+    int width = 35;
+    int height = 26;
+    int start_y = (window_size.y - height) / 2;
+    int start_x = (window_size.x - width) / 2;
+    mvwprintw(win, start_y++, start_x, " Bem vindo ao nosso jogo Cave.Exp  ");
+    mvwprintw(win, start_y++, start_x, " um jogo onde o objetivo do player ");
+    mvwprintw(win, start_y++, start_x, " é procurar chaves escondidas pelo ");
+    mvwprintw(win, start_y++, start_x, " mapa inteiro dentro de baús, onde ");
+    mvwprintw(win, start_y++, start_x, " estas vão ser precisas para abrir ");
+    mvwprintw(win, start_y++, start_x, " portais para niveis subsequentes  ");
+    mvwprintw(win, start_y++, start_x, " sendo que em cada nível existente ");
+    mvwprintw(win, start_y++, start_x, "  irão ter obstaculos pela frente  ");
+    mvwprintw(win, start_y++, start_x, " e terão pela frente, uns temíveis ");
+    mvwprintw(win, start_y++, start_x, "  monstros que habitam na caverna  ");
+    mvwprintw(win, start_y++, start_x, "      Boa sorte na exploracao      ");
+    mvwprintw(win, start_y++, start_x, "     Esperamos que se divirtam!    ");
+
+    if (key == 'q')
+    {
+        *state = State_Menu;
+    }
 
     wrefresh(win);
-    noecho();
-
-    if (key == 'q') {
-        if (contador == 0) {
-            *state = State_Menu;
-            clear();
-        } else
-            *state = State_Pause;
-        clear();
-    }
 }

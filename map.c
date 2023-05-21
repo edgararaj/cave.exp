@@ -65,10 +65,16 @@ int get_normal_map_value(Bitmap bitmap, Vec2i pos)
     return normal_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
 }
 
-void add_light_map_value(Bitmap bitmap, Vec2i pos, int value) {
+int get_dist_map_value(Bitmap bitmap, Vec2i pos)
+{
+    return dist_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
+}
+
+void add_light_map_value(Bitmap bitmap, Vec2i pos, int value)
+{
     int result = value + get_light_map_value(bitmap, pos);
     // if (result > LIGHT_RADIUS) {
-        // add_term_line("%d\n", result);
+    // add_term_line("%d\n", result);
     // }
     // if (result > LIGHT_RADIUS)
     //     result = LIGHT_RADIUS;
@@ -326,15 +332,16 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
     {
         for (int y = rect.tl.y; y < rect.br.y; y++)
         {
-            if (rand() % 100 < 3.5)
+            Vec2i pos = (Vec2i){x, y};
+            if (get_normal_map_value(pixmap, pos) == WALKABLE && rand() % 100 < 3.5)
             { // 3.5% chance to place a spike
-                set_normal_map_value(pixmap, (Vec2i){x, y}, SPIKE);
+                set_normal_map_value(pixmap, pos, SPIKE);
             }
         }
     }
 }
 
-void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
+void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
 {
     Rect rect = expand_rect(rect2, -5);
     for (int x = rect.tl.x; x < rect.br.x - 3; x++)     // -3 to avoid going out of bounds
@@ -363,14 +370,14 @@ void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2)
     }
 }
 
-void generate_portal(GameState* gs, Bitmap pixmap, Rect rect2)
+void generate_portal(GameState *gs, Bitmap pixmap, Rect rect2)
 {
     Rect rect = expand_rect(rect2, -5);
-    for (int x = rect.tl.x; x < rect.br.x - 3; x++) // -3 to avoid going out of bounds
+    for (int x = rect.tl.x; x < rect.br.x - 3; x++)     // -3 to avoid going out of bounds
     {
         for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
         {
-            if (rand() % 1000 < 1000) // 0.5% chance to place a chest
+            if (rand() % 1000 < 1000)                   // 0.5% chance to place a chest
             {
                 // Place the chest pattern
                 for (int dx = 0; dx < 4; dx++)
@@ -404,55 +411,14 @@ int has_item(Inventory *inventory, ItemType type)
     return 0;
 }
 
-// int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player, Inventory *inventory) {
-// Vec2f inc_x = {inc.x, 0};
-// Vec2f inc_y = {0, inc.y};
-// int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
-// if (data == PORTAL) {
-// // Player can only walk into the portal if they have a key and are at least level 5
-// return has_item(inventory, ITEM_TYPE_KEY) && player.level >= 5;
-// }
-// if (data == SPIKE) {
-// // Handle player stepping on a spike
-// }
-// return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x),
-//    vec2i_to_f(camera.offset))) ||
-// !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y),
-//    vec2i_to_f(camera.offset)))) &&
-//    !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc),
-//   vec2i_to_f(camera.offset)));
-// }
-
-int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player,
-                    Inventory *inventory)
+int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc)
 {
-Vec2f inc_x = {inc.x, 0};
-Vec2f inc_y = {0, inc.y};
-int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
-if (data == CHEST)
-{
-    // Handle player stepping on a chest
-}
-if (data == SPIKE)
-{
-    // Handle player stepping on a spike
-}
-return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x), vec2i_to_f(camera.offset))) ||
-        !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y), vec2i_to_f(camera.offset)))) &&
-       !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc), vec2i_to_f(camera.offset)));
-}
-
-int cap_between(int value, int min, int max)
-{
-    if (value < min)
-    {
-        return min;
-    }
-    else if (value > max)
-    {
-        return max;
-    }
-    return value;
+    Vec2f inc_x = {inc.x, 0};
+    Vec2f inc_y = {0, inc.y};
+    int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
+    return ((!map_is_wall(pixmap, vec2f_add(pos, inc_x)) ||
+            !map_is_wall(pixmap, vec2f_add(pos, inc_y))) &&
+           !map_is_wall(pixmap, vec2f_add(pos, inc)));
 }
 
 void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
@@ -520,52 +486,28 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
     }
 }
 
-void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos, int minimap_maximized)
+void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos)
 {
-    float scale = minimap_maximized ? HIGH_RESOLUTION : DEFAULT_RESOLUTION;
-    int minimap_width = illuminated.width / scale;
-    int minimap_height = illuminated.height / scale;
+    float scale_x = (float)illuminated.width / window_size.x;
+    float scale_y = (float)illuminated.height / window_size.y;
 
-    int trans_x, trans_y;
-
-    // Verifique se o minimapa está maximizado
-    if (minimap_maximized)
+    wattrset(win, COLOR_PAIR(COLOR_RED));
+    for (int y = 0; y < window_size.y; y++)
     {
-        // Se estiver maximizado, centralize-o na janela
-        trans_x = (window_size.x - minimap_width) / 2 - 2;
-        trans_y = (window_size.y - minimap_height) / 2;
-    }
-    else
-    {
-        // Se não estiver maximizado, coloque-o no canto superior direito
-        trans_x = window_size.x - minimap_width - 1;
-        trans_y = 1;
-    }
-
-    trans_y += 1; // Desce o minimapa 1 character quando maximizado
-
-    wattrset(win, COLOR_PAIR(3));
-    print_rectangleu(win, 0, trans_x - 1, trans_y + minimap_height + 1, trans_x + minimap_width - 1);
-
-    wattrset(win, COLOR_PAIR(8));
-    for (int y = 0; y < minimap_height; y++)
-    {
-        for (int x = 0; x < minimap_width; x++)
+        for (int x = 0; x < window_size.x; x++)
         {
-            int map_x = x * scale;
-            int map_y = y * scale;
+            int map_x = x * scale_x;
+            int map_y = y * scale_y;
 
             if (illuminated.data[map_y * illuminated.width + map_x])
             {
-                int screen_x = trans_x + x;
-                int screen_y = trans_y + y;
-
-                print_pixel(win, screen_x, screen_y);
+                print_pixel(win, x, y);
             }
         }
     }
-    wattrset(win, COLOR_PAIR(6));
-    int player_x = player_pos.x / scale;
-    int player_y = player_pos.y / scale;
-    print_pixel(win, trans_x + player_x, trans_y + player_y);
+    wattrset(win, COLOR_PAIR(COLOR_BLUE));
+    int player_x = player_pos.x / scale_x;
+    int player_y = player_pos.y / scale_y;
+    add_term_line("%d, %d\n", player_x, player_y);
+    print_pixel(win, player_x, player_y);
 }
