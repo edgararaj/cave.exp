@@ -509,6 +509,5 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i pl
     wattrset(win, COLOR_PAIR(COLOR_BLUE));
     int player_x = player_pos.x / scale_x;
     int player_y = player_pos.y / scale_y;
-    add_term_line("%d, %d\n", player_x, player_y);
     print_pixel(win, player_x, player_y);
 }

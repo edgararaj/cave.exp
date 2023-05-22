@@ -69,20 +69,17 @@ typedef struct
     float speed;
     MobType type;
     Warrior warrior;
+    int called;
 } Mob;
 
 typedef struct
 {
     int hp;
-    int maxHP;
     int mana;
     int maxMana;
     int level;
-    int experience;
-    int attackPower;
     int defense;
-    float speed;
-    int gold;
+    int rbp;
 } Player_Stats;
 
 typedef struct
@@ -133,7 +130,7 @@ typedef struct
     WINDOW *win_game;
     WINDOW *win_log;
     WINDOW *win_minimap;
-    WINDOW *terminalwin;
+    WINDOW *win_stats;
     Bitmap pixmap;
     Torch *torches;
     Mob *mobs;

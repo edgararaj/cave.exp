@@ -11,10 +11,7 @@ void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illumina
     {
         if (value < MAX_DIST_SHINE)
         {
-            // HACK: Put shine on walls
             set_normal_map_value(distmap, point, SHINE);
-            // distmap.data[point.y * distmap.width + point.x] = SHINE;
-            set_normal_map_value(illuminated, point, SHINE);
         }
         return;
     };
@@ -23,7 +20,6 @@ void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illumina
         return;
 
     set_dist_map_value(distmap, point, value);
-    // distmap.data[point.y * distmap.width + point.x] = dist_map_encode(value);
     set_normal_map_value(illuminated, point, WALKABLE);
     for (int i = -1; i < 2; i++)
     {

@@ -96,15 +96,11 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
 
     Player_Stats player_stats;
     player_stats.hp = 100;
-    player_stats.maxHP = 100;
     player_stats.mana = 50;
     player_stats.maxMana = 50;
     player_stats.level = 1;
-    player_stats.experience = 0;
-    player_stats.attackPower = 10;
     player_stats.defense = 5;
-    player_stats.speed = 1.0f;
-    player_stats.gold = 0;
+    player_stats.rbp = 0;
 
     gs->cam_mode = cam_mode;
     gs->camera = camera;
@@ -122,7 +118,7 @@ Player_Stats player_stats;
 
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
 {
-    gs->player_attacking = 1 * 1e6;
+    gs->player_attacking = 0.2 * 1e6;
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
@@ -274,7 +270,8 @@ void render_player_attack(GameState *gs, Rect player, Mob *mobs, int num_mobs, V
 void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us) {
     int minimap_height = 20;
     int sidebar_width = minimap_height;
-    wresize(gs->win_log, window_size.y - minimap_height, sidebar_width * X_SCALE);
+    int player_stats_height = 10;
+    wresize(gs->win_log, window_size.y - minimap_height - player_stats_height, sidebar_width * X_SCALE);
     wresize(gs->win_minimap, minimap_height, sidebar_width * X_SCALE);
     mvwin(gs->win_minimap, window_size.y - minimap_height, 0);
     window_size.x -= sidebar_width;
@@ -380,8 +377,11 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
 
     for (int i = 0; i < MAX_MOBS; i++)
     {
-        if (gs->mobs[i].warrior.hp <= 0)
+        int dist = get_dist_map_value(gs->pixmap, vec2f_to_i(rect_float_center(gs->mobs[i].warrior.rect)));
+        // add_term_line("%d\n", dist);
+        if (gs->mobs[i].warrior.hp <= 0 || dist == 0 || dist > MAX_DIST_SHINE)
             continue;
+        
         render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect));
         render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].type);
     }
@@ -412,7 +412,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
         *state = State_Pause;
     }
     render_term(gs->win_log);
-    // displayGameWindow(gs->terminalwin, &gs->player_stats);
+    render_player_stats(gs->win_stats, gs->player_stats, gs->player, (Vec2i){sidebar_width * X_SCALE, player_stats_height});
 
     wrefresh(gs->win_game);
     wrefresh(gs->win_log);

@@ -1,11 +1,11 @@
-#include <assert.h>
 #include "mobs.h"
 #include "combat.h"
+#include "dist.h"
 #include "map.h"
 #include "objects.h"
 #include "state.h"
 #include "utils.h"
-#include "dist.h"
+#include <assert.h>
 
 void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
 {
@@ -31,7 +31,7 @@ void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
     }
 }
 
-Vec2i step_to_player(Bitmap map, Mob* mob)
+Vec2i step_to_player(Bitmap map, Mob *mob)
 {
     int smallest = MAX_DIST_CALC;
     Vec2i smallest_add = {0, 0};
@@ -55,85 +55,113 @@ Vec2i step_to_player(Bitmap map, Mob* mob)
     return smallest_add;
 }
 
-void attack_player(Mob* mob, Warrior* player, Bitmap map, int delta_us)
+void move_mob(Mob *mob, Vec2i step, int delta_us)
+{
+    mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed * 10));
+}
+
+void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
 {
     Vec2i step = step_to_player(map, mob);
-    RectFloat arroz = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed * 10));
-    if (arroz.tl.x >= 0 && arroz.tl.y >= 0 && arroz.br.x < map.width && arroz.br.y < map.height)
-        mob->warrior.rect = arroz;
+    move_mob(mob, step, delta_us);
 
     warrior_attack(&mob->warrior, player, delta_us);
 }
 
-void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, int delta_us)
+void wander(Mob *mob, Bitmap map, int delta_us)
 {
-    Mob* mob = &mobs[ii];
+    for (int i = -1; i < 2; i++)
+    {
+        for (int j = -1; j < 2; j++)
+        {
+            Vec2i add = {i, j};
+            if (!map_is_wall(map, vec2f_add(rect_float_center(mob->warrior.rect), vec2i_to_f(add))) &&
+                (rand() % 100 < 20))
+            {
+                move_mob(mob, add, delta_us);
+            }
+        }
+    }
+}
+
+void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, int delta_us)
+{
+    Mob *mob = &mobs[ii];
     if (mob->type == MobType_Stupid)
     {
-        if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) < THREAT_RADIUS_SQR)
-        {   
-            // add_term_line("Stupid mob is attacking you!\n");
+        if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) <
+            THREAT_RADIUS_SQR)
+        {
             mob->warrior.rect.color = COLOR_RED;
             attack_player(mob, player, map, delta_us);
         }
-        else {
-            mob->warrior.rect.color = COLOR_BLUE;
+        else
+        {
+            if (!mob->called)
+            {
+                mob->warrior.rect.color = COLOR_BLUE;
+                wander(mob, map, delta_us);
+            }
         }
     }
     else if (mob->type == MobType_Coward || mob->type == MobType_Intelligent)
     {
-        int mob_dist_to_player = vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect));
-        // if (dist_to_player < THREAT_RADIUS_SQR)
-        // {
-        //     // Feeling threatened
-        //     mob->warrior.rect.color = COLOR_RED;
-
-        //     Vec2i step = step_to_player(map, mob);
-        //     mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed * 10));
-        //     warrior_attack(&mob->warrior, player, delta_ms);
-        // }
-
+        int mob_dist_to_player =
+            vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect));
         if (mob_dist_to_player < VISION_RADIUS_SQR)
         {
             int mobs_near = 0;
             for (int i = 0; i < num_mobs; i++)
             {
-                int mob_dist_to_caller = vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
+                int mob_dist_to_caller =
+                    vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
                 if ((ii != i) && (mob_dist_to_caller <= THREAT_RADIUS_SQR))
                 {
                     mobs_near++;
                 }
             }
-            if (mobs_near) {
+            if (mobs_near || (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) <
+                              THREAT_RADIUS_SQR))
+            {
                 mob->warrior.rect.color = COLOR_RED;
                 attack_player(mob, player, map, delta_us);
             }
-            else {
+            else
+            {
                 mob->warrior.rect.color = COLOR_YELLOW;
+                if (!mob->called)
+                {
+                    wander(mob, map, delta_us);
+                }
             }
             for (int i = 0; i < num_mobs; i++)
             {
-                mob_dist_to_player = vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(player->rect));
-                int mob_dist_to_caller = vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
+                mob_dist_to_player =
+                    vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(player->rect));
+                int mob_dist_to_caller =
+                    vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
                 if (((i != ii) && mob_dist_to_player >= THREAT_RADIUS_SQR))
                 {
+                    mobs[i].called = 1;
                     // Is Calling other
                     mobs[i].warrior.rect.color = COLOR_YELLOW;
                     attack_player(&mobs[i], player, map, delta_us);
                 }
+                if (mob_dist_to_player >= VISION_RADIUS_SQR)
+                {
+                    mobs[i].called = 0;
+                }
             }
         }
-        else {
-            mob->warrior.rect.color = COLOR_BLUE;
+        else
+        {
+            if (!mob->called)
+            {
+                mob->warrior.rect.color = COLOR_BLUE;
+                wander(mob, map, delta_us);
+            }
         }
     }
-    // else if (mob->type == MobType_Intelligent)
-    // {
-    //     // if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) < THREAT_RADIUS_SQR)
-    //     // {
-    //     //     // add_term_line("Intelligent mob is attacking you!\n");
-    //     // }
-    // }
 }
 
 void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, int delta_us)

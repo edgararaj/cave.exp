@@ -1,2 +1,2 @@
 #pragma once
-void displayGameWindow(WINDOW* terminalWin, Player_Stats *player);
+void render_player_stats(WINDOW* terminalWin, Player_Stats player, Warrior warrior, Vec2i);

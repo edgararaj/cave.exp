@@ -74,19 +74,19 @@ int main()
 
     int minimap_height = 20;
     int sidebar_width = minimap_height * X_SCALE;
+    int player_stats_height = 10;
     WINDOW *win_game = newwin(30, 20, 0, sidebar_width);
     WINDOW *win_inventory = newwin(30, 20, 0, 0);
     WINDOW *win_minimap = newwin(30, sidebar_width, 0, 0);
-    WINDOW *win_log = newwin(minimap_height, sidebar_width, 0, 0);
+    WINDOW *win_log = newwin(minimap_height, sidebar_width, player_stats_height, 0);
     WINDOW *win_menu = newwin(30, 20, 0, 0);
-    WINDOW *terminalWin = newwin(30, 20, 0, 0);
+    WINDOW *win_stats = newwin(player_stats_height, sidebar_width, 0, 0);
     wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient));
     wbkgd(win_minimap, COLOR_PAIR(Culur_Light_Gradient + 10));
     wbkgd(win_log, COLOR_PAIR(Culur_Light_Gradient + 5));
+    wbkgd(win_stats, COLOR_PAIR(Culur_Default));
 
     setup_colors();
-    // wattrset(win, COLOR_PAIR(0));
-    wattrset(win_game, COLOR_PAIR(1));
 
     Rect window = {};
     window.tl.x = 0;
@@ -99,7 +99,7 @@ int main()
     gs.win_inventory = win_inventory;
     gs.win_log = win_log;
     gs.win_minimap = win_minimap;
-    gs.terminalwin = terminalWin;
+    gs.win_stats = win_stats;
 
     StartMenuState sms;
     sms.win = win_menu;
@@ -123,14 +123,7 @@ int main()
     int delta_us = 0;
     while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
-
         wresize(win_menu, window_size.y, window_size.x);
-        // window_size.x -= INGAME_TERM_SIZE;
-        // wresize(win_game, window_size.y, window_size.x);
-        // wresize(win_menu, window_size.y, window_size.x);
-        // window_size.x /= X_SCALE;
-        // werase(win_game);
-        // wattrset(win_game, COLOR_PAIR(0));
 
         int key = getch();
 
