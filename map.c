@@ -433,6 +433,7 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
 
             if (normal_map_decode(data) == WALKABLE)
             {
+                // wattrset(win_game, COLOR_PAIR(Culur_Default));
                 wattrset(win_game, COLOR_PAIR(Culur_Light_Gradient + MIN(light_map_decode(data), LIGHT_RADIUS - 1)));
                 print_pixel(window, x, y);
             }

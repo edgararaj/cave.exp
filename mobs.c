@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "mobs.h"
 #include "combat.h"
 #include "map.h"
@@ -41,8 +42,8 @@ Vec2i step_to_player(Bitmap map, Mob* mob)
             if (i + j == -1 || i + j == 1)
             {
                 Vec2i add = {i, j};
-                RectFloat rect = rect_float_translate(mob->warrior.rect, vec2i_to_f(add));
-                int data = dist_map_decode(map.data[(int)(rect.tl.y) * map.width + (int)rect.tl.x]);
+                Vec2f rect = vec2f_add(rect_float_center(mob->warrior.rect), vec2i_to_f(add));
+                int data = get_dist_map_value(map, vec2f_to_i(rect));
                 if (data < smallest && data && data <= MAX_DIST_CALC)
                 {
                     smallest = data;
@@ -54,6 +55,16 @@ Vec2i step_to_player(Bitmap map, Mob* mob)
     return smallest_add;
 }
 
+void attack_player(Mob* mob, Warrior* player, Bitmap map, int delta_us)
+{
+    Vec2i step = step_to_player(map, mob);
+    RectFloat arroz = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed * 10));
+    if (arroz.tl.x >= 0 && arroz.tl.y >= 0 && arroz.br.x < map.width && arroz.br.y < map.height)
+        mob->warrior.rect = arroz;
+
+    warrior_attack(&mob->warrior, player, delta_us);
+}
+
 void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, int delta_us)
 {
     Mob* mob = &mobs[ii];
@@ -62,12 +73,8 @@ void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
         if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) < THREAT_RADIUS_SQR)
         {   
             // add_term_line("Stupid mob is attacking you!\n");
-            // Feeling threatened
             mob->warrior.rect.color = COLOR_RED;
-
-            Vec2i step = step_to_player(map, mob);
-            mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed * 10));
-            warrior_attack(&mob->warrior, player, delta_us);
+            attack_player(mob, player, map, delta_us);
         }
         else {
             mob->warrior.rect.color = COLOR_BLUE;
@@ -88,7 +95,6 @@ void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
 
         if (mob_dist_to_player < VISION_RADIUS_SQR)
         {
-            mob->warrior.rect.color = COLOR_YELLOW;
             int mobs_near = 0;
             for (int i = 0; i < num_mobs; i++)
             {
@@ -98,17 +104,22 @@ void update_mob(Mob* mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
                     mobs_near++;
                 }
             }
+            if (mobs_near) {
+                mob->warrior.rect.color = COLOR_RED;
+                attack_player(mob, player, map, delta_us);
+            }
+            else {
+                mob->warrior.rect.color = COLOR_YELLOW;
+            }
             for (int i = 0; i < num_mobs; i++)
             {
                 mob_dist_to_player = vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(player->rect));
                 int mob_dist_to_caller = vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
-                if (((i != ii) && mob_dist_to_player >= THREAT_RADIUS_SQR) || (ii == i && mobs_near))
+                if (((i != ii) && mob_dist_to_player >= THREAT_RADIUS_SQR))
                 {
                     // Is Calling other
-                    mob->warrior.rect.color = COLOR_GREEN;
-                    Vec2i step = step_to_player(map, &mobs[i]);
-                    mobs[i].warrior.rect = rect_float_translate(mobs[i].warrior.rect, vec2f_div_const(vec2i_to_f(step), mobs[i].speed * 10));
-                    warrior_attack(&mobs[i].warrior, player, delta_us);
+                    mobs[i].warrior.rect.color = COLOR_YELLOW;
+                    attack_player(&mobs[i], player, map, delta_us);
                 }
             }
         }

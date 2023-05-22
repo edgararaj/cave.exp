@@ -342,8 +342,8 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
             set_dist_map_value(gs->pixmap, (Vec2i){x, y}, 0);
         }
     }
-    light_reset(gs->pixmap);
     dist_pass(gs->pixmap, player_center, gs->illuminated);
+    light_reset(gs->pixmap);
 
     for (int i = 0; i < MAX_TORCHES; i++)
     {
