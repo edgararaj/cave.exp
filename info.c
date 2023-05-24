@@ -19,20 +19,32 @@ void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)
         time = time_start;
         if (pos < strlen(c))
             pos++;
-        strncpy(arroz, c, pos);
+        char* cenoura = strncpy(arroz, c, pos);
+        cenoura[pos] = 0;
     }
     mvwprintw(win, y, x, arroz);
 }
 
 void draw_info(WINDOW *win, int key, State *state, Vec2i window_size, int delta_us)
 {
+    setlocale(LC_ALL, ""); // Configuração para suporte a caracteres amplos
     int width = 35;
     int height = 26;
     wresize(win, height, width);
     mvwin(win, (window_size.y - height) / 2, (window_size.x - width) / 2);
     werase(win);
-    draw_text(win, 0, 0, "Bem vindo ao nosso jogo Cave.Exp\n um jogo onde o objetivo do player\n é procurar chaves escondidas pelo\n mapa inteiro dentro de baús,\nonde estas vão ser precisas para\n abrir portais para niveis subsequentes\n sendo que em cada nível existente\n irão ter obstaculos pela frente\n e terão pela frente, uns temíveis\n monstros que habitam na caverna\n Boa sorte na exploracao\n Esperamos que se divirtam!", delta_us);
-
+    draw_text(win, 0, 0, "Bem vindo ao nosso jogo Cave.Exp\n"
+                         "um jogo onde o objetivo do player\n"
+                         "é procurar chaves escondidas pelo\n"
+                         "   mapa inteiro dentro de baús,\n"
+                         " onde estas vão ser precisas para\n"
+                         "   para avancar de nivel sendo\n"
+                         "   que em cada nível existente\n"
+                         "  irão ter obstaculos pela frente\n"
+                         " e terão pela frente, uns temíveis\n"
+                         "  monstros que habitam na caverna\n"
+                         "     Boa sorte na exploracao\n"
+                         "    Esperamos que se divirtam!\n", delta_us);
     if (key == 'q')
     {
         *state = State_Menu;
