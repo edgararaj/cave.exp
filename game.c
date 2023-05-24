@@ -30,12 +30,31 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
+    int portal_room = random_between(0, rects_count - 1);
     for (int i = 0; i < rects_count; i++)
     {
-        generate_spikes(pixmap, rects[i]);
-        generate_obstacles(pixmap, rects[i]);
+        Rect rect = rects[i];
+        int div = 3;
+        int portal;
+        if (i == portal_room)
+        {
+            portal = random_between(0, div * div - 1);
+        }
+        for (int f = 0; f < div * div; f++)
+        {
+            Rect sub = rect_translate(subdivide_rect(rect, div, f), rect.tl);
+            if (i != portal_room || (i == portal_room && f != portal))
+            {
+                generate_spikes(pixmap, sub);
+            }
+            else {
+                generate_portal(&gs, pixmap, sub);
+            }
+            // if (f % 2 == 0) continue;
+            // generate_obstacles(pixmap, sub);
+            // add_term_line("%d %d %d %d\n", sub.tl.x, sub.tl.y, sub.br.x, sub.br.y);
+        }
         // generate_chests(&gs, pixmap, rects[i]);
-        // generate_portal(&gs, pixmap, rects[i]);
     }
     bitmap_draw_box(pixmap, window);
 
@@ -103,6 +122,7 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     player_stats.rbp = 0;
 
     gs->cam_mode = cam_mode;
+    gs->player_stats = player_stats;
     gs->camera = camera;
     gs->player = player;
     gs->torches = torches;

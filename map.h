@@ -15,6 +15,7 @@
 #define CHESTOUT 5
 #define CHESTIN 6
 #define PORTAL 7
+#define OUTER_PORTAL 8
 
 #define MAX_CHESTS 100
 

@@ -139,7 +139,7 @@ int radius_count(Bitmap bitmap, int x, int y, int r)
 
 void generate_obstacles(Bitmap bitmap, Rect rect2)
 {
-    Rect rect = expand_rect(rect2, -5);
+    Rect rect = rect2;
     for (int x = rect.tl.x; x < rect.br.x; x++)
     {
         for (int y = rect.tl.y; y < rect.br.y; y++)
@@ -327,13 +327,13 @@ int map_is_wall(Bitmap pixmap, Vec2f pos)
 
 void generate_spikes(Bitmap pixmap, Rect rect2)
 {
-    Rect rect = expand_rect(rect2, -5);
+    Rect rect = rect2;
     for (int x = rect.tl.x; x < rect.br.x; x++)
     {
         for (int y = rect.tl.y; y < rect.br.y; y++)
         {
             Vec2i pos = (Vec2i){x, y};
-            if (get_normal_map_value(pixmap, pos) == WALKABLE && rand() % 100 < 3.5)
+            if (get_normal_map_value(pixmap, pos) == WALKABLE && rand() % 100 < 1)
             { // 3.5% chance to place a spike
                 set_normal_map_value(pixmap, pos, SPIKE);
             }
@@ -372,28 +372,20 @@ void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
 
 void generate_portal(GameState *gs, Bitmap pixmap, Rect rect2)
 {
-    Rect rect = expand_rect(rect2, -5);
-    for (int x = rect.tl.x; x < rect.br.x - 3; x++)     // -3 to avoid going out of bounds
+    Rect rect = gen_subrect_with_size((Vec2i){4, 3}, rect2);
+    // Place the chest pattern
+    for (int dx = 0; dx < 4; dx++)
     {
-        for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
+        for (int dy = 0; dy < 3; dy++)
         {
-            if (rand() % 1000 < 1000)                   // 0.5% chance to place a chest
+            Vec2i pos = (Vec2i){rect.tl.x + dx, rect.tl.y + dy};
+            if (dy == 1 && (dx == 1 || dx == 2)) // Place the yellow 'O's
             {
-                // Place the chest pattern
-                for (int dx = 0; dx < 4; dx++)
-                {
-                    for (int dy = 0; dy < 3; dy++)
-                    {
-                        if (dy == 1 && (dx == 1 || dx == 2)) // Place the yellow 'O's
-                        {
-                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, PORTAL);
-                        }
-                        else // Place the brown 'C's
-                        {
-                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, PORTAL);
-                        }
-                    }
-                }
+                set_normal_map_value(pixmap, pos, PORTAL);
+            }
+            else // Place the brown 'C's
+            {
+                set_normal_map_value(pixmap, pos, OUTER_PORTAL);
             }
         }
     }
@@ -467,7 +459,12 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
             else if (normal_map_decode(data) == PORTAL)
             {
                 wattrset(win_game, COLOR_PAIR(Culur_Portal));
-                print_pixel_custom(window, x, y, "P");
+                print_pixel(window, x, y);
+            }
+            else if (normal_map_decode(data) == OUTER_PORTAL)
+            {
+                wattrset(win_game, COLOR_PAIR(Culur_Outer_Portal));
+                print_pixel(window, x, y);
             }
             else
             {

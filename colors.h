@@ -25,6 +25,7 @@ typedef enum
     Culur_Chest,
     Culur_Portal_Back,
     Culur_Portal_Front,
+    Culur_Outer_Portal,
     Culur_Portal,
     Culur_Hotbar_Back,
     Culur_Hotbar_Front,

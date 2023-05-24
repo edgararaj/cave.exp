@@ -184,6 +184,18 @@ Rect gen_random_subrect(Rect container)
     return result;
 }
 
+Rect gen_subrect_with_size(Vec2i size, Rect container)
+{
+    Rect result;
+    int random_x = random_between(0, container.br.x - size.x);
+    int random_y = random_between(0, container.br.y - size.y);
+    result.tl.x = container.tl.x + random_x;
+    result.tl.y = container.tl.y + random_y;
+    result.br.x = container.tl.x + random_x + size.x;
+    result.br.y = container.tl.y + random_y + size.y;
+    return result;
+}
+
 Rect expand_rect(Rect rect, int amount)
 {
     Rect result;

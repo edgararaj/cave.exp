@@ -59,6 +59,7 @@ typedef struct
 } Bitmap;
 
 Rect gen_random_subrect(Rect container);
+Rect gen_subrect_with_size(Vec2i size, Rect container);
 Vec2i get_center(Rect rect);
 Rect expand_rect(Rect rect, int amount);
 Vec2i rect_size(Rect rect);
