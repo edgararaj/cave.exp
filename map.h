@@ -11,13 +11,8 @@
 #define WALKABLE 1
 #define SHINE 2
 #define SPIKE 3
-#define CHEST 4
-#define CHESTOUT 5
-#define CHESTIN 6
-#define PORTAL 7
-#define OUTER_PORTAL 8
-
-#define MAX_CHESTS 100
+#define PORTAL 6
+#define OUTER_PORTAL 7
 
 #define SPIKE_DAMAGE 7
 #define SPIKE_DAMAGE_COOLDOWN 1200
@@ -58,5 +53,6 @@ void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count);
 void erode(Bitmap bitmap, int iterations);
 void generate_spikes(Bitmap pixmap, Rect rect2);
 void generate_obstacles(Bitmap bitmap, Rect rect2);
-void generate_chests(GameState* gs, Bitmap pixmap, Rect rect2);
-void generate_portal(GameState* gs, Bitmap pixmap, Rect rect2);
+Chest generate_chest(Bitmap pixmap, Rect rect2);
+void generate_portal(Bitmap pixmap, Rect rect2);
+void draw_chest(WINDOW* win, Bitmap pixmap, Rect rect);

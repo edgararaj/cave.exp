@@ -341,66 +341,63 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
     }
 }
 
-void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
+Inventory generate_chest_items()
 {
-    Rect rect = expand_rect(rect2, -5);
-    for (int x = rect.tl.x; x < rect.br.x - 3; x++)     // -3 to avoid going out of bounds
+    Inventory result = {0};
+    int num_items = random_between(1, 3);
+    for (int j = 0; j < num_items; j++)
     {
-        for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
-        {
-            if (rand() % 1000 < 5)                      // 0.5% chance to place a chest
-            {
-                // Place the chest pattern
-                for (int dx = 0; dx < 4; dx++)
-                {
-                    for (int dy = 0; dy < 3; dy++)
-                    {
-                        if (dy == 1 && (dx == 1 || dx == 2)) // Place the yellow 'O's
-                        {
-                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, CHESTIN);
-                        }
-                        else // Place the brown 'C's
-                        {
-                            set_normal_map_value(pixmap, (Vec2i){x + dx, y + dy}, CHESTOUT);
-                        }
-                    }
-                }
-            }
-        }
+        int item = random_between(0, ItemType__Size);
+        int count = random_between(1, 3);
+        add_item(&result, item, count);
     }
+    return result;
 }
 
-void generate_portal(GameState *gs, Bitmap pixmap, Rect rect2)
+Chest generate_chest(Bitmap pixmap, Rect rect2)
 {
     Rect rect = gen_subrect_with_size((Vec2i){4, 3}, rect2);
-    // Place the chest pattern
+    Inventory inventory = generate_chest_items();
+    return (Chest) {inventory, rect, 0};
+}
+
+void draw_chest(WINDOW* win, Bitmap pixmap, Rect rect)
+{
     for (int dx = 0; dx < 4; dx++)
     {
         for (int dy = 0; dy < 3; dy++)
         {
             Vec2i pos = (Vec2i){rect.tl.x + dx, rect.tl.y + dy};
-            if (dy == 1 && (dx == 1 || dx == 2)) // Place the yellow 'O's
+            if (dy == 1 && (dx == 1 || dx == 2))
+            {
+                wattrset(win, COLOR_PAIR(Culur_Chest));
+            }
+            else {
+                wattrset(win, COLOR_PAIR(Culur_Outer_Chest));
+            }
+            print_pixel(win, pos.x, pos.y);
+        }
+    }
+}
+
+void generate_portal(Bitmap pixmap, Rect rect2)
+{
+    Rect rect = gen_subrect_with_size((Vec2i){5, 4}, rect2);
+    for (int dx = 0; dx < 5; dx++)
+    {
+        for (int dy = 0; dy < 4; dy++)
+        {
+            Vec2i pos = (Vec2i){rect.tl.x + dx, rect.tl.y + dy};
+            if ((dy == 1 || dy == 2) && (dx == 1 || dx == 2 || dx == 3))
             {
                 set_normal_map_value(pixmap, pos, PORTAL);
             }
-            else // Place the brown 'C's
+            else
             {
                 set_normal_map_value(pixmap, pos, OUTER_PORTAL);
             }
         }
     }
-}
-
-int has_item(Inventory *inventory, ItemType type)
-{
-    for (int i = 0; i < inventory->size; i++)
-    {
-        if (inventory->items[i].type == type)
-        {
-            return 1;
-        }
-    }
-    return 0;
 }
 
 int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc)
@@ -446,16 +443,6 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
                 wattrset(win_game, COLOR_PAIR(Culur_Spike));
                 print_pixel_custom(window, x, y, "^");
             }
-            else if (normal_map_decode(data) == CHESTOUT)
-            {
-                wattrset(win_game, COLOR_PAIR(Culur_Chest_Back));
-                print_pixel_custom(window, x, y, "C");
-            }
-            else if (normal_map_decode(data) == CHESTIN)
-            {
-                wattrset(win_game, COLOR_PAIR(Culur_Chest_Front));
-                print_pixel_custom(window, x, y, "O");
-            }
             else if (normal_map_decode(data) == PORTAL)
             {
                 wattrset(win_game, COLOR_PAIR(Culur_Portal));
@@ -468,8 +455,7 @@ void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WIND
             }
             else
             {
-                data = illuminated.data[map_y * map.width + map_x];
-                if (data == SHINE)
+                if (get_normal_map_value(illuminated, (Vec2i){map_x, map_y}) == SHINE)
                 {
                     wattrset(win_game, COLOR_PAIR(Culur_Shine_Dimmed));
                     print_pixel(window, x, y);

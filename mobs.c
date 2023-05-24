@@ -6,6 +6,7 @@
 #include "state.h"
 #include "utils.h"
 #include <assert.h>
+#include <stdlib.h>
 
 void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
 {

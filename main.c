@@ -75,12 +75,14 @@ int main()
     int minimap_height = 20;
     int sidebar_width = minimap_height * X_SCALE;
     int player_stats_height = 10;
+    int inventory_height = 10;
     WINDOW *win_game = newwin(30, 20, 0, sidebar_width);
-    WINDOW *win_inventory = newwin(30, 20, 0, 0);
-    WINDOW *win_minimap = newwin(30, sidebar_width, 0, 0);
-    WINDOW *win_log = newwin(minimap_height, sidebar_width, player_stats_height, 0);
     WINDOW *win_menu = newwin(30, 20, 0, 0);
+
     WINDOW *win_stats = newwin(player_stats_height, sidebar_width, 0, 0);
+    WINDOW *win_inventory = newwin(inventory_height, sidebar_width, player_stats_height, 0);
+    WINDOW *win_log = newwin(minimap_height, sidebar_width, player_stats_height + inventory_height, 0);
+    WINDOW *win_minimap = newwin(30, sidebar_width, 0, 0);
     wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient));
     wbkgd(win_minimap, COLOR_PAIR(Culur_Light_Gradient + 10));
     wbkgd(win_log, COLOR_PAIR(Culur_Light_Gradient + 5));
@@ -139,7 +141,7 @@ int main()
         } else if (state == State_Niveis) {
             draw_niveis(&smsm, &state, key, window_size);
         } else if (state == State_Info) {
-            draw_info(win_menu, key, &state, window_size);
+            draw_info(win_menu, key, &state, window_size, delta_us);
         } else if (state == State_Pause) {
             draw_pause(&smsms, &state, key, window_size);
             start_menu = 0;

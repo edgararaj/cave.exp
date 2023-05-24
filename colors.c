@@ -36,8 +36,8 @@ void setup_colors()
     init_color(Culur_Shine_Dimmed, 200, 0, 0);
     init_color(Culur_Spike_Front, 500, 500, 500);
     init_color(Culur_Spike_Back, 100, 100, 100);
-    init_color(Culur_Chest_Back, 500, 250, 0);
-    init_color(Culur_Chest_Front, 1000, 1000, 0);
+    init_color(Culur_Outer_Chest, 500, 250, 0);
+    init_color(Culur_Chest, 1000, 1000, 0);
     init_color(Culur_Outer_Portal, 1000, 1000, 800);
     init_color(Culur_Portal, 800, 1000, 400);
     init_color(Culur_Hotbar_Back, 500, 500, 500);
@@ -51,7 +51,6 @@ void setup_colors()
     }
     init_pair(Culur_Default, COLOR_WHITE, COLOR_BLACK);
     init_pair(Culur_Spike, Culur_Spike_Front, Culur_Spike_Back);
-    init_pair(Culur_Chest, Culur_Chest_Front, Culur_Chest_Back);
     init_pair(Culur_Hotbar, Culur_Hotbar_Front, Culur_Hotbar_Back);
     init_pair(Culur_Hotbar_Selected, Culur_Hotbar_Selected_Front, Culur_Hotbar_Selected_Back);
 

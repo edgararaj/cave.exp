@@ -12,6 +12,7 @@ void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illumina
         if (value < MAX_DIST_SHINE)
         {
             set_normal_map_value(distmap, point, SHINE);
+            set_normal_map_value(illuminated, point, SHINE);
         }
         return;
     };

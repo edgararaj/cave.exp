@@ -3,29 +3,35 @@
 #include <string.h>
 
 #include "state.h"
+#include "utils.h"
 #include <locale.h>
 #include <ncurses.h>
 #include <string.h>
 
-void draw_info(WINDOW *win, int key, State *state, Vec2i window_size)
+static int time_start = 0.2 * 1e7;
+static int time = 0.2 * 1e7;
+static int pos = 0;
+
+void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)
 {
-    werase(win);
+    char arroz[5024];
+    if (timer_update(&time, delta_us)) {
+        time = time_start;
+        if (pos < strlen(c))
+            pos++;
+        strncpy(arroz, c, pos);
+    }
+    mvwprintw(win, y, x, arroz);
+}
+
+void draw_info(WINDOW *win, int key, State *state, Vec2i window_size, int delta_us)
+{
     int width = 35;
     int height = 26;
-    int start_y = (window_size.y - height) / 2;
-    int start_x = (window_size.x - width) / 2;
-    mvwprintw(win, start_y++, start_x, " Bem vindo ao nosso jogo Cave.Exp  ");
-    mvwprintw(win, start_y++, start_x, " um jogo onde o objetivo do player ");
-    mvwprintw(win, start_y++, start_x, " é procurar chaves escondidas pelo ");
-    mvwprintw(win, start_y++, start_x, " mapa inteiro dentro de baús, onde ");
-    mvwprintw(win, start_y++, start_x, " estas vão ser precisas para abrir ");
-    mvwprintw(win, start_y++, start_x, " portais para niveis subsequentes  ");
-    mvwprintw(win, start_y++, start_x, " sendo que em cada nível existente ");
-    mvwprintw(win, start_y++, start_x, "  irão ter obstaculos pela frente  ");
-    mvwprintw(win, start_y++, start_x, " e terão pela frente, uns temíveis ");
-    mvwprintw(win, start_y++, start_x, "  monstros que habitam na caverna  ");
-    mvwprintw(win, start_y++, start_x, "      Boa sorte na exploracao      ");
-    mvwprintw(win, start_y++, start_x, "     Esperamos que se divirtam!    ");
+    wresize(win, height, width);
+    mvwin(win, (window_size.y - height) / 2, (window_size.x - width) / 2);
+    werase(win);
+    draw_text(win, 0, 0, "Bem vindo ao nosso jogo Cave.Exp\n um jogo onde o objetivo do player\n é procurar chaves escondidas pelo\n mapa inteiro dentro de baús,\nonde estas vão ser precisas para\n abrir portais para niveis subsequentes\n sendo que em cada nível existente\n irão ter obstaculos pela frente\n e terão pela frente, uns temíveis\n monstros que habitam na caverna\n Boa sorte na exploracao\n Esperamos que se divirtam!", delta_us);
 
     if (key == 'q')
     {

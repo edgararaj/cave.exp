@@ -31,6 +31,9 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
     int portal_room = random_between(0, rects_count - 1);
+
+    Chest yoo_chests[MAX_CHESTS];
+    int num_chests = 0;
     for (int i = 0; i < rects_count; i++)
     {
         Rect rect = rects[i];
@@ -40,21 +43,26 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
         {
             portal = random_between(0, div * div - 1);
         }
+        int chests = 0;
         for (int f = 0; f < div * div; f++)
         {
             Rect sub = rect_translate(subdivide_rect(rect, div, f), rect.tl);
             if (i != portal_room || (i == portal_room && f != portal))
             {
-                generate_spikes(pixmap, sub);
+                if (rand() % 100 < 20 && chests < MAX_CHESTS_PER_ROOM && num_chests < MAX_CHESTS)
+                {
+                    yoo_chests[num_chests++] = generate_chest(pixmap, sub);
+                    chests++;
+                }
+                else {
+                    generate_spikes(pixmap, sub);
+                    generate_obstacles(pixmap, sub);
+                }
             }
             else {
-                generate_portal(&gs, pixmap, sub);
+                generate_portal(pixmap, sub);
             }
-            // if (f % 2 == 0) continue;
-            // generate_obstacles(pixmap, sub);
-            // add_term_line("%d %d %d %d\n", sub.tl.x, sub.tl.y, sub.br.x, sub.br.y);
         }
-        // generate_chests(&gs, pixmap, rects[i]);
     }
     bitmap_draw_box(pixmap, window);
 
@@ -90,28 +98,27 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     create_mobs(pixmap, mobs, MAX_MOBS);
 
     Inventory inventory;
-    init_inventory(&inventory, 10);
-    noecho();
+    add_item(&inventory, ItemType_HealthPotion, 1);
 
     // Define the items
-    Item sword = {ITEM_TYPE_SWORD, "Sword", 'S', COLOR_WHITE};
-    Item blastgun = {ITEM_TYPE_BLASTGUN, "Blastgun", 'B', COLOR_WHITE};
-    Item health_potion = {ITEM_TYPE_HEALTH_POTION, "Health Potion", 'H', COLOR_WHITE};
-    Item coins = {ITEM_TYPE_COINS, "Coins", 'C', COLOR_WHITE};
-    Item key = {ITEM_TYPE_KEY, "Key", 'K', COLOR_WHITE};
+    // Item sword = {ITEM_TYPE_SWORD, "Sword", 'S', COLOR_WHITE};
+    // Item blastgun = {ITEM_TYPE_BLASTGUN, "Blastgun", 'B', COLOR_WHITE};
+    // Item health_potion = {ITEM_TYPE_HEALTH_POTION, "Health Potion", 'H', COLOR_WHITE};
+    // Item coins = {ITEM_TYPE_COINS, "Coins", 'C', COLOR_WHITE};
+    // Item key = {ITEM_TYPE_KEY, "Key", 'K', COLOR_WHITE};
 
     // Add the items to the inventory
-    add_item(&inventory, sword);
-    add_item(&inventory, blastgun);
-    for (int i = 0; i < 5; i++)
-    {
-        add_item(&inventory, health_potion);
-    }
-    for (int i = 0; i < 20; i++)
-    {
-        add_item(&inventory, coins);
-    }
-    add_item(&inventory, key);
+    // add_item(&inventory, sword);
+    // add_item(&inventory, blastgun);
+    // for (int i = 0; i < 5; i++)
+    // {
+    //     add_item(&inventory, health_potion);
+    // }
+    // for (int i = 0; i < 20; i++)
+    // {
+    //     add_item(&inventory, coins);
+    // }
+    // add_item(&inventory, key);
 
     Player_Stats player_stats;
     player_stats.hp = 100;
@@ -131,6 +138,9 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     gs->illuminated = illuminated;
     gs->player_attacking = 0;
     gs->minimap_maximized = false;
+    gs->inventory = inventory;
+    gs->chests = yoo_chests;
+    gs->chests_count = num_chests;
 }
 
 
@@ -243,13 +253,14 @@ void update_player(RectFloat *st, int key, GameState *gs)
     }
 }
 
-Rect project_rect(WINDOW *win, Camera camera, Rect player)
+Rect project_rect(Camera camera, Rect player)
 {
     return rect_translate(player, vec2i_mul_const(camera.offset, -1));
 }
+
 void render_rect(WINDOW *win, Camera camera, Rect player)
 {
-    print_rectangle(win, project_rect(win, camera, player));
+    print_rectangle(win, project_rect(camera, player));
 }
 
 Rect rect_float_to_rect(RectFloat rect)
@@ -282,7 +293,7 @@ void render_player_attack(GameState *gs, Rect player, Mob *mobs, int num_mobs, V
     c.radius = 3;
 
     c.center = vec2f_to_i(
-        rect_center(rect_translate(project_rect(gs->win_game, gs->camera, player), (Vec2i){-c.radius, -c.radius})));
+        rect_center(rect_translate(project_rect(gs->camera, player), (Vec2i){-c.radius, -c.radius})));
     wattrset(gs->win_game, COLOR_PAIR(5));
     print_circumference(gs->win_game, window_size, c);
 }
@@ -291,7 +302,8 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     int minimap_height = 20;
     int sidebar_width = minimap_height;
     int player_stats_height = 10;
-    wresize(gs->win_log, window_size.y - minimap_height - player_stats_height, sidebar_width * X_SCALE);
+    int inventory_height = 10;
+    wresize(gs->win_log, window_size.y - minimap_height - player_stats_height - inventory_height, sidebar_width * X_SCALE);
     wresize(gs->win_minimap, minimap_height, sidebar_width * X_SCALE);
     mvwin(gs->win_minimap, window_size.y - minimap_height, 0);
     window_size.x -= sidebar_width;
@@ -300,6 +312,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     werase(gs->win_game);
     werase(gs->win_log);
     werase(gs->win_minimap);
+    werase(gs->win_inventory);
 
     window_size.x /= X_SCALE; // A partir daqui nao mexer com janelas
 
@@ -315,20 +328,6 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     if (key == ' ')
     {
         center_camera(&gs->camera, player_center);
-    }
-
-    if (key == 'i')
-    {
-        int ch;
-        while (1)
-        {
-            draw_inventory(gs->win_inventory, &gs->inventory);
-            ch = getch();
-            if (ch == 'i' || ch == 'q')
-            { // Pressione 'i' ou 'q' para sair do inventário
-                break;
-            }
-        }
     }
 
     if (key == 'm')
@@ -406,6 +405,19 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
         render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].type);
     }
 
+    for (int i = 0; i < gs->chests_count; i++)
+    {
+        if (!gs->chests[i].is_open)
+        {
+            if (collide_rect_rect(rect_float_to_rect(gs->player.rect), gs->chests[i].rect))
+            {
+                add_inventory(&gs->inventory, gs->chests[i].inventory);
+                gs->chests[i].is_open = 1;
+            }
+            draw_chest(gs->win_game, gs->pixmap, project_rect(gs->camera, gs->chests[i].rect));
+        }
+    }
+
     if (gs->player_attacking)
     {
         timer_update(&gs->player_attacking, delta_us);
@@ -427,6 +439,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_minimap, gs->illuminated, (Vec2i){sidebar_width, minimap_height}, player_center);
+    draw_inventory(gs->win_inventory, &gs->inventory, (Vec2i){sidebar_width * X_SCALE, inventory_height});
 
     if (key == 27 || key == 'p') {
         *state = State_Pause;
@@ -437,4 +450,6 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     wrefresh(gs->win_game);
     wrefresh(gs->win_log);
     wrefresh(gs->win_minimap);
+    wrefresh(gs->win_stats);
+    wrefresh(gs->win_inventory);
 }
