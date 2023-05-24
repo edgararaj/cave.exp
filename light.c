@@ -22,8 +22,7 @@ void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
     }
 }
 
-void light_pass(GameState *gs, WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect, int r, LightType t,
-                Bitmap normalmap, Player_Stats player, Inventory *inventory)
+void light_pass(Camera camera, Bitmap pixmap, Rect rect, int r, LightType t, Bitmap normalmap)
 {
     float inc = M_PI / 720.f;
     // Atualizar a posição da luz para levar em conta a posição da câmera

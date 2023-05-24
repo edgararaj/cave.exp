@@ -14,7 +14,7 @@ void print_pixel_custom(WINDOW *win, int x, int y, char *c)
 {
     for (int k = 0; k < X_SCALE; k++)
     {
-        mvwprintw(win, y, x * X_SCALE + k, c);
+        mvwprintw(win, y, x * X_SCALE + k, "%s", c);
     }
 }
 

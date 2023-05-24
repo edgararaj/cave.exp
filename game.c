@@ -21,10 +21,9 @@
 #include <time.h>
 #include <unistd.h>
 
-void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
+void init_game(GameState *gs, Rect window) {
     Rect rects[20];
     int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
-    Rect ordered_rects[ARRAY_SIZE(rects)];
     order_rects(rects, rects_count);
 
     Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
@@ -51,7 +50,7 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
             {
                 if (rand() % 100 < 20 && chests < MAX_CHESTS_PER_ROOM && num_chests < MAX_CHESTS)
                 {
-                    yoo_chests[num_chests++] = generate_chest(pixmap, sub);
+                    yoo_chests[num_chests++] = generate_chest(sub);
                     chests++;
                 }
                 else {
@@ -205,7 +204,7 @@ void render_hotbar(WINDOW *win, Hotbar *hotbar, Vec2i window_size)
     }
 }
 
-void update_player(RectFloat *st, int key, GameState *gs)
+void update_player(RectFloat *st, int key)
 {
     switch (key)
     {
@@ -287,7 +286,7 @@ void mix_lightmap(Bitmap output, Bitmap input, Camera camera)
     }
 }
 
-void render_player_attack(GameState *gs, Rect player, Mob *mobs, int num_mobs, Vec2i window_size)
+void render_player_attack(GameState *gs, Rect player, Vec2i window_size)
 {
     Circle c;
     c.radius = 3;
@@ -336,7 +335,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     }
 
     RectFloat prev_player = gs->player.rect;
-    update_player(&gs->player.rect, key, gs);
+    update_player(&gs->player.rect, key);
     if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->pixmap))
     {
         gs->player.rect = prev_player;
@@ -365,8 +364,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     {
         Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
         light_reset(lightmap);
-        light_pass(gs, gs->win_game, gs->camera, lightmap, gs->torches[i].position, gs->torches[i].radius,
-                   LightType_Torch, gs->pixmap, gs->player_stats, &gs->inventory);
+        light_pass(gs->camera, lightmap, gs->torches[i].position, gs->torches[i].radius, LightType_Torch, gs->pixmap);
 
         mix_lightmap(gs->pixmap, lightmap, gs->camera);
         free_bitmap(lightmap);
@@ -374,13 +372,12 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
 
     Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     light_reset(lightmap);
-    light_pass(gs, gs->win_game, gs->camera, lightmap, rect_float_to_rect(gs->player.rect), LIGHT_RADIUS,
-               LightType_Vision, gs->pixmap, gs->player_stats, &gs->inventory);
+    light_pass(gs->camera, lightmap, rect_float_to_rect(gs->player.rect), LIGHT_RADIUS, LightType_Vision, gs->pixmap);
 
     mix_lightmap(gs->pixmap, lightmap, gs->camera);
     free_bitmap(lightmap);
 
-    render_map(gs->win_game, gs, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
+    render_map(gs->win_game,gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
 
     if (key == 'j')
     {
@@ -414,14 +411,14 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
                 add_inventory(&gs->inventory, gs->chests[i].inventory);
                 gs->chests[i].is_open = 1;
             }
-            draw_chest(gs->win_game, gs->pixmap, project_rect(gs->camera, gs->chests[i].rect));
+            draw_chest(gs->win_game, project_rect(gs->camera, gs->chests[i].rect));
         }
     }
 
     if (gs->player_attacking)
     {
         timer_update(&gs->player_attacking, delta_us);
-        render_player_attack(gs, rect_float_to_rect(gs->player.rect), gs->mobs, MAX_MOBS, window_size);
+        render_player_attack(gs, rect_float_to_rect(gs->player.rect), window_size);
     }
 
     if (get_normal_map_value(gs->pixmap, player_center) == SPIKE)

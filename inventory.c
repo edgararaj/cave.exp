@@ -66,5 +66,5 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size)
     }
     box(win, 0, 0);
     char title[] = "INVENTORY";
-    mvwprintw(win, 0, (window_size.x - strlen(title)) / 2, title);
+    mvwprintw(win, 0, (window_size.x - strlen(title)) / 2, "%s", title);
 }

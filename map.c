@@ -354,14 +354,14 @@ Inventory generate_chest_items()
     return result;
 }
 
-Chest generate_chest(Bitmap pixmap, Rect rect2)
+Chest generate_chest(Rect rect2)
 {
     Rect rect = gen_subrect_with_size((Vec2i){4, 3}, rect2);
     Inventory inventory = generate_chest_items();
     return (Chest) {inventory, rect, 0};
 }
 
-void draw_chest(WINDOW* win, Bitmap pixmap, Rect rect)
+void draw_chest(WINDOW* win, Rect rect)
 {
     for (int dx = 0; dx < 4; dx++)
     {
@@ -404,13 +404,12 @@ int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc)
 {
     Vec2f inc_x = {inc.x, 0};
     Vec2f inc_y = {0, inc.y};
-    int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
     return ((!map_is_wall(pixmap, vec2f_add(pos, inc_x)) ||
             !map_is_wall(pixmap, vec2f_add(pos, inc_y))) &&
            !map_is_wall(pixmap, vec2f_add(pos, inc)));
 }
 
-void render_map(WINDOW *win_game, GameState *gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
+void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
 {
     for (int x = 0; x < camera.width; ++x)
     {

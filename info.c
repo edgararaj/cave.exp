@@ -10,7 +10,7 @@
 
 static int time_start = 0.2 * 1e7;
 static int time = 0.2 * 1e7;
-static int pos = 0;
+static unsigned long pos = 0;
 
 void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)
 {
@@ -22,7 +22,7 @@ void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)
         char* cenoura = strncpy(arroz, c, pos);
         cenoura[pos] = 0;
     }
-    mvwprintw(win, y, x, arroz);
+    mvwprintw(win, y, x, "%s", arroz);
 }
 
 void draw_info(WINDOW *win, int key, State *state, Vec2i window_size, int delta_us)

@@ -19,7 +19,7 @@ void add_term_line(const char *format, ...)
     }
     va_list va;
     va_start(va, format);
-    const int ret = vsnprintf(term_lines[term_line_index++], 50, format, va);
+    vsnprintf(term_lines[term_line_index++], 50, format, va);
     va_end(va);
 }
 
@@ -28,6 +28,6 @@ void render_term(WINDOW *win)
     wattrset(win, COLOR_PAIR(Culur_Default));
     for (int i = 0; i < TERM_BUFFER && *term_lines[i]; i++)
     {
-        mvwprintw(win, i, 0, term_lines[i]);
+        mvwprintw(win, i, 0, "%s", term_lines[i]);
     }
 }

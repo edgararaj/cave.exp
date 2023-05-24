@@ -154,7 +154,6 @@ int main()
         struct timeval result;
         timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
         delta_us = result.tv_usec * 1e-1;
-        int fps = 1e8 / result.tv_usec;
         start = end;
     }
 

@@ -10,7 +10,7 @@ void render_player_stats(WINDOW* terminalWin, Player_Stats player, Warrior warri
 
     // Imprimir a vida do jogador na janela do mini-terminal
     char* title = "STATS";
-    mvwprintw(terminalWin, 0, (window_size.x - strlen(title)) / 2, title);
+    mvwprintw(terminalWin, 0, (window_size.x - strlen(title)) / 2, "%s", title);
     mvwprintw(terminalWin, 1, 1, "Vida: %d/%d", warrior.hp, warrior.maxHP);
     mvwprintw(terminalWin, 2, 1, "Mana: %d/%d", player.mana, player.maxMana);
     mvwprintw(terminalWin, 3, 1, "Level: %d", player.level);

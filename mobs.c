@@ -139,8 +139,6 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
             {
                 mob_dist_to_player =
                     vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(player->rect));
-                int mob_dist_to_caller =
-                    vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
                 if (((i != ii) && mob_dist_to_player >= THREAT_RADIUS_SQR))
                 {
                     mobs[i].called = 1;
