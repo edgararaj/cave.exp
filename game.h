@@ -1,5 +1,5 @@
 #pragma once
 #include "state.h"
 
-void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_ms);
+void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_ms, Rect window, Rect win_menu);
 void render_hotbar(WINDOW *win, Hotbar *hotbar, Vec2i window_size);

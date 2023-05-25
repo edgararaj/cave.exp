@@ -186,7 +186,7 @@ void render_player_attack(GameState *gs, Rect player, Mob *mobs, int num_mobs, V
     print_circumference(gs->win_game, window_size, c);
 }
 
-void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_ms) {
+void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_ms, Rect window, Rect win_menu) {
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
     if (key == 't')
@@ -244,7 +244,8 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
         Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
         light_reset(lightmap);
         light_pass(gs, gs->win_game, gs->camera, lightmap, gs->torches[i].position, gs->torches[i].radius,
-                   LightType_Torch, gs->pixmap, gs->player_stats, &gs->inventory);
+                   LightType_Torch, gs->pixmap, gs->player_stats, &gs->inventory, state, window, win_menu);
+
 
         mix_lightmap(gs->pixmap, lightmap, gs->camera);
         free_bitmap(lightmap);
@@ -253,7 +254,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     light_reset(lightmap);
     light_pass(gs, gs->win_game, gs->camera, lightmap, rect_float_to_rect(gs->player.rect), LIGHT_RADIUS,
-               LightType_Vision, gs->pixmap, gs->player_stats, &gs->inventory);
+               LightType_Vision, gs->pixmap, gs->player_stats, &gs->inventory, state, window, win_menu);
 
     mix_lightmap(gs->pixmap, lightmap, gs->camera);
     free_bitmap(lightmap);

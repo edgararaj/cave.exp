@@ -38,8 +38,9 @@ void draw_controlos(WINDOW *win, int key, State *state, int contador) {
         if (contador == 0) {
             *state = State_Menu;
             clear();
-        } else
+        } else {
             *state = State_Pause;
             clear();
+        }
     }
 }

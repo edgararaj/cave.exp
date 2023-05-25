@@ -23,7 +23,7 @@ void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
 }
 
 void light_pass(GameState *gs, WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect, int r, LightType t,
-                Bitmap normalmap, Player_Stats player, Inventory *inventory)
+                Bitmap normalmap, Player_Stats player, Inventory *inventory, State *state, Rect window, Rect win_menu)
 {
     float inc = M_PI / 720.f;
     // Atualizar a posição da luz para levar em conta a posição da câmera
@@ -50,7 +50,7 @@ void light_pass(GameState *gs, WINDOW *win_game, Camera camera, Bitmap pixmap, R
             // print_pixel(win_game, line_pos.x, line_pos.y);
             set_light_map_value(pixmap, vec2f_to_i(line_pos), value + 1);
 
-            if (!map_is_walkable(gs, normalmap, camera, line_pos, vec, player, inventory))
+            if (!map_is_walkable(gs, normalmap, camera, line_pos, vec, player, inventory, state, window, win_menu))
             {
                 break;
             }

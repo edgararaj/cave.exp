@@ -43,7 +43,7 @@
 int map_is_wall(Bitmap pixmap, Vec2f pos);
 void render_map(WINDOW *win_game, GameState* gs, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated);
 void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos, int);
-int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player, Inventory *inventory);
+int map_is_walkable(GameState *, Bitmap, Camera, Vec2f, Vec2f, Player_Stats, Inventory *, State *, Rect, Rect);
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value);
 
 uint32_t dist_map_encode(int value);

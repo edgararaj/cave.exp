@@ -4,8 +4,10 @@
 #include "camera.h"
 #include "collide.h"
 #include "colors.h"
+#include "game.h"
 #include "draw.h"
 #include "light.h"
+#include "hud.h"
 #include "map.h"
 #include "objects.h"
 #include "state.h"
@@ -424,7 +426,7 @@ int has_item(Inventory *inventory, ItemType type)
 // }
 
 int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc, Player_Stats player,
-                    Inventory *inventory)
+                    Inventory *inventory, State *state, Rect window, Rect win_menu)
 {
     Vec2f inc_x = {inc.x, 0};
     Vec2f inc_y = {0, inc.y};
@@ -446,7 +448,9 @@ int map_is_walkable(GameState *gs, Bitmap pixmap, Camera camera, Vec2f pos, Vec2
             Player_Stats saved_stats = player;
     
             // Generate a new map
-            
+            state = State_Game;
+            init_game(&gs, window, win_menu);
+            displayGameWindow(gs->player_stats);
     
             // Load the player's stats
             player = saved_stats;

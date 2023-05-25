@@ -24,6 +24,7 @@
 #include "utils.h"
 #include "menu.h"
 #include "info.h"
+#include "pause.h"
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -54,7 +55,7 @@ int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *
     return x->tv_sec < y->tv_sec;
 }
 
-void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
+void init_game(GameState *gs, Rect window, WINDOW *win_menu, WINDOW *win_game, WINDOW *win_inventory) {
     Rect rects[20];
     int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     Rect ordered_rects[ARRAY_SIZE(rects)];
@@ -65,9 +66,8 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
         rects[i].color = 1;
     }
 
-    GameState gs;
     Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    generate_tunnels_and_rasterize(&gs, pixmap, rects, rects_count);
+    generate_tunnels_and_rasterize(gs, pixmap, rects, rects_count);
     erode(pixmap, 2200);
 
     bitmap_draw_box(pixmap, window);
@@ -133,23 +133,23 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     player_stats.speed = 1.0f;
     player_stats.gold = 0;
 
-    gs.cam_mode = cam_mode;
-    gs.camera = camera;
-    gs.player = player;
-    gs.torches = torches;
-    gs.mobs = mobs;
-    gs.pixmap = pixmap;
-    gs.win_game = win_game;
-    gs.win_inventory = win_inventory;
-    gs.illuminated = illuminated;
-    gs.inventory = inventory;
-    gs.player_attacking = 0;
-    gs.minimap_maximized = false;
-    gs.player_stats = player_stats;
-    gs.chestCount = 3;
-    gs.chests[0] = (Chest){.position = {10, 10}, .isOpen = false, .item = ITEM_GOLD};
-    gs.chests[1] = (Chest){.position = {20, 20}, .isOpen = false, .item = ITEM_SWORD};
-    gs.chests[2] = (Chest){.position = {30, 30}, .isOpen = false, .item = ITEM_POTION};
+    gs->cam_mode = cam_mode;
+    gs->camera = camera;
+    gs->player = player;
+    gs->torches = torches;
+    gs->mobs = mobs;
+    gs->pixmap = pixmap;
+    gs->win_game = win_game;
+    gs->win_inventory = win_inventory;
+    gs->illuminated = illuminated;
+    gs->inventory = inventory;
+    gs->player_attacking = 0;
+    gs->minimap_maximized = false;
+    gs->player_stats = player_stats;
+    gs->chestCount = 3;
+    gs->chests[0] = (Chest){.position = {10, 10}, .isOpen = false, .item = ITEM_GOLD};
+    gs->chests[1] = (Chest){.position = {20, 20}, .isOpen = false, .item = ITEM_SWORD};
+    gs->chests[2] = (Chest){.position = {30, 30}, .isOpen = false, .item = ITEM_POTION};
 
 
 
@@ -157,10 +157,13 @@ void init_game(GameState *gs, Rect window, WINDOW *win_menu) {
     {
         generate_spikes(pixmap, rects[i]);
         generate_obstacles(pixmap, rects[i]);
-        generate_chests(&gs, pixmap, rects[i]);
+        generate_chests(gs, pixmap, rects[i]);  
     }
-    generate_portal(&gs, pixmap, rects[rects_count - 1]);
+    generate_portal(gs, pixmap, rects[rects_count - 1]);  
 }
+
+void draw_controlos(WINDOW *win, int key, State *state, int contador);
+void draw_niveis(StartNiveisState *smsm, State *state, int key);
 
 int main()
 {
@@ -218,7 +221,7 @@ int main()
     smsms.highlight = 0;
 
     State state = State_Menu;
-    init_game(&gs, window, win_menu);
+    init_game(&gs, window, win_menu, win_game, win_inventory); 
 
     int contador = 0;
 
@@ -238,9 +241,8 @@ int main()
 
         // add_term_line("%d, %d\n", window_size.x, window_size.y);
         int key = getch();
-
         if (state == State_Game) {
-            draw_game(&gs, window_size, key, &state, delta_ms);
+            draw_game(&gs, window_size, key, &state, delta_ms, window, win_menu);
             contador++;
             displayGameWindow(&gs.player_stats);
         } else if (state == State_Menu) {
@@ -250,12 +252,12 @@ int main()
         } else if (state == State_Niveis) {
             draw_niveis(&smsm, &state, key);
         } else if (state == State_Info) {
-            draw_info(win_info, key, &state);
+            draw_info(&state, win_info, key);  
         } else if (state == State_Pause) {
             draw_pause(&smsms, &state, key);
         } else if (state == State_New_Game) {
             state = State_Game;
-            init_game(&gs, window, win_menu);
+            init_game(&gs, window, win_menu, win_game, win_inventory);
             displayGameWindow(&gs.player_stats);
         }
 

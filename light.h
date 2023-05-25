@@ -12,6 +12,6 @@ typedef enum
 } LightType;
 
 void light_pass(GameState *gs, WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect, int r, LightType t,
-                Bitmap normalmap, Player_Stats player, Inventory *inventory);
+                Bitmap normalmap, Player_Stats player, Inventory *inventory, State *state, Rect window, Rect win_menu);
 void light_reset(Bitmap distmap);
 void create_torches(Bitmap pixmap, Torch *torches, int num_torches);
