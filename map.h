@@ -15,7 +15,7 @@
 #define OUTER_PORTAL 7
 
 #define SPIKE_DAMAGE 7
-#define SPIKE_DAMAGE_COOLDOWN 1200
+#define SPIKE_DAMAGE_COOLDOWN 1.2 * 1e6
 
 #define PARTITION_MASK 0xFF
 
@@ -54,5 +54,6 @@ void erode(Bitmap bitmap, int iterations);
 void generate_spikes(Bitmap pixmap, Rect rect2);
 void generate_obstacles(Bitmap bitmap, Rect rect2);
 Chest generate_chest(Rect rect2);
-void generate_portal(Bitmap pixmap, Rect rect2);
+Rect generate_portal(Rect rect2);
 void draw_chest(WINDOW* win, Rect rect);
+void draw_portal(WINDOW* win, Rect rect);

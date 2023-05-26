@@ -96,7 +96,12 @@ int main()
     window.br.x = MAP_WIDTH;
     window.br.y = MAP_HEIGHT;
 
-    GameState gs;
+    GameState gs = {0};
+    gs.minimap_height = minimap_height;
+    gs.sidebar_width = minimap_height;
+    gs.player_stats_height = player_stats_height;
+    gs.inventory_height = inventory_height;
+
     gs.win_game = win_game;
     gs.win_inventory = win_inventory;
     gs.win_log = win_log;
@@ -116,7 +121,7 @@ int main()
     smsms.highlight = 0;
 
     State state = State_Menu;
-    init_game(&gs, window, win_menu);
+    init_game(&gs, window);
 
     int start_menu = 1;
 
@@ -130,6 +135,7 @@ int main()
         int key = getch();
 
         if (state == State_Game) {
+            update_game(&gs, window_size, key, &state, delta_us);
             draw_game(&gs, window_size, key, &state, delta_us);
         } else if (state == State_Menu) {
             if (start_menu)
@@ -147,7 +153,7 @@ int main()
             start_menu = 0;
         } else if (state == State_New_Game) {
             state = State_Game;
-            init_game(&gs, window, win_menu);
+            init_game(&gs, window);
         }
 
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);

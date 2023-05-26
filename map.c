@@ -205,32 +205,29 @@ int generate_rects(Rect window, Rect *rects, int rects_max)
     int rects_count = 0;
 
     int div = 2;
-    for (int f = 0; f < div * div; f++)
+    for (int f = 0; f < div * div && rects_count < rects_max; f++)
     {
+        Rect new_rect;
+        int valid_new_rect;
         Rect sub = subdivide_rect(window, div, f);
-        for (int i = 0; i < (rects_max / (div * div)); i++)
+        for (int j = 0; j < 255; j++)
         {
-            Rect new_rect;
-            int valid_new_rect;
-            for (int j = 0; j < 255; j++)
+            valid_new_rect = 1;
+            new_rect = gen_random_subrect(sub);
+            for (int n = 0; n < rects_count; n++)
             {
-                valid_new_rect = 1;
-                new_rect = gen_random_subrect(sub);
-                for (int n = 0; n < rects_count; n++)
+                if (collide_rect_rect(rects[n], expand_rect(new_rect, 2)))
                 {
-                    if (collide_rect_rect(rects[n], expand_rect(new_rect, 2)))
-                    {
-                        valid_new_rect = 0;
-                        break;
-                    }
-                }
-                if (valid_new_rect)
+                    valid_new_rect = 0;
                     break;
+                }
             }
             if (valid_new_rect)
-            {
-                rects[rects_count++] = new_rect;
-            }
+                break;
+        }
+        if (valid_new_rect)
+        {
+            rects[rects_count++] = new_rect;
         }
     }
 
@@ -358,10 +355,10 @@ Chest generate_chest(Rect rect2)
 {
     Rect rect = gen_subrect_with_size((Vec2i){4, 3}, rect2);
     Inventory inventory = generate_chest_items();
-    return (Chest) {inventory, rect, 0};
+    return (Chest){inventory, rect, 0};
 }
 
-void draw_chest(WINDOW* win, Rect rect)
+void draw_chest(WINDOW *win, Rect rect)
 {
     for (int dx = 0; dx < 4; dx++)
     {
@@ -372,7 +369,8 @@ void draw_chest(WINDOW* win, Rect rect)
             {
                 wattrset(win, COLOR_PAIR(Culur_Chest));
             }
-            else {
+            else
+            {
                 wattrset(win, COLOR_PAIR(Culur_Outer_Chest));
             }
             print_pixel(win, pos.x, pos.y);
@@ -380,9 +378,14 @@ void draw_chest(WINDOW* win, Rect rect)
     }
 }
 
-void generate_portal(Bitmap pixmap, Rect rect2)
+Rect generate_portal(Rect rect2)
 {
     Rect rect = gen_subrect_with_size((Vec2i){5, 4}, rect2);
+    return rect;
+}
+
+void draw_portal(WINDOW *win, Rect rect)
+{
     for (int dx = 0; dx < 5; dx++)
     {
         for (int dy = 0; dy < 4; dy++)
@@ -390,12 +393,13 @@ void generate_portal(Bitmap pixmap, Rect rect2)
             Vec2i pos = (Vec2i){rect.tl.x + dx, rect.tl.y + dy};
             if ((dy == 1 || dy == 2) && (dx == 1 || dx == 2 || dx == 3))
             {
-                set_normal_map_value(pixmap, pos, PORTAL);
+                wattrset(win, COLOR_PAIR(Culur_Portal));
             }
             else
             {
-                set_normal_map_value(pixmap, pos, OUTER_PORTAL);
+                wattrset(win, COLOR_PAIR(Culur_Outer_Portal));
             }
+            print_pixel(win, pos.x, pos.y);
         }
     }
 }
@@ -404,9 +408,8 @@ int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc)
 {
     Vec2f inc_x = {inc.x, 0};
     Vec2f inc_y = {0, inc.y};
-    return ((!map_is_wall(pixmap, vec2f_add(pos, inc_x)) ||
-            !map_is_wall(pixmap, vec2f_add(pos, inc_y))) &&
-           !map_is_wall(pixmap, vec2f_add(pos, inc)));
+    return ((!map_is_wall(pixmap, vec2f_add(pos, inc_x)) || !map_is_wall(pixmap, vec2f_add(pos, inc_y))) &&
+            !map_is_wall(pixmap, vec2f_add(pos, inc)));
 }
 
 void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)

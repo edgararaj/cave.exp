@@ -14,8 +14,10 @@
 // Define the item type
 typedef enum
 {
+    ItemType_ManaPotion,
     ItemType_HealthPotion,
-    ItemType__Size
+    ItemType__Size,
+    ItemType_Key,
 } ItemType;
 
 typedef struct
@@ -119,6 +121,7 @@ typedef struct
     Bitmap pixmap;
     Torch *torches;
     Chest* chests;
+    Rect portal;
     int chests_count;
     Mob *mobs;
     Bitmap illuminated;
@@ -127,6 +130,11 @@ typedef struct
     int minimap_maximized;
     int player_spike_damage_cooldown;
     int chestCount;
+
+    int minimap_height;
+    int sidebar_width;
+    int player_stats_height;
+    int inventory_height;
 } GameState;
 
 typedef struct

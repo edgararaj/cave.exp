@@ -62,6 +62,10 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size)
         char* name = "Unknown";
         if (inventory->items[i] == ItemType_HealthPotion)
             name = "Health Potion";
+        else if (inventory->items[i] == ItemType_ManaPotion)
+            name = "Mana Potion";
+        else if (inventory->items[i] == ItemType_Key)
+            name = "Key";
         mvwprintw(win, i+1, 1, "%d. %s x%d\n", i + 1, name, inventory->items_counts[i]);
     }
     box(win, 0, 0);

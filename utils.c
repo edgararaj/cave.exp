@@ -3,6 +3,8 @@
 
 int random_between(int min, int max)
 {
+    if (min == max)
+        return min;
     return rand() % (max - min) + min;
 }
 

@@ -37,23 +37,23 @@
 //     add_term_line("Removed item from inventory.\n");
 // }
 
-// // Function to use a health potion
-// void use_health_potion(Warrior *player, Item *item)
-// {
-//     if (player->hp < player->maxHP)
-//     {
-//         player->hp += 50; // Restore 50 HP
-//         if (player->hp > player->maxHP)
-//         {
-//             player->hp = player->maxHP; // Cap the HP at maxHP
-//         }
-//         // add_term_line("%s used! HP is now %d.\n", item->name, player->hp);
-//     }
-//     else
-//     {
-//         // add_term_line("HP is full, cannot use %s.\n", item->name);
-//     }
-// }
+// Function to use a health potion
+void use_health_potion(Warrior *player)
+{
+    if (player->hp < player->maxHP)
+    {
+        player->hp += 50; // Restore 50 HP
+        if (player->hp > player->maxHP)
+        {
+            player->hp = player->maxHP; // Cap the HP at maxHP
+        }
+        add_term_line("Health Potion used! HP is now %d.\n", player->hp);
+    }
+    else
+    {
+        add_term_line("HP is full, cannot use Health Potion.\n");
+    }
+}
 
 // // Function to use a mana potion
 // void use_mana_potion(Player_Stats *player, Item *item)
@@ -73,19 +73,21 @@
 //     }
 // }
 
-// // Function to use an item
-// void use_item(Warrior* warrior, Player_Stats *player, Item *item)
-// {
-//     switch (item->type)
-//     {
-//     case ITEM_TYPE_HEALTH_POTION:
-//         use_health_potion(warrior, item);
-//         break;
-//     case ITEM_TYPE_MANA_POTION:
-//         use_mana_potion(player, item);
-//         break;
-//     default:
-//         // add_term_line("Unknown item type!\n");
-//         break;
-//     }
-// }
+// Function to use an item
+void use_item(Warrior* warrior, Player_Stats *player, Inventory* inventory, int i)
+{
+    ItemType item = inventory->items[i];
+    remove_item(inventory, i);
+    switch (item)
+    {
+    case ItemType_HealthPotion:
+        use_health_potion(warrior);
+        break;
+    // case ItemType_ManaPotion:
+    //     use_mana_potion(player, item);
+    //     break;
+    default:
+        // add_term_line("Unknown item type!\n");
+        break;
+    }
+}
