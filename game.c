@@ -239,15 +239,14 @@ Rect rect_float_to_rect(RectFloat rect)
     return result;
 }
 
-void mix_lightmap(Bitmap output, Bitmap input, Camera camera)
+void mix_lightmap(Bitmap output, Bitmap input)
 {
     for (int x = 0; x < input.width; x++)
     {
         for (int y = 0; y < input.height; y++)
         {
-            Vec2i screen_pos = (Vec2i){x, y};
-            Vec2i abs_pos = vec2i_add((Vec2i){x, y}, camera.offset);
-            int v1 = get_light_map_value(input, screen_pos);
+            Vec2i abs_pos = (Vec2i){x, y};
+            int v1 = get_light_map_value(input, abs_pos);
             int v2 = get_light_map_value(output, abs_pos);
             set_light_map_value(output, abs_pos, (v1 + v2));
         }
@@ -316,8 +315,6 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     else
         center_camera(&gs->camera, player_center);
 
-    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, delta_us);
-
     for (int x = 0; x < gs->pixmap.width; x++)
     {
         for (int y = 0; y < gs->pixmap.height; y++)
@@ -334,17 +331,19 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     {
         Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
         light_reset(lightmap);
-        light_pass(gs->camera, lightmap, gs->torches[i].position, gs->torches[i].radius, LightType_Torch, gs->pixmap);
+        light_pass(lightmap, gs->torches[i].position, gs->torches[i].radius, gs->pixmap);
 
-        mix_lightmap(gs->pixmap, lightmap, gs->camera);
+        mix_lightmap(gs->pixmap, lightmap);
         free_bitmap(lightmap);
     }
 
     Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     light_reset(lightmap);
-    light_pass(gs->camera, lightmap, rect_float_to_rect(gs->player.rect), LIGHT_RADIUS, LightType_Vision, gs->pixmap);
+    light_pass(lightmap, rect_float_to_rect(gs->player.rect), VISION_RADIUS, gs->pixmap);
 
-    mix_lightmap(gs->pixmap, lightmap, gs->camera);
+    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, lightmap, delta_us);
+
+    mix_lightmap(gs->pixmap, lightmap);
     free_bitmap(lightmap);
 
     for (int i = 0; i < gs->chests_count; i++)
@@ -403,7 +402,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     werase(gs->win_minimap);
     werase(gs->win_inventory);
 
-    render_map(gs->win_game,gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
+    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
 
     for (int i = 0; i < MAX_TORCHES; i++)
     {

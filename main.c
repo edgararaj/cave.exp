@@ -61,7 +61,6 @@ int main()
 {
     srand(time(NULL));
     cbreak();
-    noecho();
     nonl();
     initscr();
     curs_set(0);
@@ -87,6 +86,8 @@ int main()
     wbkgd(win_minimap, COLOR_PAIR(Culur_Light_Gradient + 10));
     wbkgd(win_log, COLOR_PAIR(Culur_Light_Gradient + 5));
     wbkgd(win_stats, COLOR_PAIR(Culur_Default));
+
+    noecho();
 
     setup_colors();
 
@@ -159,7 +160,7 @@ int main()
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
         struct timeval result;
         timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
-        delta_us = result.tv_usec * 1e-1;
+        delta_us = result.tv_usec * 1e-2;
         start = end;
     }
 

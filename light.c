@@ -22,14 +22,9 @@ void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
     }
 }
 
-void light_pass(Camera camera, Bitmap pixmap, Rect rect, int r, LightType t, Bitmap normalmap)
+void light_pass_inner(Bitmap pixmap, int r, Bitmap normalmap, Vec2f light_pos_screen)
 {
     float inc = M_PI / 720.f;
-    // Atualizar a posição da luz para levar em conta a posição da câmera
-    Vec2f center = rect_center(rect);
-    Vec2f light_pos_screen = {center.x - camera.x + 0.5f, center.y - camera.y + 0.5f};
-    // Vec2f light_pos_screen = {x - camera.x + 0.5f, y - camera.y + 0.5f};
-
     for (float theta = 0; theta < 2 * M_PI; theta += inc)
     {
         Vec2f vec = {cos(theta), sin(theta)};
@@ -39,8 +34,6 @@ void light_pass(Camera camera, Bitmap pixmap, Rect rect, int r, LightType t, Bit
         {
             // add_term_line("%d\n", LIGHT_BASE + k);
             int value = r - k - 1;
-            if (t == LightType_Vision)
-                value = LIGHT_RADIUS - k - 1;
 
             if (line_pos.x < 0 || line_pos.x >= pixmap.width || line_pos.y < 0 || line_pos.y >= pixmap.height)
                 break;
@@ -49,13 +42,22 @@ void light_pass(Camera camera, Bitmap pixmap, Rect rect, int r, LightType t, Bit
             // print_pixel(win_game, line_pos.x, line_pos.y);
             set_light_map_value(pixmap, vec2f_to_i(line_pos), value + 1);
 
-            if (!map_is_walkable(normalmap, vec2f_add(line_pos, vec2i_to_f(camera.offset)), vec))
+            if (!map_is_walkable(normalmap, line_pos, vec))
             {
                 break;
             }
             line_pos = vec2f_add(line_pos, vec);
         }
     }
+}
+
+void light_pass(Bitmap pixmap, Rect rect, int r, Bitmap normalmap)
+{
+    // Atualizar a posição da luz para levar em conta a posição da câmera
+    Vec2f center = rect_center(rect);
+    // Vec2f light_pos_screen = {center.x - camera.x + 0.5f, center.y - camera.y + 0.5f};
+    // Vec2f light_pos_screen = {x - camera.x + 0.5f, y - camera.y + 0.5f};
+    light_pass_inner(pixmap, r, normalmap, center);
 }
 
 void light_reset(Bitmap distmap)

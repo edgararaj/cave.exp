@@ -118,7 +118,7 @@ Vec2f rect_float_size(RectFloat rect)
 
 Vec2f rect_center(Rect rect)
 {
-    Vec2f r = vec2f_add(vec2f_div_const(vec2i_to_f(rect_size(rect)), 2), vec2i_to_f(rect.tl));
+    Vec2f r = vec2f_add(vec2f_add(vec2f_div_const(vec2i_to_f(rect_size(rect)), 2), vec2i_to_f(rect.tl)), (Vec2f){0.5f, 0.5f});
     return r;
 }
 
@@ -208,7 +208,7 @@ Rect expand_rect(Rect rect, int amount)
 
 Bitmap alloc_bitmap(int width, int height)
 {
-    return (Bitmap){.data = (uint32_t *)malloc(width * height * sizeof(uint32_t)), .size = {MAP_WIDTH, MAP_HEIGHT}};
+    return (Bitmap){.data = (uint32_t *)malloc(width * height * sizeof(uint32_t)), .size = {width, height}};
 }
 
 void free_bitmap(Bitmap bitmap)

@@ -8,8 +8,8 @@
 #include <ncurses.h>
 #include <string.h>
 
-static int time_start = 0.2 * 1e7;
-static int time = 0.2 * 1e7;
+static int time_start = 0.2 * 1e6;
+static int time = 0.2 * 1e6;
 static unsigned long pos = 0;
 
 void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)
@@ -48,6 +48,8 @@ void draw_info(WINDOW *win, int key, State *state, Vec2i window_size, int delta_
     if (key == 'q')
     {
         *state = State_Menu;
+        mvwin(win, 0, 0);
+        pos = 0;
     }
 
     wrefresh(win);

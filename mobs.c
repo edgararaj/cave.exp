@@ -85,32 +85,62 @@ void wander(Mob *mob, Bitmap map, int delta_us)
     }
 }
 
-void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, int delta_us)
+void call_others(Mob *mobs, int num_mobs, int ii, Bitmap player_light)
 {
     Mob *mob = &mobs[ii];
+    for (int i = 0; i < num_mobs; i++)
+    {
+        // int mob_dist_to_caller =
+        //     vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
+        // if (i != ii)
+        // {
+        mobs[i].called = 1;
+        // }
+    }
+}
+
+void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bitmap player_light, int delta_us)
+{
+    Mob *mob = &mobs[ii];
+    int mob_dist_to_player = get_light_map_value(player_light, vec2f_to_i(rect_float_center(mob->warrior.rect)));
     if (mob->type == MobType_Stupid)
     {
-        if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) <
-            THREAT_RADIUS_SQR)
+        if (mob_dist_to_player > THREAT_RADIUS || mob->called)
         {
-            mob->warrior.rect.color = COLOR_RED;
+            if (mob->called)
+                mob->warrior.rect.color = COLOR_BLUE;
+            else
+                mob->warrior.rect.color = COLOR_RED;
             attack_player(mob, player, map, delta_us);
+        }
+        else if (mob_dist_to_player > 0)
+        {
+            mob->warrior.rect.color = COLOR_YELLOW;
         }
         else
         {
-            if (!mob->called)
-            {
-                mob->warrior.rect.color = COLOR_BLUE;
-                wander(mob, map, delta_us);
-            }
+            mob->warrior.rect.color = COLOR_WHITE;
+            wander(mob, map, delta_us);
         }
     }
     else if (mob->type == MobType_Coward || mob->type == MobType_Intelligent)
     {
-        int mob_dist_to_player =
-            vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect));
-        if (mob_dist_to_player < VISION_RADIUS_SQR)
+        if (mob_dist_to_player > THREAT_RADIUS || mob->called)
         {
+            call_others(mobs, num_mobs, ii, player_light);
+            if (mob->called)
+            {
+                mob->warrior.rect.color = COLOR_BLUE;
+            }
+            else
+            {
+                mob->warrior.rect.color = COLOR_RED;
+            }
+            attack_player(mob, player, map, delta_us);
+        }
+        else if (mob_dist_to_player > 0)
+        {
+            call_others(mobs, num_mobs, ii, player_light);
             int mobs_near = 0;
             for (int i = 0; i < num_mobs; i++)
             {
@@ -121,8 +151,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
                     mobs_near++;
                 }
             }
-            if (mobs_near || (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) <
-                              THREAT_RADIUS_SQR))
+            if (mobs_near)
             {
                 mob->warrior.rect.color = COLOR_RED;
                 attack_player(mob, player, map, delta_us);
@@ -130,45 +159,28 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, in
             else
             {
                 mob->warrior.rect.color = COLOR_YELLOW;
-                if (!mob->called)
-                {
-                    wander(mob, map, delta_us);
-                }
-            }
-            for (int i = 0; i < num_mobs; i++)
-            {
-                mob_dist_to_player =
-                    vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(player->rect));
-                if (((i != ii) && mob_dist_to_player >= THREAT_RADIUS_SQR))
-                {
-                    mobs[i].called = 1;
-                    // Is Calling other
-                    mobs[i].warrior.rect.color = COLOR_YELLOW;
-                    attack_player(&mobs[i], player, map, delta_us);
-                }
-                if (mob_dist_to_player >= VISION_RADIUS_SQR)
-                {
-                    mobs[i].called = 0;
-                }
             }
         }
         else
         {
-            if (!mob->called)
-            {
-                mob->warrior.rect.color = COLOR_BLUE;
-                wander(mob, map, delta_us);
-            }
+            mob->warrior.rect.color = COLOR_WHITE;
+            wander(mob, map, delta_us);
         }
     }
 }
 
-void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, int delta_us)
+void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap player_light, int delta_us)
 {
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
             continue;
-        update_mob(mobs, num_mobs, i, map, player, delta_us);
+        mobs[i].called = 0;  
+    }
+    for (int i = 0; i < num_mobs; i++)
+    {
+        if (mobs[i].warrior.hp <= 0)
+            continue;
+        update_mob(mobs, num_mobs, i, map, player, player_light, delta_us);
     }
 }
