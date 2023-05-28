@@ -1,6 +1,2 @@
-#include "player.h"
-#include "state.h"
-
 #pragma once
-
-void displayHUD(GameState *gs, Player_Stats *player);
+void render_player_stats(WINDOW* terminalWin, Player_Stats player, Warrior warrior, Vec2i);

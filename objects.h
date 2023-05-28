@@ -59,6 +59,7 @@ typedef struct
 } Bitmap;
 
 Rect gen_random_subrect(Rect container);
+Rect gen_subrect_with_size(Vec2i size, Rect container);
 Vec2i get_center(Rect rect);
 Rect expand_rect(Rect rect, int amount);
 Vec2i rect_size(Rect rect);
@@ -75,10 +76,12 @@ Vec2i vec2f_to_i(Vec2f a);
 Vec2f vec2f_add(Vec2f a, Vec2f b);
 Vec2f vec2f_sub(Vec2f a, Vec2f b);
 Vec2i vec2i_add(Vec2i a, Vec2i b);
+float vec2f_dot(Vec2f a, Vec2f b);
 float vec2i_sqrdistance(Vec2i a);
-float vec2f_sqrdistance(Vec2f a);
+float vec2f_sqrdistance(Vec2f a, Vec2f b);
 Vec2i vec2i_add(Vec2i a, Vec2i b);
 Vec2i vec2i_sub(Vec2i a, Vec2i b);
 Vec2i vec2i_mul_const(Vec2i a, int b);
 Bitmap alloc_bitmap(int width, int height);
 void free_bitmap(Bitmap bitmap);
+int vec2i_dot(Vec2i a, Vec2i b);

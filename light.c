@@ -3,6 +3,7 @@
 #include "colors.h"
 #include "map.h"
 #include "objects.h"
+#include "state.h"
 #include "utils.h"
 #include <math.h>
 
@@ -21,7 +22,7 @@ void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
     }
 }
 
-void light_pass(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect, int r, LightType t, Bitmap normalmap)
+void light_pass(Camera camera, Bitmap pixmap, Rect rect, int r, LightType t, Bitmap normalmap)
 {
     float inc = M_PI / 720.f;
     // Atualizar a posição da luz para levar em conta a posição da câmera
@@ -48,7 +49,7 @@ void light_pass(WINDOW *win_game, Camera camera, Bitmap pixmap, Rect rect, int r
             // print_pixel(win_game, line_pos.x, line_pos.y);
             set_light_map_value(pixmap, vec2f_to_i(line_pos), value + 1);
 
-            if (!map_is_walkable(normalmap, camera, line_pos, vec))
+            if (!map_is_walkable(normalmap, vec2f_add(line_pos, vec2i_to_f(camera.offset)), vec))
             {
                 break;
             }

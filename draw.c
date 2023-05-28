@@ -14,7 +14,7 @@ void print_pixel_custom(WINDOW *win, int x, int y, char *c)
 {
     for (int k = 0; k < X_SCALE; k++)
     {
-        mvwprintw(win, y, x * X_SCALE + k, c);
+        mvwprintw(win, y, x * X_SCALE + k, "%s", c);
     }
 }
 
@@ -182,13 +182,4 @@ void bitmap_draw_box(Bitmap bitmap, Rect rect)
     bitmap_draw_line(bitmap, top);
     bitmap_draw_line(bitmap, right);
     bitmap_draw_line(bitmap, bottom);
-}
-
-void draw_hotbar(WINDOW *win, Inventory *inventory) {
-    werase(win);
-    wprintw(win, "Hotbar:\n");
-    for (int i = 0; i < inventory->size; i++) {
-        wprintw(win, "%d. %c x%d\n", i + 1, inventory->items[i].symbol, inventory->item_counts[i]);
-    }
-    wrefresh(win);
 }

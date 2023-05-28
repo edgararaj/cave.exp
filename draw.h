@@ -1,7 +1,7 @@
 #pragma once
-#include "objects.h"
 #include "inventory.h"
 #include "items.h"
+#include "objects.h"
 #include "screen.h"
 
 void print_pixel(WINDOW *win, int x, int y);
@@ -16,4 +16,3 @@ void print_line(WINDOW *win, Line line);
 void print_pixel_custom(WINDOW *win, int x, int y, char *c);
 void print_ellipsumference(WINDOW *win, Vec2i win_size, int x, int y, int r2, int r1);
 void bitmap_draw_box(Bitmap bitmap, Rect rect);
-void draw_hotbar(WINDOW *win, Inventory *inventory);

@@ -99,9 +99,9 @@ float vec2i_sqrdistance(Vec2i a)
     return vec2i_dot(a, a);
 }
 
-float vec2f_sqrdistance(Vec2f a)
+float vec2f_sqrdistance(Vec2f a, Vec2f b)
 {
-    return vec2f_dot(a, a);
+    return vec2f_dot(vec2f_sub(a, b), vec2f_sub(a, b));
 }
 
 Vec2i rect_size(Rect rect)
@@ -181,6 +181,18 @@ Rect gen_random_subrect(Rect container)
     result.tl.y = container.tl.y + random_y;
     result.br.x = container.tl.x + random_x + random_width;
     result.br.y = container.tl.y + random_y + random_height;
+    return result;
+}
+
+Rect gen_subrect_with_size(Vec2i size, Rect container)
+{
+    Rect result;
+    int random_x = random_between(0, container.br.x - size.x);
+    int random_y = random_between(0, container.br.y - size.y);
+    result.tl.x = container.tl.x + random_x;
+    result.tl.y = container.tl.y + random_y;
+    result.br.x = container.tl.x + random_x + size.x;
+    result.br.y = container.tl.y + random_y + size.y;
     return result;
 }
 

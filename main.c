@@ -6,25 +6,27 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "camera.c"
-#include "collide.c"
-#include "controlos.c"
-#include "dist.c"
-#include "draw.c"
-#include "game.c"
-#include "hud.c"
-#include "info.c"
-#include "inventory.c"
-#include "items.c"
-#include "light.c"
-#include "map.c"
-#include "menu.c"
-#include "mobs.c"
-#include "movimento.c"
-#include "niveis.c"
-#include "objects.c"
-#include "term.c"
-#include "utils.c"
+#include "collide.h"
+#include "colors.h"
+#include "draw.h"
+#include "game.h"
+#include "hud.h"
+#include "inventory.h"
+#include "items.h"
+#include "light.h"
+#include "map.h"
+#include "menu.h"
+#include "mobs.h"
+#include "objects.h"
+#include "player.h"
+#include "screen.h"
+#include "state.h"
+#include "utils.h"
+#include "menu.h"
+#include "info.h"
+#include "controls.h"
+#include "niveis.h"
+#include "pause.h"
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -70,18 +72,23 @@ int main()
 
     Vec2i window_size;
 
-    WINDOW *win = newwin(30, INGAME_TERM_SIZE, 0, 0);
-    WINDOW *win_game = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_inventory = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_menu = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_info = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_hotbar = newwin(30, 20, 0, INGAME_TERM_SIZE);
-    WINDOW *win_vida = newwin(30, 20, 0,INGAME_TERM_SIZE);
+    int minimap_height = 20;
+    int sidebar_width = minimap_height * X_SCALE;
+    int player_stats_height = 10;
+    int inventory_height = 10;
+    WINDOW *win_game = newwin(30, 20, 0, sidebar_width);
+    WINDOW *win_menu = newwin(30, 20, 0, 0);
+
+    WINDOW *win_stats = newwin(player_stats_height, sidebar_width, 0, 0);
+    WINDOW *win_inventory = newwin(inventory_height, sidebar_width, player_stats_height, 0);
+    WINDOW *win_log = newwin(minimap_height, sidebar_width, player_stats_height + inventory_height, 0);
+    WINDOW *win_minimap = newwin(30, sidebar_width, 0, 0);
     wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient));
+    wbkgd(win_minimap, COLOR_PAIR(Culur_Light_Gradient + 10));
+    wbkgd(win_log, COLOR_PAIR(Culur_Light_Gradient + 5));
+    wbkgd(win_stats, COLOR_PAIR(Culur_Default));
 
     setup_colors();
-    wattrset(win, COLOR_PAIR(0));
-    wattrset(win_game, COLOR_PAIR(1));
 
     Rect window = {};
     window.tl.x = 0;
@@ -89,106 +96,12 @@ int main()
     window.br.x = MAP_WIDTH;
     window.br.y = MAP_HEIGHT;
 
-    Rect rects[20];
-    int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
-    Rect ordered_rects[ARRAY_SIZE(rects)];
-    order_rects(rects, rects_count);
-
-    for (int i = 0; i < rects_count; i++)
-    {
-        rects[i].color = 1;
-    }
-
-    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 2200);
-
-    bitmap_draw_box(pixmap, window);
-
-    uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap illuminated = {(uint32_t *)illuminated_data, {{MAP_WIDTH, MAP_HEIGHT}}};
-
-    Vec2i first_rect_center = get_center(rects[0]);
-    Warrior player;
-    player.rect =
-        (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
-    player.dmg = 5;
-    player.hp = 100;
-    player.maxHP = 100;
-    player.kills = 0;
-    player.weight = 3;
-    player.velocity = (Vec2f){0, 0};
-    player.dmg_cooldown = 0;
-
-    Camera camera = {{{0, 0}}, 0, 0, 10};
-
-    CameraMode cam_mode = CameraMode_Follow;
-
-    Torch torches[MAX_TORCHES];
-    create_torches(pixmap, torches, MAX_TORCHES);
-
-    Mob mobs[MAX_MOBS];
-    create_mobs(pixmap, mobs, MAX_MOBS);
-
-    Inventory inventory;
-    init_inventory(&inventory, 10);
-    noecho();
-
-    // Define the items
-    Item sword = {ITEM_TYPE_SWORD, "Sword", 'S', COLOR_WHITE};
-    Item blastgun = {ITEM_TYPE_BLASTGUN, "Blastgun", 'B', COLOR_WHITE};
-    Item health_potion = {ITEM_TYPE_HEALTH_POTION, "Health Potion", 'H', COLOR_WHITE};
-    Item coins = {ITEM_TYPE_COINS, "Coins", 'C', COLOR_WHITE};
-    Item key = {ITEM_TYPE_KEY, "Key", 'K', COLOR_WHITE};
-
-    // Add the items to the inventory
-    add_item(&inventory, sword);
-    add_item(&inventory, blastgun);
-    for (int i = 0; i < 5; i++)
-    {
-        add_item(&inventory, health_potion);
-    }
-    for (int i = 0; i < 20; i++)
-    {
-        add_item(&inventory, coins);
-    }
-    add_item(&inventory, key);
-
-    Player_Stats player_stats;
-    player_stats.hp = 100;
-    player_stats.maxHP = 100;
-    player_stats.mana = 50;
-    player_stats.maxMana = 50;
-    player_stats.level = 1;
-    player_stats.experience = 0;
-    player_stats.attackPower = 10;
-    player_stats.defense = 5;
-    player_stats.speed = 1.0f;
-    player_stats.gold = 0;
-
     GameState gs;
-    gs.cam_mode = cam_mode;
-    gs.camera = camera;
-    gs.player = player;
-    gs.torches = torches;
-    gs.mobs = mobs;
-    gs.pixmap = pixmap;
     gs.win_game = win_game;
     gs.win_inventory = win_inventory;
-    gs.illuminated = illuminated;
-    gs.inventory = inventory;
-    gs.player_attacking = 0;
-    gs.minimap_maximized = false;
-    gs.player_stats = player_stats;
-
-    for (int i = 0; i < rects_count; i++)
-    {
-        generate_spikes(pixmap, rects[i]);
-        generate_obstacles(pixmap, rects[i]);
-        generate_chests(&gs, pixmap, rects[i]);
-    }
-
-    State state = State_Menu;
+    gs.win_log = win_log;
+    gs.win_minimap = win_minimap;
+    gs.win_stats = win_stats;
 
     StartMenuState sms;
     sms.win = win_menu;
@@ -198,65 +111,50 @@ int main()
     smsm.win = win_menu;
     smsm.highlight = 1;
 
+    StartPauseState smsms;
+    smsms.win = win_menu;
+    smsms.highlight = 0;
+
+    State state = State_Menu;
+    init_game(&gs, window, win_menu);
+
+    int start_menu = 1;
+
     struct timespec start, end;
-    // clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-    int delta_ms = 0;
-    while (1)
-    {
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    int delta_us = 0;
+    while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
+        wresize(win_menu, window_size.y, window_size.x);
 
-        window_size.x -= INGAME_TERM_SIZE;
-        wresize(win, window_size.y, INGAME_TERM_SIZE);
-        wresize(win_game, window_size.y, window_size.x);
-        window_size.x /= X_SCALE;
-        werase(win);
-        werase(win_game);
-        wattrset(win_game, COLOR_PAIR(0));
-
-        // add_term_line("%d, %d\n", window_size.x, window_size.y);
         int key = getch();
 
-        if (state == State_Game)
-        {
-            draw_game(&gs, window_size, key, delta_ms);
-            draw_hotbar(win_hotbar, &gs.inventory);
-            displayHUD(&gs, &player_stats);
-            render_hotbar(win_game, &player.hotbar, window_size);
-        }
-        else if (state == State_Menu)
-        {
-            draw_menu(&sms, &state, key);
-        }
-        else if (state == State_Info)
-        {
-            draw_info(&state, win_info, key);
-        }
-        else if (state == State_Controlos)
-        {
-
-            draw_controlos(win_info, key, &state);
-        }
-        else if (state == State_Niveis)
-        {
-            draw_niveis(&smsm, &state, key);
-        }
-        else if (state == State_Info)
-        {
-            draw_info(win_info, key, &state);
+        if (state == State_Game) {
+            draw_game(&gs, window_size, key, &state, delta_us);
+        } else if (state == State_Menu) {
+            if (start_menu)
+                draw_menu(&sms, &state, key, window_size);
+            else 
+                draw_pause(&smsms, &state, key, window_size);
+        } else if (state == State_Controlos) {
+            draw_controls(win_menu, key, &state, window_size);
+        } else if (state == State_Niveis) {
+            draw_niveis(&smsm, &state, key, window_size);
+        } else if (state == State_Info) {
+            draw_info(win_menu, key, &state, window_size, delta_us);
+        } else if (state == State_Pause) {
+            draw_pause(&smsms, &state, key, window_size);
+            start_menu = 0;
+        } else if (state == State_New_Game) {
+            state = State_Game;
+            init_game(&gs, window, win_menu);
         }
 
-        render_term(win);
-        box(win, 0, 0);
-
-        wrefresh(win);
-        // clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
         struct timeval result;
-        timeval_subtract(&result, (struct timeval *)&end, (struct timeval *)&start);
-        delta_ms = result.tv_usec * 1e-4;
-        int fps = 1e8 / result.tv_usec;
+        timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
+        delta_us = result.tv_usec * 1e-1;
         start = end;
-
-        // add_term_line("%d\n", fps);
     }
 
     endwin();

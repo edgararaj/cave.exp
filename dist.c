@@ -1,17 +1,19 @@
+#include "dist.h"
 #include "map.h"
 #include "objects.h"
 #include <assert.h>
 
 void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illuminated)
 {
-    if (value >= MAX_DIST)
+    if (value >= MAX_DIST_CALC)
         return;
     if (map_is_wall(distmap, vec2i_to_f(point)))
     {
-        // HACK: Put shine on walls
-        set_normal_map_value(distmap, point, SHINE);
-        // distmap.data[point.y * distmap.width + point.x] = SHINE;
-        set_normal_map_value(illuminated, point, SHINE);
+        if (value < MAX_DIST_SHINE)
+        {
+            set_normal_map_value(distmap, point, SHINE);
+            set_normal_map_value(illuminated, point, SHINE);
+        }
         return;
     };
     int data = distmap.data[point.y * distmap.width + point.x];
@@ -19,14 +21,14 @@ void dist_pass_recursive(Bitmap distmap, Vec2i point, int value, Bitmap illumina
         return;
 
     set_dist_map_value(distmap, point, value);
-    // distmap.data[point.y * distmap.width + point.x] = dist_map_encode(value);
-    illuminated.data[point.y * illuminated.width + point.x] = dist_map_encode(value);
+    set_normal_map_value(illuminated, point, WALKABLE);
     for (int i = -1; i < 2; i++)
     {
         for (int j = -1; j < 2; j++)
         {
             Vec2i add = {i, j};
-            dist_pass_recursive(distmap, vec2i_add(point, add), value + 1, illuminated);
+            if (map_is_wall(distmap, vec2i_to_f(vec2i_add(point, add))) || (!map_is_wall(distmap, vec2i_to_f(vec2i_add(point, add))) && map_is_walkable(distmap, vec2i_to_f(point), vec2i_to_f(add))))
+                dist_pass_recursive(distmap, vec2i_add(point, add), value + 1, illuminated);
         }
     }
 }
