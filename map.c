@@ -318,7 +318,7 @@ void erode(Bitmap bitmap, int iterations)
 
 int map_is_wall(Bitmap pixmap, Vec2f pos)
 {
-    int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
+    int data = get_normal_map_value(pixmap, vec2f_to_i(pos));
     return data == WALL || data == SHINE;
 }
 
@@ -462,11 +462,6 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bit
                     wattrset(win_game, COLOR_PAIR(Culur_Shine_Dimmed));
                     print_pixel(window, x, y);
                 }
-            }
-            if (dist_map_decode(data) == 1)
-            {
-                wattrset(win_game, COLOR_PAIR(COLOR_GREEN));
-                print_pixel(window, x, y);
             }
         }
     }

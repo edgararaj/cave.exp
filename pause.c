@@ -7,6 +7,7 @@
 
 void draw_pause(StartPauseState *sms, State *state, int choice, Vec2i window_size)
 {
+    wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
     char *choices[] = {"RESTART",       "CONTINUE",       "CONTROLOS",     "INFO",         "QUIT",
                        "WORK DONE BY:", "Afonso Martins", "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};

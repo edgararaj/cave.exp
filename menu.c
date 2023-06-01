@@ -7,6 +7,7 @@
 
 void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
 {
+    wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
     char *choices[] = {"START", "CONTROLOS",     "INFO",
 

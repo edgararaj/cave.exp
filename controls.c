@@ -9,6 +9,7 @@
 
 void draw_controls(WINDOW *win, int key, State *state, Vec2i window_size)
 {
+    wresize(win, window_size.y, window_size.x);
     werase(win);
     int width = 34;
     int height = 35;

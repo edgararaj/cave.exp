@@ -1,3 +1,4 @@
+#include <math.h>
 #include "mobs.h"
 #include "combat.h"
 #include "dist.h"
@@ -5,6 +6,8 @@
 #include "objects.h"
 #include "state.h"
 #include "utils.h"
+#include "light.h"
+#include "collide.h"
 #include <assert.h>
 #include <stdlib.h>
 
@@ -21,6 +24,7 @@ void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
             y = random_between(0, pixmap.height - height);
         } while (normal_map_decode(pixmap.data[y * pixmap.width + x]) != WALKABLE);
 
+        mobs[i] = (Mob){0};
         mobs[i].type = random_between(0, MobType__Size);
         mobs[i].warrior.rect = (RectFloat){{x, y}, {x + width - 1, y + height - 1}, 6};
         mobs[i].warrior.dmg = random_between(2, 20);
@@ -71,18 +75,32 @@ void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
 
 void wander(Mob *mob, Bitmap map, int delta_us)
 {
-    for (int i = -1; i < 2; i++)
+    if (mob->wander_to.x != 0 && mob->wander_to.y != 0)
     {
-        for (int j = -1; j < 2; j++)
+        RectFloat new_rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed * 10));
+        if (!collide_rect_bitmap(rect_float_to_rect(new_rect), map) && rand() % 100 < 20)
         {
-            Vec2i add = {i, j};
-            if (!map_is_wall(map, vec2f_add(rect_float_center(mob->warrior.rect), vec2i_to_f(add))) &&
-                (rand() % 100 < 20))
-            {
-                move_mob(mob, add, delta_us);
-            }
+            mob->warrior.rect = new_rect;
+            mob->wander_to = vec2f_to_i(vec2f_sub(vec2i_to_f(mob->wander_to), vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed * 10)));
+            return;
         }
     }
+    int r = random_between(0, MAX_LIGHT_CALC);
+    int a = random_between(0, 2*M_PI);
+    Vec2i step = {r * cos(a), r * sin(a)};
+    mob->wander_to = step;
+    // for (int i = -1; i < 2; i++)
+    // {
+    //     for (int j = -1; j < 2; j++)
+    //     {
+    //         Vec2i add = {i, j};
+    //         if (!map_is_wall(map, vec2f_add(rect_float_center(mob->warrior.rect), vec2i_to_f(add))) &&
+    //             (rand() % 100 < 20))
+    //         {
+    //             move_mob(mob, add, delta_us);
+    //         }
+    //     }
+    // }
 }
 
 void call_others(Mob *mobs, int num_mobs, int ii, Bitmap player_light)
@@ -90,12 +108,7 @@ void call_others(Mob *mobs, int num_mobs, int ii, Bitmap player_light)
     Mob *mob = &mobs[ii];
     for (int i = 0; i < num_mobs; i++)
     {
-        // int mob_dist_to_caller =
-        //     vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
-        // if (i != ii)
-        // {
         mobs[i].called = 1;
-        // }
     }
 }
 

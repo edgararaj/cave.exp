@@ -27,6 +27,7 @@ void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)
 
 void draw_info(WINDOW *win, int key, State *state, Vec2i window_size, int delta_us)
 {
+    wresize(win, window_size.y, window_size.x);
     setlocale(LC_ALL, ""); // Configuração para suporte a caracteres amplos
     int width = 35;
     int height = 26;

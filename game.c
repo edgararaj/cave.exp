@@ -181,43 +181,45 @@ void render_hotbar(WINDOW *win, Hotbar *hotbar, Vec2i window_size)
     }
 }
 
-void update_player(RectFloat *st, int key)
+void update_player(RectFloat *st, int key, int delta_us)
 {
+    Vec2f move = {0};
     switch (key)
     {
     case KEY_A1:
-        *st = rect_float_translate(*st, (Vec2f){-1, -1});
+        move = (Vec2f){-1, -1};
         break;
     case KEY_UP:
     case 'w':
-        *st = rect_float_translate(*st, (Vec2f){0, -1});
+        move = (Vec2f){0, -1};
         break;
     case KEY_A3:
-        *st = rect_float_translate(*st, (Vec2f){1, -1});
+        move = (Vec2f){1, -1};
         break;
     case KEY_LEFT:
     case 'a':
-        *st = rect_float_translate(*st, (Vec2f){-1, 0});
+        move = (Vec2f){-1, 0};
         break;
     case KEY_B2:
         break;
     case KEY_RIGHT:
     case 'd':
-        *st = rect_float_translate(*st, (Vec2f){1, 0});
+        move = (Vec2f){1, 0};
         break;
     case KEY_C1:
-        *st = rect_float_translate(*st, (Vec2f){-1, 1});
+        move = (Vec2f){-1, 1};
         break;
     case KEY_DOWN:
     case 's':
-        *st = rect_float_translate(*st, (Vec2f){0, 1});
+        move = (Vec2f){0, 1};
         break;
     case KEY_C3:
-        *st = rect_float_translate(*st, (Vec2f){1, 1});
+        move = (Vec2f){1, 1};
         break;
     default:
         break;
     }
+    *st = rect_float_translate(*st, move);
 }
 
 Rect project_rect(Camera camera, Rect player)
@@ -228,15 +230,6 @@ Rect project_rect(Camera camera, Rect player)
 void render_rect(WINDOW *win, Camera camera, Rect player)
 {
     print_rectangle(win, project_rect(camera, player));
-}
-
-Rect rect_float_to_rect(RectFloat rect)
-{
-    Rect result;
-    result.color = rect.color;
-    result.tl = vec2f_to_i(rect.tl);
-    result.br = vec2f_to_i(rect.br);
-    return result;
 }
 
 void mix_lightmap(Bitmap output, Bitmap input)
@@ -304,7 +297,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     }
 
     RectFloat prev_player = gs->player.rect;
-    update_player(&gs->player.rect, key);
+    update_player(&gs->player.rect, key, delta_us);
     if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->pixmap))
     {
         gs->player.rect = prev_player;
@@ -395,12 +388,13 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
 }
 
 void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us) {
-    Vec2i player_center = vec2f_to_i(rect_float_center(gs->player.rect));
-
     werase(gs->win_game);
     werase(gs->win_log);
     werase(gs->win_minimap);
+    werase(gs->win_stats);
     werase(gs->win_inventory);
+
+    Vec2i player_center = vec2f_to_i(rect_float_center(gs->player.rect));
 
     render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
 
@@ -448,6 +442,10 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     }
     render_term(gs->win_log);
     render_player_stats(gs->win_stats, gs->player_stats, gs->player, (Vec2i){gs->sidebar_width * X_SCALE, gs->player_stats_height});
+    
+    wattrset(gs->win_game, COLOR_PAIR(Culur_Default));
+
+    mvwprintw(gs->win_game, window_size.y - 1, 0, "Press ESC or P to pause | %d FPS | %f ms", (int)(1e6/delta_us), 1e-3*delta_us);
 
     wrefresh(gs->win_game);
     wrefresh(gs->win_log);

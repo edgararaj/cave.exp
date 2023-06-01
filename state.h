@@ -73,7 +73,7 @@ typedef struct
     Hotbar hotbar;
 } Warrior;
 
-#define MAX_MOBS 10
+#define MAX_MOBS 0
 
 typedef enum
 {
@@ -89,6 +89,7 @@ typedef struct
     MobType type;
     Warrior warrior;
     int called;
+    Vec2i wander_to;
 } Mob;
 
 typedef struct

@@ -60,7 +60,13 @@ Vec2i vec2i_mul_const(Vec2i a, int b)
     return r;
 }
 
-Vec2f vec2f_mul_const(Vec2f a, int b)
+Vec2f vec2f_mul(Vec2f a, Vec2f b)
+{
+    Vec2f r = {a.x * b.x, a.y * b.y};
+    return r;
+}
+
+Vec2f vec2f_mul_const(Vec2f a, float b)
 {
     Vec2f r = {a.x * b, a.y * b};
     return r;
@@ -75,6 +81,12 @@ Vec2i vec2i_add_const(Vec2i a, int b)
 Vec2i vec2i_sub(Vec2i a, Vec2i b)
 {
     Vec2i r = {a.x - b.x, a.y - b.y};
+    return r;
+}
+
+Vec2i vec2i_div_const(Vec2i a, int b)
+{
+    Vec2i r = {a.x / b, a.y / b};
     return r;
 }
 
@@ -145,6 +157,16 @@ RectFloat rect_float_translate(RectFloat rect, Vec2f trans)
     result.br = vec2f_add(rect.br, trans);
     return result;
 }
+
+Rect rect_float_to_rect(RectFloat rect)
+{
+    Rect result;
+    result.color = rect.color;
+    result.tl = vec2f_to_i(rect.tl);
+    result.br = vec2f_to_i(rect.br);
+    return result;
+}
+
 
 // -------------------
 // |        |        |

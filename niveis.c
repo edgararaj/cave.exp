@@ -3,6 +3,7 @@
 #include <string.h>
 
 void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_size) {
+    wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
     char *choices[] = {"MODOS:",        "FACIL",          "MEDIO",
                        "DIFICIL",       "MENU",           "------------------",

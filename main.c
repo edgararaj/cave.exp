@@ -121,7 +121,7 @@ int main()
     smsms.win = win_menu;
     smsms.highlight = 0;
 
-    State state = State_Menu;
+    State state = State_Game;
     init_game(&gs, window);
 
     int start_menu = 1;
@@ -131,36 +131,37 @@ int main()
     int delta_us = 0;
     while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
-        wresize(win_menu, window_size.y, window_size.x);
-
         int key = getch();
 
         if (state == State_Game) {
             update_game(&gs, window_size, key, &state, delta_us);
             draw_game(&gs, window_size, key, &state, delta_us);
-        } else if (state == State_Menu) {
-            if (start_menu)
-                draw_menu(&sms, &state, key, window_size);
-            else 
+        }
+        else {
+            if (state == State_Menu) {
+                if (start_menu)
+                    draw_menu(&sms, &state, key, window_size);
+                else 
+                    draw_pause(&smsms, &state, key, window_size);
+            } else if (state == State_Controlos) {
+                draw_controls(win_menu, key, &state, window_size);
+            } else if (state == State_Niveis) {
+                draw_niveis(&smsm, &state, key, window_size);
+            } else if (state == State_Info) {
+                draw_info(win_menu, key, &state, window_size, delta_us);
+            } else if (state == State_Pause) {
                 draw_pause(&smsms, &state, key, window_size);
-        } else if (state == State_Controlos) {
-            draw_controls(win_menu, key, &state, window_size);
-        } else if (state == State_Niveis) {
-            draw_niveis(&smsm, &state, key, window_size);
-        } else if (state == State_Info) {
-            draw_info(win_menu, key, &state, window_size, delta_us);
-        } else if (state == State_Pause) {
-            draw_pause(&smsms, &state, key, window_size);
-            start_menu = 0;
-        } else if (state == State_New_Game) {
-            state = State_Game;
-            init_game(&gs, window);
+                start_menu = 0;
+            } else if (state == State_New_Game) {
+                state = State_Game;
+                init_game(&gs, window);
+            }
         }
 
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
         struct timeval result;
         timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
-        delta_us = result.tv_usec * 1e-2;
+        delta_us = result.tv_usec + result.tv_sec * 1e6;
         start = end;
     }
 
