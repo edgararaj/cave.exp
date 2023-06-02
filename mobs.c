@@ -184,7 +184,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
     }
 }
 
-void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap player_light, int delta_us)
+void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap player_light, int delta_us, GameState *gs)
 {
     for (int i = 0; i < num_mobs; i++)
     {
@@ -197,5 +197,9 @@ void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap pl
         if (mobs[i].warrior.hp <= 0)
             continue;
         update_mob(mobs, num_mobs, i, map, player, player_light, delta_us);
+    }
+    
+    if(player->hp <= 0) {
+        gs->gameOver = 1;
     }
 }

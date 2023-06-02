@@ -55,7 +55,8 @@ typedef enum
     State_Niveis,
     State_Info,
     State_Pause,
-    State_New_Game
+    State_New_Game,
+    State_Game_Over,
 } State;
 
 
@@ -163,6 +164,7 @@ typedef struct
     int sidebar_width;
     int player_stats_height;
     int inventory_height;
+    int gameOver;
 } GameState;
 
 typedef struct
@@ -183,3 +185,9 @@ typedef struct {
     WINDOW *win;
     int highlight;
 } StartPauseState;
+
+typedef struct
+{
+    WINDOW *win;
+    int highlight;
+} GameOverState;

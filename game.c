@@ -274,6 +274,8 @@ int use_key(GameState* gs)
 
 void update_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us)
 {
+    if(gs->gameOver == 1) draw_game_over(gs->gameOver, state, key, window_size);
+
     wresize(gs->win_log, window_size.y - gs->minimap_height - gs->player_stats_height - gs->inventory_height, gs->sidebar_width * X_SCALE);
     wresize(gs->win_minimap, gs->minimap_height, gs->sidebar_width * X_SCALE);
     mvwin(gs->win_minimap, window_size.y - gs->minimap_height, 0);
@@ -368,7 +370,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     light_reset(lightmap);
     light_pass(lightmap, rect_float_to_rect(gs->player.rect), VISION_RADIUS, gs->pixmap);
 
-    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, lightmap, delta_us);
+    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, lightmap, delta_us, gs);
 
     mix_lightmap(gs->pixmap, lightmap);
     free_bitmap(lightmap);

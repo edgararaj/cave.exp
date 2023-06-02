@@ -15,7 +15,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
                        "QUIT",  "WORK DONE BY:", "Afonso Martins", "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = ARRAY_SIZE(choices);
 
-        FILE *f = fopen("name.txt", "r");
+        FILE *f = fopen("menu.txt", "r");
     if (f == NULL) {
         perror("Erro ao abrir o arquivo");
         return;

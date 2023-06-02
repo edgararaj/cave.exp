@@ -6,7 +6,7 @@ void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_s
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
     char *choices[] = {"MODOS:",        "FACIL",          "MEDIO",
-                       "DIFICIL",       "MENU",           "------------------",
+                       "DIFICIL",       "BACK",           "------------------",
                        "WORK DONE BY:", "Afonso Martins", "Davide Santos",
                        "Edgar Araujo",  "Goncalo Barroso"};
     int n_choices = sizeof(choices) / sizeof(char *);

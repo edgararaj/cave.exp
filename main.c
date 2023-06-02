@@ -27,6 +27,7 @@
 #include "controls.h"
 #include "niveis.h"
 #include "pause.h"
+#include "gameover.h"
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -132,6 +133,10 @@ int main()
     smsms.win = win_menu;
     smsms.highlight = 0;
 
+    GameOverState gos;
+    gos.highlight = 0;
+    gos.win = win_menu;
+
     State state = State_Menu;
     init_game(&gs, window);
 
@@ -147,6 +152,10 @@ int main()
         if (state == State_Game) {
             update_game(&gs, window_size, key, &state, delta_us);
             draw_game(&gs, window_size, key, &state, delta_us);
+        }
+        else if (state == State_Pause)
+        {
+            draw_game_over(&gos, &state, key, window_size);
         }
         else {
             if (state == State_Menu) {
