@@ -8,8 +8,8 @@
 #include <ncurses.h>
 #include <string.h>
 
-static int time_start = 0.2 * 1e6;
-static int time = 0.2 * 1e6;
+static int time_start = 5e2;
+static int time = 5e2;
 static unsigned long pos = 0;
 
 void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)

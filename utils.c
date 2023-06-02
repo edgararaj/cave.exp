@@ -10,13 +10,18 @@ int random_between(int min, int max)
 
 int timer_update(int *left, int delta)
 {
-    *left -= delta;
+    *left -= 1;
     if (*left < 0)
     {
         *left = 0;
         return 1;
     }
     return 0;
+}
+
+int is_between(int value, int min, int max)
+{
+    return value >= min && value <= max;
 }
 
 int cap_between(int value, int min, int max)
