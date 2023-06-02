@@ -1,6 +1,7 @@
 #pragma once
 #include "objects.h"
 #include "camera.h"
+
 #define MAX_CHESTS 100
 #define MAX_CHESTS_PER_ROOM 2
 
@@ -117,11 +118,23 @@ typedef struct
     int rbp;
 } Player_Stats;
 
+typedef enum
+{
+    LightType_Vision,
+    LightType_Torch
+} LightType;
+
 typedef struct
 {
     Rect position;
     int radius;
 } Torch;
+
+typedef struct {
+    Rect rect;
+    int radius;
+    Vec2f velocity;
+} Star;
 
 typedef struct
 {
@@ -157,6 +170,9 @@ typedef struct
 {
     WINDOW *win;
     int highlight;
+    Star *stars;  // array of Star
+    int num_stars; // size of the array
+    Bitmap star_map; // bitmap for the stars
 } StartMenuState;
 
 typedef struct {
