@@ -121,7 +121,7 @@ int main()
     smsms.win = win_menu;
     smsms.highlight = 0;
 
-    State state = State_Game;
+    State state = State_Menu;
     init_game(&gs, window);
 
     int start_menu = 1;
