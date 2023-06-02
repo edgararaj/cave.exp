@@ -22,10 +22,11 @@
 #include <unistd.h>
 
 void init_game(GameState *gs, Rect window) {
-    Rect rects[20];
+    Rect rects[1];
     int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     order_rects(rects, rects_count);
 
+    if (gs->pixmap.data) { free(gs->pixmap.data); }
     Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     generate_tunnels_and_rasterize(pixmap, rects, rects_count);
     erode(pixmap, 2200);
@@ -43,14 +44,12 @@ void init_game(GameState *gs, Rect window) {
         for (int f = 0; f < div * div; f++)
         {
             Rect sub = rect_translate(subdivide_rect(rect, div, f), rect.tl);
-            add_term_line("%d %d - %d %d\n", sub.tl.x, sub.tl.y, sub.br.x, sub.br.y);
             if (i != portal_room || (i == portal_room && f != portal_div))
             {
                 if (chests < MAX_CHESTS_PER_ROOM && num_chests < MAX_CHESTS)
                 {
                     yoo_chests[num_chests] = generate_chest(sub);
                     Rect arroz = yoo_chests[num_chests].rect;
-                    add_term_line("     %d %d - %d %d\n", arroz.tl.x, arroz.tl.y, arroz.br.x, arroz.br.y);
                     chests++;
                     num_chests++;
                 }
@@ -65,11 +64,11 @@ void init_game(GameState *gs, Rect window) {
         }
     }
     int key_chest_pos = random_between(0, num_chests - 1);
-    add_item(&yoo_chests[key_chest_pos].inventory, ItemType_Key, 1);
+    add_item(&yoo_chests[key_chest_pos].inventory, Item_Key, 1);
     bitmap_draw_box(pixmap, window);
 
-    uint32_t illuminated_data[MAP_WIDTH][MAP_HEIGHT] = {};
-    Bitmap illuminated = {(uint32_t *)illuminated_data, {{MAP_WIDTH, MAP_HEIGHT}}};
+    if (gs->illuminated.data) { free(gs->illuminated.data); }
+    Bitmap illuminated = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
 
     Vec2i first_rect_center = get_center(rects[0]);
     // for (int i = 0; i < 500; i++)
@@ -78,16 +77,14 @@ void init_game(GameState *gs, Rect window) {
     //     if (get_normal_map_value(pixmap, first_rect_center) == WALKABLE)
     //         return;
     // }
-    Warrior player;
+    Warrior player = (Warrior){0};
     player.rect =
         (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
     player.dmg = 5;
     player.hp = 100;
     player.maxHP = 100;
-    player.kills = 0;
-    player.weight = 5;
+    player.weight = 10;
     player.velocity = (Vec2f){0, 0};
-    player.dmg_cooldown = 0;
 
     Camera camera = {{{0, 0}}, 0, 0, 10};
 
@@ -124,7 +121,7 @@ void init_game(GameState *gs, Rect window) {
 
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
 {
-    gs->player_attacking = 0.2 * 1e6;
+    gs->player_attacking = 10;
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
@@ -246,15 +243,33 @@ void mix_lightmap(Bitmap output, Bitmap input)
     }
 }
 
-void render_player_attack(GameState *gs, Rect player, Vec2i window_size)
+void render_player_attack(GameState *gs, Warrior player, Vec2i window_size)
 {
     Circle c;
-    c.radius = 3;
+    c.radius = player.weight;
 
     c.center = vec2f_to_i(
-        rect_center(rect_translate(project_rect(gs->camera, player), (Vec2i){-c.radius, -c.radius})));
+        rect_center(rect_translate(project_rect(gs->camera, rect_float_to_rect(player.rect)), (Vec2i){-c.radius, -c.radius})));
     wattrset(gs->win_game, COLOR_PAIR(5));
     print_circumference(gs->win_game, window_size, c);
+}
+
+int use_key(GameState* gs)
+{
+    if (collide_rect_rect(rect_float_to_rect(gs->player.rect), gs->portal))
+    {
+        Rect window = {};
+        window.tl.x = 0;
+        window.tl.y = 0;
+        window.br.x = MAP_WIDTH;
+        window.br.y = MAP_HEIGHT;
+        int prev_level = gs->player_stats.level;
+        init_game(gs, window);
+        gs->player_stats.level = prev_level + 1;
+        return 1;
+    }
+    add_term_line("Cant use key here!\n");
+    return 0;
 }
 
 void update_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us)
@@ -285,14 +300,33 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     }
     if (key == 'j')
     {
-        player_attack(gs, gs->mobs, MAX_MOBS, &gs->player, delta_us);
+        int i = gs->inventory.selected_item - 1;
+        Item item = gs->inventory.items[i].name;
+        if (gs->inventory.items[i].count > 0)
+        {
+            switch (item)
+            {
+            case Item_Sword:
+                player_attack(gs, gs->mobs, MAX_MOBS, &gs->player, delta_us);
+                break;
+            case Item_HealthPotion:
+                use_health_potion(&gs->player);
+                remove_item(&gs->inventory, i);
+                break;
+            case Item_Key:
+                if (use_key(gs)) {
+                    remove_item(&gs->inventory, i);
+                };
+                break;
+            }
+        }
     }
     if (key > '0' && key <= '9')
     {
-        int selected_item = key - '0';
+        int selected_item = key - '1';
         if (selected_item < gs->inventory.size)
         {
-            use_item(&gs->player, &gs->player_stats, &gs->inventory, selected_item);
+            gs->inventory.selected_item = selected_item + 1;
         }
     }
 
@@ -351,29 +385,6 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
         }
     }
 
-    int has_key = 0;
-    int i;
-    for (i = 0; i < gs->inventory.size; i++)
-    {
-        if (gs->inventory.items[i] == ItemType_Key)
-        {
-            has_key = 1;
-            break;
-        }
-    }
-
-    if (has_key && collide_rect_rect(rect_float_to_rect(gs->player.rect), gs->portal))
-    {
-        remove_item(&gs->inventory, i);
-        Rect window = {};
-        window.tl.x = 0;
-        window.tl.y = 0;
-        window.br.x = MAP_WIDTH;
-        window.br.y = MAP_HEIGHT;
-        init_game(gs, window);
-        gs->player_stats.level += 1;
-    }
-
     if (get_normal_map_value(gs->pixmap, player_center) == SPIKE)
     {
         if (timer_update(&gs->player_spike_damage_cooldown, delta_us))
@@ -398,13 +409,6 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
 
     render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
 
-    for (int i = 0; i < MAX_TORCHES; i++)
-    {
-        wattrset(gs->win_game, COLOR_PAIR(3));
-        print_pixel(gs->win_game, gs->torches[i].position.tl.x - gs->camera.x,
-                    gs->torches[i].position.tl.y - gs->camera.y);
-    }
-
     for (int i = 0; i < MAX_MOBS; i++)
     {
         int dist = get_dist_map_value(gs->pixmap, vec2f_to_i(rect_float_center(gs->mobs[i].warrior.rect)));
@@ -412,7 +416,26 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
             continue;
         
         render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect));
-        render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].type);
+        render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].warrior.hp);
+
+        if (gs->mobs[i].warrior.attacking)
+        {
+            timer_update(&gs->mobs[i].warrior.attacking, delta_us);
+            render_player_attack(gs, gs->mobs[i].warrior, window_size);
+        }
+    }
+
+    if (gs->player_attacking)
+    {
+        timer_update(&gs->player_attacking, delta_us);
+        render_player_attack(gs, gs->player, window_size);
+    }
+
+    for (int i = 0; i < MAX_TORCHES; i++)
+    {
+        wattrset(gs->win_game, COLOR_PAIR(3));
+        print_pixel(gs->win_game, gs->torches[i].position.tl.x - gs->camera.x,
+                    gs->torches[i].position.tl.y - gs->camera.y);
     }
 
     for (int i = 0; i < gs->chests_count; i++)
@@ -425,17 +448,11 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
 
     draw_portal(gs->win_game, project_rect(gs->camera, gs->portal));
 
-    if (gs->player_attacking)
-    {
-        timer_update(&gs->player_attacking, delta_us);
-        render_player_attack(gs, rect_float_to_rect(gs->player.rect), window_size);
-    }
-
     render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_minimap, gs->illuminated, (Vec2i){gs->sidebar_width, gs->minimap_height}, player_center);
-    draw_inventory(gs->win_inventory, &gs->inventory, (Vec2i){gs->sidebar_width * X_SCALE, gs->inventory_height});
+    draw_inventory(gs->win_inventory, &gs->inventory, (Vec2i){gs->sidebar_width * X_SCALE, gs->inventory_height}, gs->inventory.selected_item);
 
     if (key == 27 || key == 'p') {
         *state = State_Pause;
@@ -445,7 +462,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     
     wattrset(gs->win_game, COLOR_PAIR(Culur_Default));
 
-    mvwprintw(gs->win_game, window_size.y - 1, 0, "Press ESC or P to pause | %d FPS | %f ms", (int)(1e6/delta_us), 1e-3*delta_us);
+    // mvwprintw(gs->win_game, window_size.y - 1, 0, "Press ESC or P to pause | %d FPS | %f ms", (int)(1e6/delta_us), 1e-3*delta_us);
 
     wrefresh(gs->win_game);
     wrefresh(gs->win_log);

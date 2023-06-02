@@ -230,7 +230,9 @@ Rect expand_rect(Rect rect, int amount)
 
 Bitmap alloc_bitmap(int width, int height)
 {
-    return (Bitmap){.data = (uint32_t *)malloc(width * height * sizeof(uint32_t)), .size = {width, height}};
+    uint32_t* data = (uint32_t *)malloc(width * height * sizeof(uint32_t));
+    for (int i = 0; i < width * height; i++) { data[i] = 0; }
+    return (Bitmap){.data = data, .size = {width, height}};
 }
 
 void free_bitmap(Bitmap bitmap)

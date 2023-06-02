@@ -15,17 +15,30 @@
 // Define the item type
 typedef enum
 {
-    ItemType_ManaPotion,
-    ItemType_HealthPotion,
-    ItemType__Size,
-    ItemType_Key,
+    Item_ManaPotion,
+    Item_HealthPotion,
+    Item__Size,
+    Item_Key,
+    Item_Sword,
+    Item_BlastGun,
+} Item;
+
+typedef enum {
+    ItemType_Disposable,
+    ItemType_Weapon
 } ItemType;
+
+typedef struct {
+    ItemType type;
+    int count;
+    Item name;
+} ItemSlot;
 
 typedef struct
 {
-    ItemType items[MAX_INVENTORY_SIZE];
-    int items_counts[MAX_INVENTORY_SIZE];
+    ItemSlot items[MAX_INVENTORY_SIZE];
     int size;
+    int selected_item;
 } Inventory;
 
 typedef struct {
@@ -71,10 +84,11 @@ typedef struct
     int weight;
     int kills;
     int dmg_cooldown;
+    int attacking;
     Hotbar hotbar;
 } Warrior;
 
-#define MAX_MOBS 0
+#define MAX_MOBS 10
 
 typedef enum
 {

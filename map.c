@@ -344,7 +344,7 @@ Inventory generate_chest_items()
     int num_items = random_between(1, 3);
     for (int j = 0; j < num_items; j++)
     {
-        int item = random_between(0, ItemType__Size);
+        int item = random_between(0, Item__Size);
         int count = random_between(1, 3);
         add_item(&result, item, count);
     }
@@ -420,21 +420,17 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bit
         {
             int map_x = x + camera.x;
             int map_y = y + camera.y;
+            if (!is_between(map_x, 0, map.width) || !is_between(map_y, 0, map.height))
+            {
+                continue;
+            }
             uint32_t data = map.data[map_y * map.width + map_x];
 
             if (normal_map_decode(data) == WALKABLE)
             {
-                // wattrset(win_game, COLOR_PAIR(Culur_Default));
                 wattrset(win_game, COLOR_PAIR(Culur_Light_Gradient + MIN(light_map_decode(data), LIGHT_RADIUS - 1)));
                 print_pixel(window, x, y);
             }
-            // if (light_map_decode(data)) {
-            //     wattrset(win_game, COLOR_PAIR(Culur_Default));
-            //     char s[] = "0";
-            //     s[0] = '0' + light_map_decode(data);
-            //     print_pixel_custom(window, x, y, s);
-            // }
-
             if (normal_map_decode(data) == SHINE)
             {
                 wattrset(win_game, COLOR_PAIR(Culur_Shine));

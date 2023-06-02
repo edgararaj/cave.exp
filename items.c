@@ -76,11 +76,12 @@ void use_health_potion(Warrior *player)
 // Function to use an item
 void use_item(Warrior* warrior, Player_Stats *player, Inventory* inventory, int i)
 {
-    ItemType item = inventory->items[i];
+    Item item = inventory->items[i].type;
+    if (inventory->items[i].count <= 0) return;
     remove_item(inventory, i);
     switch (item)
     {
-    case ItemType_HealthPotion:
+    case Item_HealthPotion:
         use_health_potion(warrior);
         break;
     // case ItemType_ManaPotion:

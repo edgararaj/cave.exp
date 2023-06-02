@@ -98,6 +98,17 @@ int main()
     window.br.y = MAP_HEIGHT;
 
     GameState gs = {0};
+    gs.inventory.items[0].name = Item_Sword;
+    gs.inventory.items[0].count = 1;
+    gs.inventory.items[0].type = ItemType_Weapon;
+
+    gs.inventory.items[1].name = Item_BlastGun;
+    gs.inventory.items[2].name = Item_HealthPotion;
+    gs.inventory.items[3].name = Item_ManaPotion;
+    gs.inventory.items[4].name = Item_Key;
+
+    gs.inventory.size = 5;
+
     gs.minimap_height = minimap_height;
     gs.sidebar_width = minimap_height;
     gs.player_stats_height = player_stats_height;

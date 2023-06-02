@@ -28,11 +28,10 @@ void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
         mobs[i].type = random_between(0, MobType__Size);
         mobs[i].warrior.rect = (RectFloat){{x, y}, {x + width - 1, y + height - 1}, 6};
         mobs[i].warrior.dmg = random_between(2, 20);
-        mobs[i].speed = random_between(1, 5);
+        mobs[i].speed = random_between(40, 50);
         mobs[i].warrior.hp = random_between(10, 100);
         mobs[i].warrior.maxHP = 100;
         mobs[i].warrior.weight = 3;
-        mobs[i].warrior.dmg_cooldown = 1000;
     }
 }
 
@@ -62,13 +61,16 @@ Vec2i step_to_player(Bitmap map, Mob *mob)
 
 void move_mob(Mob *mob, Vec2i step, int delta_us)
 {
-    mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed * 10));
+    mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed));
 }
 
 void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
 {
-    Vec2i step = step_to_player(map, mob);
-    move_mob(mob, step, delta_us);
+    if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) > mob->warrior.weight * mob->warrior.weight)
+    {
+        Vec2i step = step_to_player(map, mob);
+        move_mob(mob, step, delta_us);
+    }
 
     warrior_attack(&mob->warrior, player, delta_us);
 }
@@ -77,11 +79,11 @@ void wander(Mob *mob, Bitmap map, int delta_us)
 {
     if (mob->wander_to.x != 0 && mob->wander_to.y != 0)
     {
-        RectFloat new_rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed * 10));
-        if (!collide_rect_bitmap(rect_float_to_rect(new_rect), map) && rand() % 100 < 20)
+        RectFloat new_rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed));
+        if (!collide_rect_bitmap(rect_float_to_rect(new_rect), map) && rand() % 100 < 10)
         {
             mob->warrior.rect = new_rect;
-            mob->wander_to = vec2f_to_i(vec2f_sub(vec2i_to_f(mob->wander_to), vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed * 10)));
+            mob->wander_to = vec2f_to_i(vec2f_sub(vec2i_to_f(mob->wander_to), vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed)));
             return;
         }
     }

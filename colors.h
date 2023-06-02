@@ -15,6 +15,7 @@ typedef enum
     Color_Cyan,
     Color_White,
     Culur_Black,
+    Culur_Gray,
     Culur_Shine,
     Culur_Shine_Dimmed,
     Culur_Spike_Back,
@@ -38,6 +39,8 @@ typedef enum
     Culur_Menu_Highlight_Text,
     Color__RGBSize,
     Culur_Default,
+    Culur_Default_Gray,
+    Culur_Default_Green,
     Culur_Light_Gradient,
     // ... LIGHT_RADIUS reserved
 } Color;
