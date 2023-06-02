@@ -24,7 +24,7 @@
 #include "items.h"
 
 void init_game(GameState *gs, Rect window) {
-    Rect rects[30];
+    Rect rects[10];
     int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     order_rects(rects, rects_count);
 
@@ -45,7 +45,7 @@ void init_game(GameState *gs, Rect window) {
         int chests = 0;
         for (int f = 0; f < div * div; f++)
         {
-            Rect sub = rect_translate(subdivide_rect(rect, div, f), rect.tl);
+            Rect sub = subdivide_rect(rect, div, f);
             if (i != portal_room || (i == portal_room && f != portal_div))
             {
                 if (chests < MAX_CHESTS_PER_ROOM && num_chests < MAX_CHESTS)

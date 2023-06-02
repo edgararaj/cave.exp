@@ -83,7 +83,7 @@ int main()
     WINDOW *win_log = newwin(minimap_height, sidebar_width, player_stats_height + inventory_height, 0);
     WINDOW *win_minimap = newwin(30, sidebar_width, 0, 0);
     wbkgd(win_game, COLOR_PAIR(Culur_Light_Gradient));
-    wbkgd(win_minimap, COLOR_PAIR(Culur_Light_Gradient + 10));
+    wbkgd(win_minimap, COLOR_PAIR(Culur_Light_Gradient));
     wbkgd(win_log, COLOR_PAIR(Culur_Light_Gradient + 5));
     wbkgd(win_stats, COLOR_PAIR(Culur_Default));
 
