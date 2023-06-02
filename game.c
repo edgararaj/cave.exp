@@ -145,39 +145,6 @@ void render_hp(WINDOW *win_game, Camera camera, Rect rect, int hp)
     mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d", hp);
 }
 
-void render_hotbar(WINDOW *win, Hotbar *hotbar, Vec2i window_size)
-{
-    // Calculate the position of the hotbar
-    int hotbar_x = (window_size.x - HOTBAR_SIZE) / 2;
-    int hotbar_y = window_size.y - 2;
-
-    // Draw the hotbar
-    wattrset(win, COLOR_PAIR(Culur_Hotbar));
-    for (int i = 0; i < HOTBAR_SIZE; i++)
-    {
-        // Draw the hotbar slot
-        mvwprintw(win, hotbar_y, hotbar_x + i * 2, "[ ]");
-
-        // Draw the item in the slot
-        if (hotbar->items[i].count > 0)
-        {
-            // This is just a placeholder, you'll need to replace 'I' with the actual item icon
-            mvwprintw(win, hotbar_y, hotbar_x + i * 2 + 1, "I");
-
-            // Draw the item count
-            mvwprintw(win, hotbar_y + 1, hotbar_x + i * 2, "%d", hotbar->items[i].count);
-        }
-
-        // Highlight the selected item
-        if (i == hotbar->selected)
-        {
-            wattrset(win, COLOR_PAIR(Culur_Hotbar_Selected));
-            mvwprintw(win, hotbar_y, hotbar_x + i * 2, "[%c]", 'I'); // Replace 'I' with the actual item icon
-            wattrset(win, COLOR_PAIR(Culur_Hotbar));
-        }
-    }
-}
-
 void update_player(RectFloat *st, int key, int delta_us)
 {
     Vec2f move = {0};
@@ -251,7 +218,7 @@ void render_player_attack(GameState *gs, Warrior player, Vec2i window_size)
     c.center = vec2f_to_i(
         rect_center(rect_translate(project_rect(gs->camera, rect_float_to_rect(player.rect)), (Vec2i){-c.radius, -c.radius})));
     wattrset(gs->win_game, COLOR_PAIR(5));
-    print_circumference(gs->win_game, window_size, c);
+    print_circle(gs->win_game, window_size, c);
 }
 
 int use_key(GameState* gs)
@@ -460,8 +427,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     render_term(gs->win_log);
     render_player_stats(gs->win_stats, gs->player_stats, gs->player, (Vec2i){gs->sidebar_width * X_SCALE, gs->player_stats_height});
     
-    wattrset(gs->win_game, COLOR_PAIR(Culur_Default));
-
+    // wattrset(gs->win_game, COLOR_PAIR(Culur_Default));
     // mvwprintw(gs->win_game, window_size.y - 1, 0, "Press ESC or P to pause | %d FPS | %f ms", (int)(1e6/delta_us), 1e-3*delta_us);
 
     wrefresh(gs->win_game);

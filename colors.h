@@ -35,6 +35,7 @@ typedef enum
     Culur_Default,
     Culur_Default_Gray,
     Culur_Default_Green,
+    Culur_Default_Red,
     Culur_Light_Gradient,
     // ... LIGHT_RADIUS reserved
 } Color;

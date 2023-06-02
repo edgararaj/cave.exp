@@ -60,9 +60,8 @@ void print_ellipsumference(WINDOW *win, Vec2i win_size, int x, int y, int r2, in
         for (int j = min_x; j < max_x; j++)
         {
             float radius = sqrtf(powf(i - y - r1, 2) / powf(r1, 2) + powf(j - x - r2, 2) / powf(r2, 2));
-            if (radius > 1 || radius < 0.7f)
-                continue;
-            print_pixel(win, j, i);
+            if (radius <= 1.f)
+                print_pixel(win, j, i);
         }
     }
 }

@@ -105,7 +105,7 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size, int se
         {
             if (i + 1 == selected)
             {
-                wattrset(win, COLOR_PAIR(Culur_Default_Green));
+                wattrset(win, COLOR_PAIR(Culur_Default_Red));
                 mvwprintw(win, i+1, 1, "%d. %s (Empty)\n", i + 1, name);
             }
             else
