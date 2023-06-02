@@ -1,3 +1,4 @@
+#include "game.h"
 #include "camera.h"
 #include "collide.h"
 #include "colors.h"
@@ -20,9 +21,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include "items.h"
 
 void init_game(GameState *gs, Rect window) {
-    Rect rects[1];
+    Rect rects[30];
     int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     order_rects(rects, rects_count);
 
@@ -49,7 +51,6 @@ void init_game(GameState *gs, Rect window) {
                 if (chests < MAX_CHESTS_PER_ROOM && num_chests < MAX_CHESTS)
                 {
                     yoo_chests[num_chests] = generate_chest(sub);
-                    Rect arroz = yoo_chests[num_chests].rect;
                     chests++;
                     num_chests++;
                 }
@@ -112,11 +113,11 @@ void init_game(GameState *gs, Rect window) {
     gs->mobs = mobs;
     gs->pixmap = pixmap;
     gs->illuminated = illuminated;
-    gs->player_attacking = 0;
     gs->minimap_maximized = false;
     gs->chests = yoo_chests;
     gs->chests_count = num_chests;
     gs->portal = portal_rect;
+    gs->arrows = malloc(sizeof(Arrow) * MAX_ARROWS);
 }
 
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
@@ -230,14 +231,23 @@ int use_key(GameState* gs)
         window.tl.y = 0;
         window.br.x = MAP_WIDTH;
         window.br.y = MAP_HEIGHT;
-        int prev_level = gs->player_stats.level;
+        Player_Stats prev_stats = gs->player_stats;
         init_game(gs, window);
-        gs->player_stats.level = prev_level + 1;
+        gs->player_stats = prev_stats;
+        gs->player_stats.level++;
         return 1;
     }
     add_term_line("Cant use key here!\n");
     return 0;
 }
+
+void draw_arrow(GameState *gs, Arrow arrow)
+{
+    Vec2i pos = vec2f_to_i(rect_center(rect_translate(project_rect(gs->camera, rect_float_to_rect(arrow.rect)), (Vec2i){-1, -1})));
+    wattrset(gs->win_game, COLOR_PAIR(Culur_Default_Red));
+    print_pixel_custom(gs->win_game, pos.x, pos.y, ">");
+}
+
 
 void update_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us)
 {
@@ -333,9 +343,27 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
 
     Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
     light_reset(lightmap);
-    light_pass(lightmap, rect_float_to_rect(gs->player.rect), VISION_RADIUS, gs->pixmap);
+    light_pass(lightmap, rect_float_to_rect(gs->player.rect), LIGHT_RADIUS, gs->pixmap);
 
-    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, lightmap, delta_us);
+    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, lightmap, delta_us, gs->arrows, &gs->arrow_count);
+
+    for (int i = 0; i < gs->arrow_count; i++)
+    {
+        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_div_const(gs->arrows[i].velocity, 7));
+        if (collide_rect_rect(rect_float_to_rect(gs->arrows[i].rect), rect_float_to_rect(gs->player.rect)))
+        {
+            gs->player.hp -= 10;
+            gs->arrows[i] = gs->arrows[gs->arrow_count - 1];
+            gs->arrow_count--;
+            i--;
+        }
+        else if (collide_rect_bitmap(rect_float_to_rect(gs->arrows[i].rect), gs->pixmap))
+        {
+            gs->arrows[i] = gs->arrows[gs->arrow_count - 1];
+            gs->arrow_count--;
+            i--;
+        }
+    }
 
     mix_lightmap(gs->pixmap, lightmap);
     free_bitmap(lightmap);
@@ -362,10 +390,12 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
                 gs->player.hp = 0;
         }
     }
-
+    if (key == 27 || key == 'p') {
+        *state = State_Pause;
+    }
 }
 
-void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us) {
+void draw_game(GameState *gs, Vec2i window_size, int delta_us) {
     werase(gs->win_game);
     werase(gs->win_log);
     werase(gs->win_minimap);
@@ -375,6 +405,12 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     Vec2i player_center = vec2f_to_i(rect_float_center(gs->player.rect));
 
     render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
+
+    if (gs->player_attacking)
+    {
+        timer_update(&gs->player_attacking, delta_us);
+        render_player_attack(gs, gs->player, window_size);
+    }
 
     for (int i = 0; i < MAX_MOBS; i++)
     {
@@ -392,12 +428,6 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
         }
     }
 
-    if (gs->player_attacking)
-    {
-        timer_update(&gs->player_attacking, delta_us);
-        render_player_attack(gs, gs->player, window_size);
-    }
-
     for (int i = 0; i < MAX_TORCHES; i++)
     {
         wattrset(gs->win_game, COLOR_PAIR(3));
@@ -413,6 +443,11 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
         }
     }
 
+    for (int i = 0; i < gs->arrow_count; i++)
+    {
+        draw_arrow(gs, gs->arrows[i]);
+    }
+
     draw_portal(gs->win_game, project_rect(gs->camera, gs->portal));
 
     render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
@@ -421,9 +456,6 @@ void draw_game(GameState *gs, Vec2i window_size, int key, State *state, int delt
     render_minimap(gs->win_minimap, gs->illuminated, (Vec2i){gs->sidebar_width, gs->minimap_height}, player_center);
     draw_inventory(gs->win_inventory, &gs->inventory, (Vec2i){gs->sidebar_width * X_SCALE, gs->inventory_height}, gs->inventory.selected_item);
 
-    if (key == 27 || key == 'p') {
-        *state = State_Pause;
-    }
     render_term(gs->win_log);
     render_player_stats(gs->win_stats, gs->player_stats, gs->player, (Vec2i){gs->sidebar_width * X_SCALE, gs->player_stats_height});
     

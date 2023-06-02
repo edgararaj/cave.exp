@@ -10,3 +10,6 @@ all: $(SRC)
 
 run:
 	make && ./a.out
+
+clean:
+	rm -rf ./a.out

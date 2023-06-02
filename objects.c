@@ -1,8 +1,10 @@
+#include <stdlib.h>
+#include <math.h>
+
 #include "objects.h"
 #include "map.h"
 #include "screen.h"
 #include "utils.h"
-#include <stdlib.h>
 
 Vec2i get_center(Rect rect)
 {
@@ -114,6 +116,18 @@ float vec2i_sqrdistance(Vec2i a)
 float vec2f_sqrdistance(Vec2f a, Vec2f b)
 {
     return vec2f_dot(vec2f_sub(a, b), vec2f_sub(a, b));
+}
+
+float vec2f_distance(Vec2f a, Vec2f b)
+{
+    return sqrtf(vec2f_sqrdistance(a, b));
+}
+
+Vec2f vec2f_normalize(Vec2f a)
+{
+    float len = vec2f_distance(a, (Vec2f){0, 0});
+    Vec2f r = {a.x / len, a.y / len};
+    return r;
 }
 
 Vec2i rect_size(Rect rect)

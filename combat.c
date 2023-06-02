@@ -13,7 +13,7 @@ void warrior_attack(Warrior *a, Warrior *b, int delta_us)
             {
                 a->kills += 1;
             }
-            a->dmg_cooldown = 10;
+            a->dmg_cooldown = 50;
             a->attacking = 10;
         }
     }

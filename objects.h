@@ -33,6 +33,12 @@ typedef struct
     short color;
 } RectFloat;
 
+typedef struct 
+{
+    RectFloat rect;
+    Vec2f velocity;
+} Arrow;
+
 typedef struct
 {
     Vec2i center;
@@ -80,6 +86,8 @@ Vec2i vec2i_add(Vec2i a, Vec2i b);
 float vec2f_dot(Vec2f a, Vec2f b);
 float vec2i_sqrdistance(Vec2i a);
 float vec2f_sqrdistance(Vec2f a, Vec2f b);
+float vec2f_distance(Vec2f a, Vec2f b);
+Vec2f vec2f_normalize(Vec2f a);
 Vec2i vec2i_add(Vec2i a, Vec2i b);
 Vec2i vec2i_sub(Vec2i a, Vec2i b);
 Vec2i vec2i_mul_const(Vec2i a, int b);

@@ -146,7 +146,7 @@ int main()
 
         if (state == State_Game) {
             update_game(&gs, window_size, key, &state, delta_us);
-            draw_game(&gs, window_size, key, &state, delta_us);
+            draw_game(&gs, window_size, delta_us);
         }
         else {
             if (state == State_Menu) {

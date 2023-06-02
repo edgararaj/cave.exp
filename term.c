@@ -6,7 +6,7 @@
 #include "colors.h"
 #include "utils.h"
 
-#define TERM_BUFFER 40
+#define TERM_BUFFER 5
 int term_line_index = 0;
 char term_lines[TERM_BUFFER][50] = {};
 static int last_line_hightlight = 200;

@@ -52,6 +52,7 @@ int remove_item_name(Inventory *inventory, Item name)
             return 1;
         }
     }
+    return 0;
 }
 
 int remove_item(Inventory *inventory, int index)

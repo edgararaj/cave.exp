@@ -89,13 +89,14 @@ typedef struct
     Hotbar hotbar;
 } Warrior;
 
-#define MAX_MOBS 10
+#define MAX_MOBS 20
 
 typedef enum
 {
     MobType_Stupid,
     MobType_Coward,
     MobType_Intelligent,
+    MobType_Archer,
     MobType__Size
 } MobType;
 
@@ -159,6 +160,8 @@ typedef struct
     int minimap_maximized;
     int player_spike_damage_cooldown;
     int chestCount;
+    Arrow* arrows;
+    int arrow_count;
 
     int minimap_height;
     int sidebar_width;

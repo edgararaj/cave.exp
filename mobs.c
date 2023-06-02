@@ -1,14 +1,15 @@
-#include <math.h>
+#include "game.h"
 #include "mobs.h"
+#include "collide.h"
 #include "combat.h"
 #include "dist.h"
+#include "light.h"
 #include "map.h"
 #include "objects.h"
 #include "state.h"
 #include "utils.h"
-#include "light.h"
-#include "collide.h"
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 
 void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
@@ -66,7 +67,8 @@ void move_mob(Mob *mob, Vec2i step, int delta_us)
 
 void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
 {
-    if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) > mob->warrior.weight * mob->warrior.weight)
+    if (vec2f_sqrdistance(rect_float_center(mob->warrior.rect), rect_float_center(player->rect)) >
+        mob->warrior.weight * mob->warrior.weight)
     {
         Vec2i step = step_to_player(map, mob);
         move_mob(mob, step, delta_us);
@@ -75,20 +77,33 @@ void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
     warrior_attack(&mob->warrior, player, delta_us);
 }
 
+Arrow attack_player_with_arrow(Mob *mob, Warrior *player, int delta_us)
+{
+    Arrow result;
+    Vec2f vec = vec2f_sub(rect_float_center(player->rect), rect_float_center(mob->warrior.rect));
+    vec = vec2f_normalize(vec);
+    result.velocity = vec;
+    result.rect = mob->warrior.rect;
+
+    return result;
+}
+
 void wander(Mob *mob, Bitmap map, int delta_us)
 {
     if (mob->wander_to.x != 0 && mob->wander_to.y != 0)
     {
-        RectFloat new_rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed));
+        RectFloat new_rect =
+            rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed));
         if (!collide_rect_bitmap(rect_float_to_rect(new_rect), map) && rand() % 100 < 10)
         {
             mob->warrior.rect = new_rect;
-            mob->wander_to = vec2f_to_i(vec2f_sub(vec2i_to_f(mob->wander_to), vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed)));
+            mob->wander_to = vec2f_to_i(
+                vec2f_sub(vec2i_to_f(mob->wander_to), vec2f_div_const(vec2i_to_f(mob->wander_to), mob->speed)));
             return;
         }
     }
     int r = random_between(0, MAX_LIGHT_CALC);
-    int a = random_between(0, 2*M_PI);
+    int a = random_between(0, 2 * M_PI);
     Vec2i step = {r * cos(a), r * sin(a)};
     mob->wander_to = step;
     // for (int i = -1; i < 2; i++)
@@ -114,7 +129,7 @@ void call_others(Mob *mobs, int num_mobs, int ii, Bitmap player_light)
     }
 }
 
-void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bitmap player_light, int delta_us)
+void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bitmap player_light, int delta_us, Arrow* arrows, int *arrow_count)
 {
     Mob *mob = &mobs[ii];
     int mob_dist_to_player = get_light_map_value(player_light, vec2f_to_i(rect_float_center(mob->warrior.rect)));
@@ -182,20 +197,69 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
             wander(mob, map, delta_us);
         }
     }
+    else if (mob->type == MobType_Archer)
+    {
+        if (mob_dist_to_player > THREAT_RADIUS || mob->called)
+        {
+            // call_others(mobs, num_mobs, ii, player_light);
+            if (mob->called)
+            {
+                mob->warrior.rect.color = COLOR_BLUE;
+            }
+            else
+            {
+                mob->warrior.rect.color = COLOR_RED;
+            }
+            attack_player(mob, player, map, delta_us);
+        }
+        else if (mob_dist_to_player > 0)
+        {
+            // call_others(mobs, num_mobs, ii, player_light);
+            // int mobs_near = 0;
+            // for (int i = 0; i < num_mobs; i++)
+            // {
+            //     int mob_dist_to_caller =
+            //         vec2f_sqrdistance(rect_float_center(mobs[i].warrior.rect), rect_float_center(mob->warrior.rect));
+            //     if ((ii != i) && (mob_dist_to_caller <= THREAT_RADIUS_SQR))
+            //     {
+            //         mobs_near++;
+            //     }
+            // }
+            // if (mobs_near)
+            // {
+            mob->warrior.rect.color = COLOR_RED;
+            if (*arrow_count < MAX_ARROWS && timer_update(&mob->warrior.dmg_cooldown, delta_us))
+            {
+                mob->warrior.dmg_cooldown = 120;
+                arrows[(*arrow_count)] = attack_player_with_arrow(mob, player, delta_us);
+                *arrow_count += 1;
+            }
+            // }
+            // else
+            // {
+            //     mob->warrior.rect.color = COLOR_YELLOW;
+            // }
+        }
+        else
+        {
+            mob->warrior.rect.color = COLOR_WHITE;
+            wander(mob, map, delta_us);
+        }
+    }
 }
 
-void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap player_light, int delta_us)
+void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap player_light, int delta_us, Arrow* arrows, int* arrow_count)
 {
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
             continue;
-        mobs[i].called = 0;  
+        mobs[i].called = 0;
     }
     for (int i = 0; i < num_mobs; i++)
     {
         if (mobs[i].warrior.hp <= 0)
             continue;
-        update_mob(mobs, num_mobs, i, map, player, player_light, delta_us);
+        update_mob(mobs, num_mobs, i, map, player, player_light, delta_us, arrows, arrow_count);
     }
 }

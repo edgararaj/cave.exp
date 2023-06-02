@@ -72,23 +72,3 @@ void use_health_potion(Warrior *player)
 //         // add_term_line("Mana is full, cannot use %s.\n", item->name);
 //     }
 // }
-
-// Function to use an item
-void use_item(Warrior* warrior, Player_Stats *player, Inventory* inventory, int i)
-{
-    Item item = inventory->items[i].type;
-    if (inventory->items[i].count <= 0) return;
-    remove_item(inventory, i);
-    switch (item)
-    {
-    case Item_HealthPotion:
-        use_health_potion(warrior);
-        break;
-    // case ItemType_ManaPotion:
-    //     use_mana_potion(player, item);
-    //     break;
-    default:
-        // add_term_line("Unknown item type!\n");
-        break;
-    }
-}
