@@ -202,15 +202,15 @@ Rect subdivide_rect(Rect container, int div, int index)
     result.tl.y = size.y / div * (index / div);
     result.br.x = size.x / div * (((index) % (div)) + 1);
     result.br.y = size.y / div * ((index + div) / (div));
-    return result;
+    return rect_translate(result, container.tl);
 }
 
 Rect gen_random_subrect(Rect container)
 {
     Vec2i size = rect_size(container);
     Rect result;
-    int random_width = random_between(size.x / 5, size.x / 2);
-    int random_height = random_between(size.y / 5, size.y / 2);
+    int random_width = random_between(size.x / 6, size.x / 2);
+    int random_height = random_between(size.y / 6, size.y / 2);
     int random_x = random_between(0, size.x - random_width);
     int random_y = random_between(0, size.y - random_height);
     result.tl.x = container.tl.x + random_x;

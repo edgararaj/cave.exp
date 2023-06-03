@@ -205,29 +205,34 @@ int generate_rects(Rect window, Rect *rects, int rects_max)
     int rects_count = 0;
 
     int div = 2;
-    for (int f = 0; f < div * div && rects_count < rects_max; f++)
+    int rects_per_div = rects_max / (div * div);
+    for (int f = 0; f < div * div; f++)
     {
-        Rect new_rect;
-        int valid_new_rect;
-        Rect sub = subdivide_rect(window, div, f);
-        for (int j = 0; j < 255; j++)
+        for (int i = 0; i < rects_per_div; i++)
         {
-            valid_new_rect = 1;
-            new_rect = gen_random_subrect(sub);
-            for (int n = 0; n < rects_count; n++)
+            Rect new_rect;
+            int valid_new_rect;
+            Rect sub = subdivide_rect(window, div, f);
+            for (int j = 0; j < 255; j++)
             {
-                if (collide_rect_rect(rects[n], expand_rect(new_rect, 2)))
+                valid_new_rect = 1;
+                new_rect = gen_random_subrect(sub);
+                for (int n = 0; n < rects_count; n++)
                 {
-                    valid_new_rect = 0;
-                    break;
+                    if (collide_rect_rect(rects[n], expand_rect(new_rect, 2)))
+                    {
+                        valid_new_rect = 0;
+                        break;
+                    }
                 }
+                if (valid_new_rect)
+                    break;
             }
             if (valid_new_rect)
-                break;
-        }
-        if (valid_new_rect)
-        {
-            rects[rects_count++] = new_rect;
+            {
+                rects[rects_count++] = new_rect;
+                add_term_line("n %d\n", rects_count);
+            }
         }
     }
 
@@ -463,25 +468,133 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bit
     }
 }
 
-void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos)
+void box_sampling_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled, int size)
 {
+    // Use box sampling to downscale the image and sample a square of size
+    // size*size
     float scale_x = (float)illuminated.width / window_size.x;
     float scale_y = (float)illuminated.height / window_size.y;
 
-    wattrset(win, COLOR_PAIR(COLOR_RED));
     for (int y = 0; y < window_size.y; y++)
     {
         for (int x = 0; x < window_size.x; x++)
         {
-            int map_x = x * scale_x;
-            int map_y = y * scale_y;
-
-            if (illuminated.data[map_y * illuminated.width + map_x] == WALKABLE)
+            float map_x = x * scale_x;
+            float map_y = y * scale_y;
+            // Box sampling
+            int map_x1 = floor(map_x) - size / 2;
+            int map_y1 = floor(map_y) - size / 2;
+            int map_x2 = map_x1 + size;
+            int map_y2 = map_y1 + size;
+            float sum = 0;
+            for (int i = map_x1; i <= map_x2; i++)
             {
-                print_pixel(win, x, y);
+                for (int j = map_y1; j <= map_y2; j++)
+                {
+                    sum += get_normal_map_value(illuminated, (Vec2i){i, j});
+                }
             }
+            float average = sum / (size * size);
+            set_normal_map_value(scaled, (Vec2i){x, y}, average * (LIGHT_RADIUS - 1));
         }
     }
+
+}
+
+void bilinear_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled)
+{
+    float scale_x = (float)illuminated.width / window_size.x;
+    float scale_y = (float)illuminated.height / window_size.y;
+
+    for (int y = 0; y < window_size.y; y++)
+    {
+        for (int x = 0; x < window_size.x; x++)
+        {
+            float map_x = x * scale_x;
+            float map_y = y * scale_y;
+            // Bilinear interpolation
+            int map_x1 = floor(map_x);
+            int map_x2 = ceil(map_x);
+            int map_y1 = floor(map_y);
+            int map_y2 = ceil(map_y);
+            float x_ratio = map_x - map_x1;
+            float y_ratio = map_y - map_y1;
+            float x_opposite = 1 - x_ratio;
+            float y_opposite = 1 - y_ratio;
+            float top_left = illuminated.data[map_y1 * illuminated.width + map_x1] == WALKABLE ? LIGHT_RADIUS -1 : 0;
+            float top_right = illuminated.data[map_y1 * illuminated.width + map_x2] == WALKABLE ? LIGHT_RADIUS -1 : 0;
+            float bottom_left = illuminated.data[map_y2 * illuminated.width + map_x1] == WALKABLE ? LIGHT_RADIUS -1: 0;
+            float bottom_right = illuminated.data[map_y2 * illuminated.width + map_x2] == WALKABLE ? LIGHT_RADIUS -1: 0;
+            float top = top_left * x_opposite + top_right * x_ratio;
+            float bottom = bottom_left * x_opposite + bottom_right * x_ratio;
+            float value = top * y_opposite + bottom * y_ratio;
+
+            set_normal_map_value(scaled, (Vec2i){x, y}, value);
+        }
+    }
+}
+
+void guassian_blur(Bitmap map, Bitmap temp)
+{
+    float kernel[3][3] = {
+        {0.0625, 0.125, 0.0625},
+        {0.125, 0.25, 0.125},
+        {0.0625, 0.125, 0.0625}};
+    for (int y = 0; y < map.height; y++)
+    {
+        for (int x = 0; x < map.width; x++)
+        {
+            float value = 0;
+            for (int ky = 0; ky < 3; ky++)
+            {
+                for (int kx = 0; kx < 3; kx++)
+                {
+                    int map_x = x + kx - 1;
+                    int map_y = y + ky - 1;
+                    if (is_between(map_x, 0, map.width) && is_between(map_y, 0, map.height))
+                    {
+                        value += get_normal_map_value(map, (Vec2i){map_x, map_y}) * kernel[ky][kx];
+                    }
+                }
+            }
+            set_normal_map_value(temp, (Vec2i){x, y}, value);
+        }
+    }
+    for (int y = 0; y < map.height; y++)
+    {
+        for (int x = 0; x < map.width; x++)
+        {
+            set_normal_map_value(map, (Vec2i){x, y}, get_normal_map_value(temp, (Vec2i){x, y}));
+        }
+    }
+}
+
+void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos)
+{
+    Bitmap scaled = alloc_bitmap(window_size.x, window_size.y);
+    // bilinear_scale(illuminated, window_size, scaled);
+    box_sampling_scale(illuminated, window_size, scaled, 4);
+
+    Bitmap blurred = scaled;
+    // Bitmap blurred = alloc_bitmap(window_size.x, window_size.y);
+    // guassian_blur(scaled, blurred);
+    // free_bitmap(scaled);
+
+    for (int y = 0; y < window_size.y; y++)
+    {
+        for (int x = 0; x < window_size.x; x++)
+        {
+            int value = get_normal_map_value(blurred, (Vec2i){x, y});
+            wattrset(win, COLOR_PAIR(Culur_Light_Gradient + MIN(value, LIGHT_RADIUS - 1)));
+            print_pixel(win, x, y);
+        }
+    }
+
+    free_bitmap(blurred);
+
+    float scale_x = (float)illuminated.width / window_size.x;
+    float scale_y = (float)illuminated.height / window_size.y;
+
     wattrset(win, COLOR_PAIR(COLOR_BLUE));
     int player_x = player_pos.x / scale_x;
     int player_y = player_pos.y / scale_y;
