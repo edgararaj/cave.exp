@@ -22,9 +22,10 @@
 #include <time.h>
 #include <unistd.h>
 #include "items.h"
+#include "buffs.h"
 
 void init_game(GameState *gs, Rect window) {
-    Rect rects[30];
+    Rect rects[1];
     int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     order_rects(rects, rects_count);
 
@@ -226,6 +227,10 @@ int use_key(GameState* gs)
 {
     if (collide_rect_rect(rect_float_to_rect(gs->player.rect), gs->portal))
     {
+        add_term_line("SOCORRO SOCORRO AJUDA SOCORRO!\n");
+        generate_random_buffs();
+        apply_buffs(gs);
+
         Rect window = {};
         window.tl.x = 0;
         window.tl.y = 0;

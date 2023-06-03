@@ -187,3 +187,11 @@ typedef struct {
     WINDOW *win;
     int highlight;
 } StartPauseState;
+
+typedef enum {
+    BUFF_INCREASE_MOBS_HEALTH,
+    BUFF_INCREASE_MOBS_DAMAGE,
+    BUFF_INCREASE_MAX_MOBS,
+    BUFF_INCREASE_MOBS_SPEED,
+    BUFF_INCREASE_ROOMS
+} BuffType;
