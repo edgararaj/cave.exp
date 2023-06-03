@@ -248,7 +248,6 @@ void draw_arrow(GameState *gs, Arrow arrow)
     print_pixel_custom(gs->win_game, pos.x, pos.y, ">");
 }
 
-
 void update_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us)
 {
     wresize(gs->win_log, window_size.y - gs->minimap_height - gs->player_stats_height - gs->inventory_height, gs->sidebar_width * X_SCALE);
