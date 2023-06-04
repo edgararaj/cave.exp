@@ -8,25 +8,25 @@
 
 #include "collide.h"
 #include "colors.h"
+#include "controls.h"
 #include "draw.h"
 #include "game.h"
 #include "hud.h"
+#include "info.h"
 #include "inventory.h"
 #include "items.h"
 #include "light.h"
 #include "map.h"
 #include "menu.h"
 #include "mobs.h"
+#include "niveis.h"
 #include "objects.h"
+#include "over.h"
+#include "pause.h"
 #include "player.h"
 #include "screen.h"
 #include "state.h"
 #include "utils.h"
-#include "menu.h"
-#include "info.h"
-#include "controls.h"
-#include "niveis.h"
-#include "pause.h"
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -124,6 +124,10 @@ int main()
     sms.win = win_menu;
     sms.highlight = 0;
 
+    StartOverState smsmsm;
+    smsmsm.win = win_menu;
+    smsmsm.highlight = 1;
+
     StartNiveisState smsm;
     smsm.win = win_menu;
     smsm.highlight = 1;
@@ -140,38 +144,56 @@ int main()
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     int delta_us = 0;
-    while (1) {
+    while (1)
+    {
         getmaxyx(stdscr, window_size.y, window_size.x);
         int key = getch();
 
-        if (state == State_Game) {
+        if (state == State_Game)
+        {
             update_game(&gs, window_size, key, &state, delta_us);
             draw_game(&gs, window_size, delta_us);
         }
-        else {
-            if (state == State_Menu) {
+        else
+        {
+            if (state == State_Menu)
+            {
                 if (start_menu)
                     draw_menu(&sms, &state, key, window_size);
-                else 
+                else
                     draw_pause(&smsms, &state, key, window_size);
-            } else if (state == State_Controlos) {
+            }
+            else if (state == State_Controlos)
+            {
                 draw_controls(win_menu, key, &state, window_size);
-            } else if (state == State_Niveis) {
+            }
+            else if (state == State_Niveis)
+            {
                 draw_niveis(&smsm, &state, key, window_size);
-            } else if (state == State_Info) {
+            }
+            else if (state == State_Info)
+            {
                 draw_info(win_menu, key, &state, window_size, delta_us);
-            } else if (state == State_Pause) {
+            }
+            else if (state == State_Pause)
+            {
                 draw_pause(&smsms, &state, key, window_size);
                 start_menu = 0;
-            } else if (state == State_New_Game) {
+            }
+            else if (state == State_New_Game)
+            {
                 state = State_Game;
                 init_game(&gs, window);
+            }
+            else if (state == State_Over)
+            {
+                draw_game_over(&smsmsm, &state, key, window_size);
             }
         }
 
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
         struct timeval result;
-        timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
+        timeval_subtract(&result, (struct timeval *)&end, (struct timeval *)&start);
         delta_us = result.tv_usec + result.tv_sec * 1e6;
         start = end;
     }

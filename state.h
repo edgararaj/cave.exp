@@ -56,7 +56,8 @@ typedef enum
     State_Niveis,
     State_Info,
     State_Pause,
-    State_New_Game
+    State_New_Game,
+    State_Over
 } State;
 
 
@@ -187,6 +188,11 @@ typedef struct {
     WINDOW *win;
     int highlight;
 } StartPauseState;
+
+typedef struct {
+    WINDOW *win;
+    int highlight;
+} StartOverState;
 
 typedef enum {
     BUFF_INCREASE_MOBS_HEALTH,
