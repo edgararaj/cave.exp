@@ -69,6 +69,7 @@ void setup_colors()
     init_pair(Culur_Default, Color_White, Color_Black);
     init_pair(Culur_Default_Gray, Culur_Gray, Color_Black);
     init_pair(Culur_Default_Green, Color_Green, Color_Black);
+    init_pair(Culur_Default_Blue, Color_Blue, Color_Black);
     init_pair(Culur_Default_Red, Color_Red, Color_Black);
     init_pair(Culur_Spike, Culur_Spike_Front, Culur_Spike_Back);
     init_pair(Culur_Hotbar, Culur_Hotbar_Front, Culur_Hotbar_Back);

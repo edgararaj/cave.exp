@@ -29,7 +29,7 @@ typedef struct {
     ItemType type;
     int count;
     Item name;
-    int cooldown;
+    float cooldown;
 } ItemSlot;
 
 typedef struct

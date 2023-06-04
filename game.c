@@ -122,7 +122,7 @@ void init_game(GameState *gs, Rect window) {
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
 {
     int attacked = 0;
-    if (timer_update(&player->dmg_cooldown, delta_us))
+    if (!player->dmg_cooldown)
     {
         for (int i = 0; i < num_mobs; i++)
         {
@@ -272,6 +272,8 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
         }
     }
 
+    timer_update(&gs->player.dmg_cooldown, delta_us);
+
     RectFloat prev_player = gs->player.rect;
     update_player(&gs->player.rect, key, delta_us);
     if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->collision))
@@ -344,6 +346,9 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     else {
         gs->player_spike_damage_cooldown = 0;
     }
+
+    gs->inventory.items[0].cooldown = gs->player.dmg_cooldown / 1e6;
+
     if (key == 27 || key == 'p') {
         *state = State_Pause;
     }

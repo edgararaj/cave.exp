@@ -74,6 +74,17 @@ int remove_item(Inventory *inventory, int index)
     return 0;
 }
 
+void split_string(char* str, char* buffer, int n)
+{
+    int i;
+    for (i = 0; i < strlen(str) - n; i++)
+    {
+        buffer[i] = str[i + n];
+    }
+    buffer[i] = '\0';
+    str[n] = '\0';
+}
+
 void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size, int selected)
 {
     for (int i = 0; i < inventory->size; i++)
@@ -92,15 +103,24 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size, int se
 
         if (inventory->items[i].count > 0)
         {
+            char buffer[100];
+            if (inventory->items[i].type != ItemType_Disposable)
+                snprintf(buffer, 100, "%d. %s", i + 1, name);
+            else
+                snprintf(buffer, 100, "%d. %s x%d", i + 1, name, inventory->items[i].count);
+
+            char buffer2[100];
+            int n = (1-inventory->items[i].cooldown) * strlen(buffer);
+            split_string(buffer, buffer2, n);
+
             if (i + 1 == selected)
                 wattrset(win, COLOR_PAIR(Culur_Default_Green));
             else
                 wattrset(win, COLOR_PAIR(Culur_Default));
+            mvwprintw(win, i+1, 1, buffer);
 
-            if (inventory->items[i].type != ItemType_Disposable)
-                mvwprintw(win, i+1, 1, "%d. %s", i + 1, name);
-            else
-                mvwprintw(win, i+1, 1, "%d. %s x%d", i + 1, name, inventory->items[i].count);
+            wattrset(win, COLOR_PAIR(Culur_Default_Blue));
+            mvwprintw(win, i+1, 1+n, buffer2);
         }
         else if (inventory->items[i].count == 0)
         {
