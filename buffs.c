@@ -21,7 +21,6 @@ void apply_buffs(GameState *gs) {
                 add_term_line("Mobs Health Increased!\n");
                 for (int j = 0; j < MAX_MOBS; j++) {
                     gs->mobs[j].warrior.maxHP = gs->mobs[j].warrior.maxHP * 1.1;
-                    gs->mobs[j].warrior.hp = gs->mobs[j].warrior.hp * 1.1;
                 }
                 break;
             case BUFF_INCREASE_MOBS_DAMAGE:
