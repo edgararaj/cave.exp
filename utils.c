@@ -10,7 +10,7 @@ int random_between(int min, int max)
 
 int timer_update(int *left, int delta)
 {
-    *left -= 1;
+    *left -= delta;
     if (*left < 0)
     {
         *left = 0;

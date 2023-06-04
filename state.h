@@ -145,7 +145,9 @@ typedef struct
     WINDOW *win_log;
     WINDOW *win_minimap;
     WINDOW *win_stats;
-    Bitmap pixmap;
+    Bitmap collision;
+    Bitmap distance;
+    Bitmap light;
     Torch *torches;
     Chest* chests;
     Rect portal;
@@ -153,7 +155,6 @@ typedef struct
     Mob *mobs;
     Bitmap illuminated;
     Inventory inventory;
-    int player_attacking;
     int minimap_maximized;
     int player_spike_damage_cooldown;
     int chestCount;

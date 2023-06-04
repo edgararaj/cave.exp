@@ -11,82 +11,7 @@
 #include "state.h"
 #include "term.h"
 #include "utils.h"
-
-uint32_t dist_map_encode(int value)
-{
-    return (value & PARTITION_MASK) << DIST_MAP_SHIFT;
-}
-
-uint32_t light_map_encode(int value)
-{
-    return (value & PARTITION_MASK) << LIGHT_MAP_SHIFT;
-}
-
-int light_map_decode(uint32_t value)
-{
-    return (value & LIGHT_MAP_MASK) >> LIGHT_MAP_SHIFT;
-}
-
-int dist_map_decode(uint32_t value)
-{
-    return (value & DIST_MAP_MASK) >> DIST_MAP_SHIFT;
-}
-
-int normal_map_decode(uint32_t value)
-{
-    return (value & NORMAL_MAP_MASK) >> NORMAL_MAP_SHIFT;
-}
-
-uint32_t normal_map_encode(int value)
-{
-    return value << NORMAL_MAP_SHIFT;
-}
-
-void set_normal_map_value(Bitmap bitmap, Vec2i pos, int value)
-{
-    bitmap.data[pos.y * bitmap.width + pos.x] &= (~NORMAL_MAP_MASK);
-    bitmap.data[pos.y * bitmap.width + pos.x] |= normal_map_encode(value);
-}
-
-void set_light_map_value(Bitmap bitmap, Vec2i pos, int value)
-{
-    // assert(value >= 0 && value <= LIGHT_RADIUS);
-    bitmap.data[pos.y * bitmap.width + pos.x] &= (~LIGHT_MAP_MASK);
-    bitmap.data[pos.y * bitmap.width + pos.x] |= light_map_encode(value);
-}
-
-int get_light_map_value(Bitmap bitmap, Vec2i pos)
-{
-    return light_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
-}
-
-int get_normal_map_value(Bitmap bitmap, Vec2i pos)
-{
-    return normal_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
-}
-
-int get_dist_map_value(Bitmap bitmap, Vec2i pos)
-{
-    return dist_map_decode(bitmap.data[pos.y * bitmap.width + pos.x]);
-}
-
-void add_light_map_value(Bitmap bitmap, Vec2i pos, int value)
-{
-    int result = value + get_light_map_value(bitmap, pos);
-    // if (result > LIGHT_RADIUS) {
-    // add_term_line("%d\n", result);
-    // }
-    // if (result > LIGHT_RADIUS)
-    //     result = LIGHT_RADIUS;
-    set_light_map_value(bitmap, pos, result);
-}
-
-void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value)
-{
-    // assert(value >= 0 && value <= MAX_DIST);
-    bitmap.data[pos.y * bitmap.width + pos.x] &= (~DIST_MAP_MASK);
-    bitmap.data[pos.y * bitmap.width + pos.x] |= dist_map_encode(value);
-}
+#include "dist.h"
 
 void apply_horizontal_tunnel(int x1, int x2, int y, Bitmap bitmap)
 {
@@ -95,10 +20,10 @@ void apply_horizontal_tunnel(int x1, int x2, int y, Bitmap bitmap)
 
     for (int x = start; x <= end; x++)
     {
-        set_normal_map_value(bitmap, (Vec2i){x, y}, WALKABLE);
+        set_bitmap_value(bitmap, (Vec2i){x, y}, WALKABLE);
         if (y + 1 < bitmap.height) // Verifica se não estamos no limite do bitmap
         {
-            set_normal_map_value(bitmap, (Vec2i){x, y + 1}, WALKABLE);
+            set_bitmap_value(bitmap, (Vec2i){x, y + 1}, WALKABLE);
         }
     }
 }
@@ -110,10 +35,10 @@ void apply_vertical_tunnel(int y1, int y2, int x, Bitmap bitmap)
 
     for (int y = start; y <= end; y++)
     {
-        set_normal_map_value(bitmap, (Vec2i){x, y}, WALKABLE);
+        set_bitmap_value(bitmap, (Vec2i){x, y}, WALKABLE);
         if (x + 1 < bitmap.width) // Verifica se não estamos no limite do bitmap
         {
-            set_normal_map_value(bitmap, (Vec2i){x + 1, y}, WALKABLE);
+            set_bitmap_value(bitmap, (Vec2i){x + 1, y}, WALKABLE);
         }
     }
 }
@@ -130,7 +55,7 @@ int radius_count(Bitmap bitmap, int x, int y, int r)
         int ymax = MIN(y + r, bitmap.height - 1);
         for (int j = ymin; j <= ymax; j++)
         {
-            if (normal_map_decode(bitmap.data[j * bitmap.width + i]) == WALL)
+            if (get_bitmap_value(bitmap, (Vec2i){i, j}) == WALL)
                 result++;
         }
     }
@@ -146,7 +71,7 @@ void generate_obstacles(Bitmap bitmap, Rect rect2)
         {
             if (rand() % 100 < 10 && radius_count(bitmap, x, y, 4) <= 10)
             {
-                set_normal_map_value(bitmap, (Vec2i){x, y}, WALL);
+                set_bitmap_value(bitmap, (Vec2i){x, y}, WALL);
             }
         }
     }
@@ -158,7 +83,7 @@ void generate_obstacles(Bitmap bitmap, Rect rect2)
             {
                 if (radius_count(bitmap, x, y, 1) >= 4)
                 {
-                    set_normal_map_value(bitmap, (Vec2i){x, y}, WALL);
+                    set_bitmap_value(bitmap, (Vec2i){x, y}, WALL);
                 }
             }
         }
@@ -167,9 +92,9 @@ void generate_obstacles(Bitmap bitmap, Rect rect2)
     {
         for (int y = rect.tl.y; y < rect.br.y; y++)
         {
-            if (radius_count(bitmap, x, y, 2) <= 4 && normal_map_decode(bitmap.data[y * bitmap.width + x]) == WALL)
+            if (radius_count(bitmap, x, y, 2) <= 4 && get_bitmap_value(bitmap, (Vec2i){x, y}) == WALL)
             {
-                set_normal_map_value(bitmap, (Vec2i){x, y}, WALKABLE);
+                set_bitmap_value(bitmap, (Vec2i){x, y}, WALKABLE);
             }
         }
     }
@@ -264,11 +189,14 @@ void erode(Bitmap bitmap, int iterations)
         int open_tiles[bitmap.width * bitmap.height];
         int open_tile_count = 0;
 
-        for (int j = 0; j < bitmap.width * bitmap.height; j++)
+        for (int i = 0; i < bitmap.width; i++)
         {
-            if (normal_map_decode(bitmap.data[j]) == WALKABLE)
+            for (int j = 0; j < bitmap.height; j++)
             {
-                open_tiles[open_tile_count++] = j;
+                if (get_bitmap_value(bitmap, (Vec2i){i, j}) == WALKABLE)
+                {
+                    open_tiles[open_tile_count++] = j * bitmap.width + i;
+                }
             }
         }
 
@@ -281,7 +209,7 @@ void erode(Bitmap bitmap, int iterations)
         // Enquanto a célula escolhida ainda for um '#', escolha uma direção
         // aleatória e mova o "digger"
         int cap = 1000;
-        while (normal_map_decode(bitmap.data[digger]) == WALKABLE && cap-- > 0)
+        while (get_bitmap_value(bitmap, (Vec2i){digger_x, digger_y}) == WALKABLE && cap-- > 0)
         {
             int direction = rand() % 4;
 
@@ -312,18 +240,16 @@ void erode(Bitmap bitmap, int iterations)
                 }
                 break;
             }
-
-            digger = digger_y * bitmap.width + digger_x;
         }
 
         // Marque a nova célula como um '#'
-        set_normal_map_value(bitmap, (Vec2i){digger_x, digger_y}, WALKABLE);
+        set_bitmap_value(bitmap, (Vec2i){digger_x, digger_y}, WALKABLE);
     }
 }
 
 int map_is_wall(Bitmap pixmap, Vec2f pos)
 {
-    int data = get_normal_map_value(pixmap, vec2f_to_i(pos));
+    int data = get_bitmap_value(pixmap, vec2f_to_i(pos));
     return data == WALL || data == SHINE;
 }
 
@@ -335,9 +261,9 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
         for (int y = rect.tl.y; y < rect.br.y; y++)
         {
             Vec2i pos = (Vec2i){x, y};
-            if (get_normal_map_value(pixmap, pos) == WALKABLE && rand() % 100 < 1)
+            if (get_bitmap_value(pixmap, pos) == WALKABLE && rand() % 100 < 1)
             { // 3.5% chance to place a spike
-                set_normal_map_value(pixmap, pos, SPIKE);
+                set_bitmap_value(pixmap, pos, SPIKE);
             }
         }
     }
@@ -417,7 +343,7 @@ int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc)
             !map_is_wall(pixmap, vec2f_add(pos, inc)));
 }
 
-void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bitmap illuminated)
+void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitmap dist, WINDOW *window, Bitmap illuminated)
 {
     for (int x = 0; x < camera.width; ++x)
     {
@@ -429,36 +355,42 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, WINDOW *window, Bit
             {
                 continue;
             }
-            uint32_t data = map.data[map_y * map.width + map_x];
+            int collision_data = get_bitmap_value(map, (Vec2i){map_x, map_y});
+            int light_data = get_bitmap_value(light, (Vec2i){map_x, map_y});
+            int dist_data = get_bitmap_value(dist, (Vec2i){map_x, map_y});
 
-            if (normal_map_decode(data) == WALKABLE)
+            if (collision_data == WALKABLE)
             {
-                wattrset(win_game, COLOR_PAIR(Culur_Light_Gradient + MIN(light_map_decode(data), LIGHT_RADIUS - 1)));
+                wattrset(win_game, COLOR_PAIR(Culur_Light_Gradient + MIN(light_data, LIGHT_RADIUS - 1)));
                 print_pixel(window, x, y);
             }
-            if (normal_map_decode(data) == SHINE)
+            if (collision_data == SHINE)
             {
                 wattrset(win_game, COLOR_PAIR(Culur_Shine));
                 print_pixel(window, x, y);
             }
-            else if (normal_map_decode(data) == SPIKE)
+            else if (collision_data == SPIKE)
             {
-                wattrset(win_game, COLOR_PAIR(Culur_Spike));
-                print_pixel_custom(window, x, y, "^");
+                int distance = get_bitmap_value(dist, (Vec2i){map_x, map_y});
+                if (distance != 0 && distance <= MAX_DIST_SHINE)
+                {
+                    wattrset(win_game, COLOR_PAIR(Culur_Spike));
+                    print_pixel_custom(window, x, y, "^");
+                }
             }
-            else if (normal_map_decode(data) == PORTAL)
+            else if (collision_data == PORTAL)
             {
                 wattrset(win_game, COLOR_PAIR(Culur_Portal));
                 print_pixel(window, x, y);
             }
-            else if (normal_map_decode(data) == OUTER_PORTAL)
+            else if (collision_data == OUTER_PORTAL)
             {
                 wattrset(win_game, COLOR_PAIR(Culur_Outer_Portal));
                 print_pixel(window, x, y);
             }
             else
             {
-                if (get_normal_map_value(illuminated, (Vec2i){map_x, map_y}) == SHINE)
+                if (get_bitmap_value(illuminated, (Vec2i){map_x, map_y}) == SHINE)
                 {
                     wattrset(win_game, COLOR_PAIR(Culur_Shine_Dimmed));
                     print_pixel(window, x, y);
@@ -491,11 +423,11 @@ void box_sampling_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled, in
             {
                 for (int j = map_y1; j <= map_y2; j++)
                 {
-                    sum += get_normal_map_value(illuminated, (Vec2i){i, j});
+                    sum += get_bitmap_value(illuminated, (Vec2i){i, j});
                 }
             }
             float average = sum / (size * size);
-            set_normal_map_value(scaled, (Vec2i){x, y}, average * (LIGHT_RADIUS - 1));
+            set_bitmap_value(scaled, (Vec2i){x, y}, average * (LIGHT_RADIUS - 1));
         }
     }
 
@@ -529,42 +461,7 @@ void bilinear_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled)
             float bottom = bottom_left * x_opposite + bottom_right * x_ratio;
             float value = top * y_opposite + bottom * y_ratio;
 
-            set_normal_map_value(scaled, (Vec2i){x, y}, value);
-        }
-    }
-}
-
-void guassian_blur(Bitmap map, Bitmap temp)
-{
-    float kernel[3][3] = {
-        {0.0625, 0.125, 0.0625},
-        {0.125, 0.25, 0.125},
-        {0.0625, 0.125, 0.0625}};
-    for (int y = 0; y < map.height; y++)
-    {
-        for (int x = 0; x < map.width; x++)
-        {
-            float value = 0;
-            for (int ky = 0; ky < 3; ky++)
-            {
-                for (int kx = 0; kx < 3; kx++)
-                {
-                    int map_x = x + kx - 1;
-                    int map_y = y + ky - 1;
-                    if (is_between(map_x, 0, map.width) && is_between(map_y, 0, map.height))
-                    {
-                        value += get_normal_map_value(map, (Vec2i){map_x, map_y}) * kernel[ky][kx];
-                    }
-                }
-            }
-            set_normal_map_value(temp, (Vec2i){x, y}, value);
-        }
-    }
-    for (int y = 0; y < map.height; y++)
-    {
-        for (int x = 0; x < map.width; x++)
-        {
-            set_normal_map_value(map, (Vec2i){x, y}, get_normal_map_value(temp, (Vec2i){x, y}));
+            set_bitmap_value(scaled, (Vec2i){x, y}, value);
         }
     }
 }
@@ -584,7 +481,7 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i pl
     {
         for (int x = 0; x < window_size.x; x++)
         {
-            int value = get_normal_map_value(blurred, (Vec2i){x, y});
+            int value = get_bitmap_value(blurred, (Vec2i){x, y});
             wattrset(win, COLOR_PAIR(Culur_Light_Gradient + MIN(value, LIGHT_RADIUS - 1)));
             print_pixel(win, x, y);
         }

@@ -132,25 +132,25 @@ Vec2f vec2f_normalize(Vec2f a)
 
 Vec2i rect_size(Rect rect)
 {
-    Vec2i r = {rect.br.x - rect.tl.x, rect.br.y - rect.tl.y};
+    Vec2i r = {rect.br.x - rect.tl.x + 1, rect.br.y - rect.tl.y + 1};
     return r;
 }
 
 Vec2f rect_float_size(RectFloat rect)
 {
-    Vec2f r = {rect.br.x - rect.tl.x, rect.br.y - rect.tl.y};
+    Vec2f r = {rect.br.x - rect.tl.x + 1, rect.br.y - rect.tl.y + 1};
     return r;
 }
 
 Vec2f rect_center(Rect rect)
 {
-    Vec2f r = vec2f_add(vec2f_add(vec2f_div_const(vec2i_to_f(rect_size(rect)), 2), vec2i_to_f(rect.tl)), (Vec2f){0.5f, 0.5f});
+    Vec2f r = vec2f_add(vec2f_div_const(vec2i_to_f(rect_size(rect)), 2), vec2i_to_f(rect.tl));
     return r;
 }
 
 Vec2f rect_float_center(RectFloat rect)
 {
-    Vec2f r = vec2f_add(vec2f_div_const(rect_float_size(rect), 2), (rect.tl));
+    Vec2f r = vec2f_add(vec2f_div_const(rect_float_size(rect), 2), rect.tl);
     return r;
 }
 
@@ -242,14 +242,38 @@ Rect expand_rect(Rect rect, int amount)
     return result;
 }
 
+void zero_bitmap(Bitmap bitmap)
+{
+    for (int i = 0; i < bitmap.width * bitmap.height; i++) { bitmap.data[i] = 0; }
+}
+
 Bitmap alloc_bitmap(int width, int height)
 {
     uint32_t* data = (uint32_t *)malloc(width * height * sizeof(uint32_t));
-    for (int i = 0; i < width * height; i++) { data[i] = 0; }
-    return (Bitmap){.data = data, .size = {width, height}};
+    Bitmap result = {data, {width, height}};
+    zero_bitmap(result);
+    return result;
 }
 
 void free_bitmap(Bitmap bitmap)
 {
     free(bitmap.data);
+}
+
+void set_bitmap_value(Bitmap bitmap, Vec2i pos, int value)
+{
+    bitmap.data[pos.y * bitmap.width + pos.x] = value;
+}
+
+int get_bitmap_value(Bitmap bitmap, Vec2i pos)
+{
+    return bitmap.data[pos.y * bitmap.width + pos.x];
+}
+
+int get_rect_distance(Bitmap distance, Rect rect) {
+    int tl = get_bitmap_value(distance, rect.tl);
+    int tr = get_bitmap_value(distance, (Vec2i){rect.br.x, rect.tl.y});
+    int bl = get_bitmap_value(distance, (Vec2i){rect.tl.x, rect.br.y});
+    int br = get_bitmap_value(distance, rect.br);
+    return MIN(MIN(tl, tr), MIN(bl, br));
 }

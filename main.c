@@ -108,8 +108,12 @@ int main()
     gs.inventory.items[2].name = Item_HealthPotion;
     gs.inventory.items[3].name = Item_ManaPotion;
     gs.inventory.items[4].name = Item_Key;
-
     gs.inventory.size = 5;
+
+    gs.collision = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    gs.distance = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    gs.illuminated = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    gs.light = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
 
     gs.minimap_height = minimap_height;
     gs.sidebar_width = minimap_height;
@@ -139,14 +143,8 @@ int main()
 
     int start_menu = 1;
 
-    // Uint64 oldtime = SDL_GetTicks64();
-    int fps_counter = 0;
-    int frames_drawn = 0;
-    int fps = 0;
-
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-    uint64_t diff;
 
     int delta_us = 0;
     while (1) {
@@ -178,28 +176,10 @@ int main()
             }
         }
 
-        // Uint64 newtime = SDL_GetTicks64();
-        // int ms = (newtime - oldtime);
-        // oldtime = newtime;
-
-        // fps_counter += ms;
-        // frames_drawn++;
-        // if(fps_counter >= 1000) {
-        //     fps = (float)frames_drawn / (float)(fps_counter/1000.0f);
-        // }
-        // char title[100];
-        // snprintf(title, 100, "GAME | %i ms, %i fps", ms, fps);
-        // printf("%d ms, %d fps\n", ms, fps);
-
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-        diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+        uint64_t diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
         start = end;
-
-        // fps_counter += (int)(diff * 1e-6);
-        // frames_drawn++;
-        // if(fps_counter >= 1000) {
-        //     fps = (float)frames_drawn / (float)(fps_counter/1000.0f);
-        // }
+        delta_us = diff * 1e-3;
         add_term_line("%d ms, %d fps", (int)(diff * 1e-6), (int)(1000/(diff * 1e-6)));
     }
 

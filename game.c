@@ -25,14 +25,16 @@
 #include "movimento.h"
 
 void init_game(GameState *gs, Rect window) {
+    zero_bitmap(gs->illuminated);
+    zero_bitmap(gs->collision);
+    zero_bitmap(gs->light);
+
     Rect rects[10];
     int rects_count = generate_rects(expand_rect(window, -5), rects, ARRAY_SIZE(rects));
     order_rects(rects, rects_count);
 
-    if (gs->pixmap.data) { free(gs->pixmap.data); }
-    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 2200);
+    generate_tunnels_and_rasterize(gs->collision, rects, rects_count);
+    erode(gs->collision, 2200);
     int portal_room = random_between(0, rects_count - 1);
     int div = 2;
     int portal_div = random_between(0, div * div - 1);
@@ -56,8 +58,8 @@ void init_game(GameState *gs, Rect window) {
                     num_chests++;
                 }
                 else {
-                    generate_spikes(pixmap, sub);
-                    generate_obstacles(pixmap, sub);
+                    generate_spikes(gs->collision, sub);
+                    generate_obstacles(gs->collision, sub);
                 }
             }
             else {
@@ -67,10 +69,7 @@ void init_game(GameState *gs, Rect window) {
     }
     int key_chest_pos = random_between(0, num_chests - 1);
     add_item(&yoo_chests[key_chest_pos].inventory, Item_Key, 1);
-    bitmap_draw_box(pixmap, window);
-
-    if (gs->illuminated.data) { free(gs->illuminated.data); }
-    Bitmap illuminated = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    bitmap_draw_box(gs->collision, window);
 
     Vec2i first_rect_center = get_center(rects[0]);
     // for (int i = 0; i < 500; i++)
@@ -93,10 +92,10 @@ void init_game(GameState *gs, Rect window) {
     CameraMode cam_mode = CameraMode_Follow;
 
     Torch torches[MAX_TORCHES];
-    create_torches(pixmap, torches, MAX_TORCHES);
+    create_torches(gs->collision, torches, MAX_TORCHES);
 
     Mob mobs[MAX_MOBS];
-    create_mobs(pixmap, mobs, MAX_MOBS);
+    create_mobs(gs->collision, mobs, MAX_MOBS);
 
     Player_Stats player_stats;
     player_stats.hp = 100;
@@ -112,24 +111,31 @@ void init_game(GameState *gs, Rect window) {
     gs->player = player;
     gs->torches = torches;
     gs->mobs = mobs;
-    gs->pixmap = pixmap;
-    gs->illuminated = illuminated;
     gs->minimap_maximized = false;
     gs->chests = yoo_chests;
     gs->chests_count = num_chests;
     gs->portal = portal_rect;
+    if (gs->arrows) free(gs->arrows);
     gs->arrows = malloc(sizeof(Arrow) * MAX_ARROWS);
 }
 
 void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
 {
-    gs->player_attacking = 10;
-    for (int i = 0; i < num_mobs; i++)
+    int attacked = 0;
+    if (timer_update(&player->dmg_cooldown, delta_us))
     {
-        if (mobs[i].warrior.hp <= 0)
-            continue;
-        warrior_attack(player, &mobs[i].warrior, delta_us);
+        for (int i = 0; i < num_mobs; i++)
+        {
+            if (mobs[i].warrior.hp <= 0)
+                continue;
+            attacked += warrior_attack(player, &mobs[i].warrior, delta_us);
+        }
     }
+    if (attacked)
+    {
+        player->dmg_cooldown = 1e6;
+    }
+    player->attacking = 0.1 * 1e6;
 }
 
 int char_width_int(int value)
@@ -142,7 +148,7 @@ void render_hp(WINDOW *win_game, Camera camera, Rect rect, int hp)
     Vec2i size = rect_size(rect);
     Rect translated_rect = rect_translate(rect, vec2i_mul_const(camera.offset, -1));
     int char_width = char_width_int(hp);
-    int new_x = (int)(translated_rect.tl.x * X_SCALE + (size.x * X_SCALE) / 2.f - (char_width / 2.f)) + 1;
+    int new_x = (int)(translated_rect.tl.x * X_SCALE + (size.x * X_SCALE) / 2.f - (char_width / 2.f));
     wattrset(win_game, COLOR_PAIR(Culur_Default));
     mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d", hp);
 }
@@ -155,20 +161,6 @@ Rect project_rect(Camera camera, Rect player)
 void render_rect(WINDOW *win, Camera camera, Rect player)
 {
     print_rectangle(win, project_rect(camera, player));
-}
-
-void mix_lightmap(Bitmap output, Bitmap input)
-{
-    for (int x = 0; x < input.width; x++)
-    {
-        for (int y = 0; y < input.height; y++)
-        {
-            Vec2i abs_pos = (Vec2i){x, y};
-            int v1 = get_light_map_value(input, abs_pos);
-            int v2 = get_light_map_value(output, abs_pos);
-            set_light_map_value(output, abs_pos, (v1 + v2));
-        }
-    }
 }
 
 void render_player_attack(GameState *gs, Warrior player, Vec2i window_size)
@@ -203,9 +195,23 @@ int use_key(GameState* gs)
 
 void draw_arrow(GameState *gs, Arrow arrow)
 {
-    Vec2i pos = vec2f_to_i(rect_center(rect_translate(project_rect(gs->camera, rect_float_to_rect(arrow.rect)), (Vec2i){-1, -1})));
+    Vec2i pos = vec2f_to_i(rect_center(project_rect(gs->camera, rect_float_to_rect(arrow.rect))));
     wattrset(gs->win_game, COLOR_PAIR(Culur_Default_Red));
     print_pixel_custom(gs->win_game, pos.x, pos.y, ">");
+}
+
+void mix_lightmap(Bitmap output, Bitmap input)
+{
+    for (int x = 0; x < input.width; x++)
+    {
+        for (int y = 0; y < input.height; y++)
+        {
+            Vec2i abs_pos = (Vec2i){x, y};
+            int v1 = get_bitmap_value(input, abs_pos);
+            int v2 = get_bitmap_value(output, abs_pos);
+            set_bitmap_value(output, abs_pos, (v1 + v2));
+        }
+    }
 }
 
 void update_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us)
@@ -268,7 +274,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
 
     RectFloat prev_player = gs->player.rect;
     update_player(&gs->player.rect, key, delta_us);
-    if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->pixmap))
+    if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->collision))
     {
         gs->player.rect = prev_player;
     }
@@ -278,37 +284,28 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     else
         center_camera(&gs->camera, player_center);
 
-    for (int x = 0; x < gs->pixmap.width; x++)
+    for (int x = 0; x < MAP_WIDTH; x++)
     {
-        for (int y = 0; y < gs->pixmap.height; y++)
+        for (int y = 0; y < MAP_HEIGHT; y++)
         {
-            if (get_normal_map_value(gs->pixmap, (Vec2i){x, y}) == SHINE)
-                set_normal_map_value(gs->pixmap, (Vec2i){x, y}, WALL);
-            set_dist_map_value(gs->pixmap, (Vec2i){x, y}, 0);
+            set_bitmap_value(gs->distance, (Vec2i){x, y}, 0);
+            if (get_bitmap_value(gs->collision, (Vec2i){x, y}) == SHINE)
+                set_bitmap_value(gs->collision, (Vec2i){x, y}, WALL);
+            set_bitmap_value(gs->light, (Vec2i){x, y}, 0);
         }
     }
-    dist_pass(gs->pixmap, player_center, gs->illuminated);
-    light_reset(gs->pixmap);
+    dist_pass(gs->distance, gs->collision, player_center, gs->illuminated);
 
-    for (int i = 0; i < MAX_TORCHES; i++)
-    {
-        Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-        light_reset(lightmap);
-        light_pass(lightmap, gs->torches[i].position, gs->torches[i].radius, gs->pixmap);
+    Bitmap player_light = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    light_pass(player_light, rect_float_to_rect(gs->player.rect), LIGHT_RADIUS, gs->collision);
+    mix_lightmap(gs->light, player_light);
 
-        mix_lightmap(gs->pixmap, lightmap);
-        free_bitmap(lightmap);
-    }
-
-    Bitmap lightmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    light_reset(lightmap);
-    light_pass(lightmap, rect_float_to_rect(gs->player.rect), LIGHT_RADIUS, gs->pixmap);
-
-    update_mobs(gs->mobs, MAX_MOBS, gs->pixmap, &gs->player, lightmap, delta_us, gs->arrows, &gs->arrow_count);
+    update_mobs(gs->mobs, MAX_MOBS, gs->distance, &gs->player, player_light, delta_us, gs->arrows, &gs->arrow_count);
+    free_bitmap(player_light);
 
     for (int i = 0; i < gs->arrow_count; i++)
     {
-        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_div_const(gs->arrows[i].velocity, 7));
+        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_div_const(gs->arrows[i].velocity, 2));
         if (collide_rect_rect(rect_float_to_rect(gs->arrows[i].rect), rect_float_to_rect(gs->player.rect)))
         {
             gs->player.hp -= 10;
@@ -316,16 +313,13 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
             gs->arrow_count--;
             i--;
         }
-        else if (collide_rect_bitmap(rect_float_to_rect(gs->arrows[i].rect), gs->pixmap))
+        else if (collide_rect_bitmap(rect_float_to_rect(gs->arrows[i].rect), gs->collision))
         {
             gs->arrows[i] = gs->arrows[gs->arrow_count - 1];
             gs->arrow_count--;
             i--;
         }
     }
-
-    mix_lightmap(gs->pixmap, lightmap);
-    free_bitmap(lightmap);
 
     for (int i = 0; i < gs->chests_count; i++)
     {
@@ -339,15 +333,16 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
         }
     }
 
-    if (get_normal_map_value(gs->pixmap, player_center) == SPIKE)
+    if (get_bitmap_value(gs->collision, player_center) == SPIKE)
     {
         if (timer_update(&gs->player_spike_damage_cooldown, delta_us))
         {
             gs->player_spike_damage_cooldown = SPIKE_DAMAGE_COOLDOWN;
             gs->player.hp -= SPIKE_DAMAGE;
-            if (gs->player.hp < 0)
-                gs->player.hp = 0;
         }
+    }
+    else {
+        gs->player_spike_damage_cooldown = 0;
     }
     if (key == 27 || key == 'p') {
         *state = State_Pause;
@@ -363,17 +358,57 @@ void draw_game(GameState *gs, Vec2i window_size, int delta_us) {
 
     Vec2i player_center = vec2f_to_i(rect_float_center(gs->player.rect));
 
-    render_map(gs->win_game, gs->camera, gs->pixmap, gs->win_game, gs->illuminated);
-
-    if (gs->player_attacking)
+    for (int i = 0; i < MAX_TORCHES; i++)
     {
-        timer_update(&gs->player_attacking, delta_us);
+        int dist = get_rect_distance(gs->distance, gs->torches[i].position);
+        if (dist == 0 || dist > MAX_DIST_SHINE)
+            continue;
+        Bitmap torch_light = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+        light_pass(torch_light, gs->torches[i].position, gs->torches[i].radius, gs->collision);
+        mix_lightmap(gs->light, torch_light);
+    }
+
+    render_map(gs->win_game, gs->camera, gs->collision, gs->light, gs->distance, gs->win_game, gs->illuminated);
+
+    if (gs->player.attacking)
+    {
+        timer_update(&gs->player.attacking, delta_us);
         render_player_attack(gs, gs->player, window_size);
     }
 
+    for (int i = 0; i < MAX_TORCHES; i++)
+    {
+        int dist = get_rect_distance(gs->distance, gs->torches[i].position);
+        if (dist == 0 || dist > MAX_DIST_SHINE)
+            continue;
+        wattrset(gs->win_game, COLOR_PAIR(3));
+        print_pixel(gs->win_game, gs->torches[i].position.tl.x - gs->camera.x,
+                    gs->torches[i].position.tl.y - gs->camera.y);
+    }
+
+    for (int i = 0; i < gs->chests_count; i++)
+    {
+        if (!gs->chests[i].is_open)
+        {
+            int dist = get_rect_distance(gs->distance, gs->chests[i].rect);
+            if (dist == 0 || dist > MAX_DIST_SHINE)
+                continue;
+            draw_chest(gs->win_game, project_rect(gs->camera, gs->chests[i].rect));
+        }
+    }
+
+    for (int i = 0; i < gs->arrow_count; i++)
+    {
+        draw_arrow(gs, gs->arrows[i]);
+    }
+
+    int dist = get_rect_distance(gs->distance, gs->portal);
+    if (dist != 0 && dist <= MAX_DIST_SHINE)
+        draw_portal(gs->win_game, project_rect(gs->camera, gs->portal));
+
     for (int i = 0; i < MAX_MOBS; i++)
     {
-        int dist = get_dist_map_value(gs->pixmap, vec2f_to_i(rect_float_center(gs->mobs[i].warrior.rect)));
+        int dist = get_bitmap_value(gs->distance, vec2f_to_i(rect_float_center(gs->mobs[i].warrior.rect)));
         if (gs->mobs[i].warrior.hp <= 0 || dist == 0 || dist > MAX_DIST_SHINE)
             continue;
         
@@ -387,35 +422,13 @@ void draw_game(GameState *gs, Vec2i window_size, int delta_us) {
         }
     }
 
-    for (int i = 0; i < MAX_TORCHES; i++)
-    {
-        wattrset(gs->win_game, COLOR_PAIR(3));
-        print_pixel(gs->win_game, gs->torches[i].position.tl.x - gs->camera.x,
-                    gs->torches[i].position.tl.y - gs->camera.y);
-    }
-
-    for (int i = 0; i < gs->chests_count; i++)
-    {
-        if (!gs->chests[i].is_open)
-        {
-            draw_chest(gs->win_game, project_rect(gs->camera, gs->chests[i].rect));
-        }
-    }
-
-    for (int i = 0; i < gs->arrow_count; i++)
-    {
-        draw_arrow(gs, gs->arrows[i]);
-    }
-
-    draw_portal(gs->win_game, project_rect(gs->camera, gs->portal));
-
     render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_minimap, gs->illuminated, (Vec2i){gs->sidebar_width, gs->minimap_height}, player_center);
     draw_inventory(gs->win_inventory, &gs->inventory, (Vec2i){gs->sidebar_width * X_SCALE, gs->inventory_height}, gs->inventory.selected_item);
 
-    render_term(gs->win_log);
+    render_term(gs->win_log, delta_us);
     render_player_stats(gs->win_stats, gs->player_stats, gs->player, (Vec2i){gs->sidebar_width * X_SCALE, gs->player_stats_height});
     
     // wattrset(gs->win_game, COLOR_PAIR(Culur_Default));

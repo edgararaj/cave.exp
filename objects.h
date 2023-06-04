@@ -53,7 +53,7 @@ typedef struct
 
 typedef struct
 {
-    uint32_t *data;
+    int *data;
     union {
         Vec2i size;
         struct
@@ -96,3 +96,8 @@ void free_bitmap(Bitmap bitmap);
 int vec2i_dot(Vec2i a, Vec2i b);
 Rect rect_float_to_rect(RectFloat rect);
 Vec2f vec2f_mul(Vec2f a, Vec2f b);
+
+int get_bitmap_value(Bitmap bitmap, Vec2i pos);
+void set_bitmap_value(Bitmap bitmap, Vec2i pos, int value);
+void zero_bitmap(Bitmap bitmap);
+int get_rect_distance(Bitmap distance, Rect rect);
