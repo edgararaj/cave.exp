@@ -47,7 +47,7 @@ void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_s
         wattroff(sms->win, A_REVERSE);
     }
 
-    if (choice == MKEY_ENTER) {
+    if (choice == 10) {
         if (sms->highlight == 3 || sms->highlight == 2 || sms->highlight == 1) {
             *state = State_Game;
         }

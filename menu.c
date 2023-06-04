@@ -89,7 +89,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
         mvwprintw(sms->win, y, text_x, "%s", choices[i]);
     }
 
-    if (choice == MKEY_ENTER)
+    if (choice == 10)
     {
         if (sms->highlight == 0)
         {

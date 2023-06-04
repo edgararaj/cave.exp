@@ -1,6 +1,7 @@
 #pragma once
 #include "objects.h"
 #include "camera.h"
+#include <ncurses.h>
 
 #define MAX_CHESTS 100
 #define MAX_CHESTS_PER_ROOM 2
