@@ -9,7 +9,7 @@ void draw_pause(StartPauseState *sms, State *state, int choice, Vec2i window_siz
 {
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
-    char *choices[] = {"RESTART",       "CONTINUE",       "CONTROLOS",     "INFO",         "QUIT",
+    char *choices[] = {"CONTINUE",       "RESTART",       "CONTROLOS",     "INFO",         "QUIT",
                        "WORK DONE BY:", "Afonso Martins", "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
@@ -55,11 +55,11 @@ void draw_pause(StartPauseState *sms, State *state, int choice, Vec2i window_siz
     {
         if (sms->highlight == 0)
         {
-            *state = State_New_Game;
+            *state = State_Game;
         }
         if (sms->highlight == 1)
         {
-            *state = State_Game;
+            *state = State_New_Game;
         }
         if (sms->highlight == 2)
         {
