@@ -125,7 +125,7 @@ void init_game(GameState *gs, Rect window) {
     gs->arrows = malloc(sizeof(Arrow) * MAX_ARROWS);
 }
 
-void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
+void player_attack(Mob *mobs, int num_mobs, Warrior *player)
 {
     int attacked = 0;
     if (!player->dmg_cooldown)
@@ -134,7 +134,7 @@ void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int 
         {
             if (mobs[i].warrior.hp <= 0)
                 continue;
-            attacked += warrior_attack(player, &mobs[i].warrior, delta_us);
+            attacked += warrior_attack(player, &mobs[i].warrior);
         }
     }
     if (attacked)
@@ -188,7 +188,7 @@ int use_key(GameState *gs)
         generate_random_buffs();
         apply_buffs(gs);
 
-        Rect window = {};
+        Rect window = {{0, 0}, {0, 0}, 0};
         window.tl.x = 0;
         window.tl.y = 0;
         window.br.x = MAP_WIDTH;
@@ -266,17 +266,29 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
             switch (item)
             {
             case Item_Sword:
-                player_attack(gs, gs->mobs, MAX_MOBS, &gs->player, delta_us);
+                player_attack(gs->mobs, MAX_MOBS, &gs->player);
+                break;
+            case Item_BlastGun:
+                // adicionar mais tarde
                 break;
             case Item_HealthPotion:
                 use_health_potion(&gs->player);
                 remove_item(&gs->inventory, i);
+                break;
+            case Item_ManaPotion:
+                // adicionar mais tarde
                 break;
             case Item_Key:
                 if (use_key(gs))
                 {
                     remove_item(&gs->inventory, i);
                 };
+                break;
+            case Item__Size:
+                // adicionar mais tarde
+                break;
+            default:
+                // adicionar mais tarde
                 break;
             }
         }
@@ -293,7 +305,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     timer_update(&gs->player.dmg_cooldown, delta_us);
 
     RectFloat prev_player = gs->player.rect;
-    update_player(&gs->player.rect, key, delta_us);
+    update_player(&gs->player.rect, key);
     if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->collision))
     {
         gs->player.rect = prev_player;

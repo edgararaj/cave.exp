@@ -59,7 +59,7 @@ int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *
 
 #define BILLION 1000000000L
 
-int main()
+int main(void)
 {
     srand(time(NULL));
     cbreak();
@@ -93,7 +93,7 @@ int main()
 
     setup_colors();
 
-    Rect window = {};
+    Rect window = {{0, 0}, {0, 0}, 0};
     window.tl.x = 0;
     window.tl.y = 0;
     window.br.x = MAP_WIDTH;

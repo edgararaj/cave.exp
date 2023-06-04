@@ -269,7 +269,7 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
     }
 }
 
-Inventory generate_chest_items()
+Inventory generate_chest_items(void)
 {
     Inventory result = {0};
     int num_items = random_between(1, 3);
@@ -357,7 +357,6 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitma
             }
             int collision_data = get_bitmap_value(map, (Vec2i){map_x, map_y});
             int light_data = get_bitmap_value(light, (Vec2i){map_x, map_y});
-            int dist_data = get_bitmap_value(dist, (Vec2i){map_x, map_y});
 
             if (collision_data == WALKABLE)
             {

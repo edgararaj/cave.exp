@@ -61,7 +61,7 @@ Vec2i step_to_player(Bitmap map, Mob *mob)
     return smallest_add;
 }
 
-void move_mob(Mob *mob, Vec2i step, int delta_us)
+void move_mob(Mob *mob, Vec2i step)
 {
     mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_div_const(vec2i_to_f(step), mob->speed));
 }
@@ -72,19 +72,19 @@ void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
         mob->warrior.weight * mob->warrior.weight)
     {
         Vec2i step = step_to_player(map, mob);
-        move_mob(mob, step, delta_us);
+        move_mob(mob, step);
     }
 
     if (timer_update(&mob->warrior.dmg_cooldown, delta_us))
     {
-        if (warrior_attack(&mob->warrior, player, delta_us)) {
+        if (warrior_attack(&mob->warrior, player)) {
             mob->warrior.dmg_cooldown = 1e6;
             mob->warrior.attacking = 0.1 * 1e6;
         }
     }
 }
 
-Arrow attack_player_with_arrow(Mob *mob, Warrior *player, int delta_us)
+Arrow attack_player_with_arrow(Mob *mob, Warrior *player)
 {
     Arrow result;
     Vec2f vec = vec2f_sub(rect_float_center(player->rect), rect_float_center(mob->warrior.rect));
@@ -95,7 +95,7 @@ Arrow attack_player_with_arrow(Mob *mob, Warrior *player, int delta_us)
     return result;
 }
 
-void wander(Mob *mob, Bitmap map, int delta_us)
+void wander(Mob *mob, Bitmap map)
 {
     if (mob->wander_to.x != 0 && mob->wander_to.y != 0)
     {
@@ -127,9 +127,8 @@ void wander(Mob *mob, Bitmap map, int delta_us)
     // }
 }
 
-void call_others(Mob *mobs, int num_mobs, int ii, Bitmap player_light)
+void call_others(Mob *mobs, int num_mobs)
 {
-    Mob *mob = &mobs[ii];
     for (int i = 0; i < num_mobs; i++)
     {
         mobs[i].called = 1;
@@ -157,14 +156,14 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
         else
         {
             mob->warrior.rect.color = Color_White;
-            wander(mob, map, delta_us);
+            wander(mob, map);
         }
     }
     else if (mob->type == MobType_Coward || mob->type == MobType_Intelligent)
     {
         if (mob_dist_to_player < THREAT_RADIUS || mob->called)
         {
-            call_others(mobs, num_mobs, ii, player_light);
+            call_others(mobs, num_mobs);
             if (mob->called)
             {
                 mob->warrior.rect.color = Color_Blue;
@@ -177,7 +176,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
         }
         else if (mob_dist_to_player < LIGHT_RADIUS)
         {
-            call_others(mobs, num_mobs, ii, player_light);
+            call_others(mobs, num_mobs);
             int mobs_near = 0;
             for (int i = 0; i < num_mobs; i++)
             {
@@ -201,7 +200,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
         else
         {
             mob->warrior.rect.color = Color_White;
-            wander(mob, map, delta_us);
+            wander(mob, map);
         }
     }
     else if (mob->type == MobType_Archer)
@@ -238,7 +237,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
             if (*arrow_count < MAX_ARROWS && timer_update(&mob->warrior.dmg_cooldown, delta_us))
             {
                 mob->warrior.dmg_cooldown = 1e6;
-                arrows[(*arrow_count)] = attack_player_with_arrow(mob, player, delta_us);
+                arrows[(*arrow_count)] = attack_player_with_arrow(mob, player);
                 *arrow_count += 1;
             }
             // }
@@ -250,7 +249,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
         else
         {
             mob->warrior.rect.color = COLOR_WHITE;
-            wander(mob, map, delta_us);
+            wander(mob, map);
         }
     }
 }

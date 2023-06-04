@@ -8,7 +8,7 @@
 
 #define TERM_BUFFER 5
 int term_line_index = 0;
-char term_lines[TERM_BUFFER][50] = {};
+char term_lines[TERM_BUFFER][50] = {0};
 static int last_line_hightlight = 2*1e6;
 static int hightlighting = 0;
 void add_term_line(const char *format, ...)

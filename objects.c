@@ -249,8 +249,8 @@ void zero_bitmap(Bitmap bitmap)
 
 Bitmap alloc_bitmap(int width, int height)
 {
-    uint32_t* data = (uint32_t *)malloc(width * height * sizeof(uint32_t));
-    Bitmap result = {data, {width, height}};
+    int* data = (int *)malloc(width * height * sizeof(int));
+    Bitmap result = {data, {{width, height}}};
     zero_bitmap(result);
     return result;
 }

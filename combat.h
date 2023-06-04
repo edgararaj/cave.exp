@@ -9,4 +9,4 @@
 #define VISION_RADIUS MAX_DIST_SHINE
 #define VISION_RADIUS_SQR (VISION_RADIUS * VISION_RADIUS)
 
-int warrior_attack(Warrior *a, Warrior *b, int);
+int warrior_attack(Warrior *a, Warrior *b);

@@ -1,9 +1,11 @@
+#include <stdlib.h>
+
 #include "state.h"
 #include "term.h"
 
 BuffType buffs[2];
 
-void generate_random_buffs() {
+void generate_random_buffs(void) {
     add_term_line("EBA EBA!\n");
     buffs[0] = rand() % 5;
     do {
