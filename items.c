@@ -47,11 +47,11 @@ void use_health_potion(Warrior *player)
         {
             player->hp = player->maxHP; // Cap the HP at maxHP
         }
-        add_term_line("Health Potion used! HP is now %d.\n", player->hp);
+        add_term_line("Health Potion used! HP is now %d.", player->hp);
     }
     else
     {
-        add_term_line("HP is full, cannot use Health Potion.\n");
+        add_term_line("HP is full, cannot use Health Potion.");
     }
 }
 

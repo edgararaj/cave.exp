@@ -24,7 +24,7 @@ int add_item(Inventory *inventory, Item name, int count)
         return 1;
     }
     else {
-        add_term_line("Inventory is full!\n");
+        add_term_line("Inventory is full!");
     }
     return 0;
 }
@@ -35,7 +35,7 @@ int add_inventory(Inventory* inventory, Inventory other)
     {
         if (other.items[i].name == Item_Key)
         {
-            add_term_line("You found a key, find the portal!\n");
+            add_term_line("You found a key, find the portal!");
         }
         add_item(inventory, other.items[i].name, other.items[i].count);
     }
@@ -98,21 +98,21 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size, int se
                 wattrset(win, COLOR_PAIR(Culur_Default));
 
             if (inventory->items[i].type != ItemType_Disposable)
-                mvwprintw(win, i+1, 1, "%d. %s\n", i + 1, name);
+                mvwprintw(win, i+1, 1, "%d. %s", i + 1, name);
             else
-                mvwprintw(win, i+1, 1, "%d. %s x%d\n", i + 1, name, inventory->items[i].count);
+                mvwprintw(win, i+1, 1, "%d. %s x%d", i + 1, name, inventory->items[i].count);
         }
         else if (inventory->items[i].count == 0)
         {
             if (i + 1 == selected)
             {
                 wattrset(win, COLOR_PAIR(Culur_Default_Red));
-                mvwprintw(win, i+1, 1, "%d. %s (Empty)\n", i + 1, name);
+                mvwprintw(win, i+1, 1, "%d. %s (Empty)", i + 1, name);
             }
             else
             {
                 wattrset(win, COLOR_PAIR(Culur_Default_Gray));
-                mvwprintw(win, i+1, 1, "%d. %s\n", i + 1, name);
+                mvwprintw(win, i+1, 1, "%d. %s", i + 1, name);
             }
         }
     }

@@ -231,7 +231,7 @@ int generate_rects(Rect window, Rect *rects, int rects_max)
             if (valid_new_rect)
             {
                 rects[rects_count++] = new_rect;
-                add_term_line("n %d\n", rects_count);
+                add_term_line("n %d", rects_count);
             }
         }
     }
@@ -595,7 +595,7 @@ void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i pl
     float scale_x = (float)illuminated.width / window_size.x;
     float scale_y = (float)illuminated.height / window_size.y;
 
-    wattrset(win, COLOR_PAIR(COLOR_BLUE));
+    wattrset(win, COLOR_PAIR(Color_Blue));
     int player_x = player_pos.x / scale_x;
     int player_y = player_pos.y / scale_y;
     print_pixel(win, player_x, player_y);

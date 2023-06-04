@@ -56,7 +56,7 @@ int main()
     WINDOW *win_game = newwin(0, 0, 0, 0);
     Vec2i window_size = (Vec2i){0};
     noecho();
-    wbkgd(win_game, COLOR_PAIR(COLOR_BLACK));
+    wbkgd(win_game, COLOR_PAIR(Color_Black));
     setup_colors();
 
     struct timespec start, end;

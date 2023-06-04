@@ -2,6 +2,8 @@ LIBS  = -lm -lncurses -lc
 CFLAGS = -std=gnu11 -ggdb -O2 -Wall -Wextra 
 #-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
 
+.PHONY: all sdl run clean ncurses
+
 # Should be equivalent to your list of C files, if you don't build selectively
 SRC=$(wildcard *.c)
 

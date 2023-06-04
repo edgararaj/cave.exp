@@ -21,19 +21,19 @@ void update_camera(Camera *camera, Vec2i player)
     int player_x = player.x;
     int player_y = player.y;
     // Verifica se o jogador está perto das bordas da câmera
-    if (player_x - camera->x < camera->margin)
+    if (player_x - camera->x < camera->margin) // Se o jogador está perto da borda esquerda
     {
         camera->x = player_x - camera->margin;
     }
-    else if (player_x - camera->x > camera->width - camera->margin)
+    else if (player_x - camera->x > camera->width - camera->margin) // Se o jogador está perto da borda direita
     {
         camera->x = player_x - camera->width + camera->margin;
     }
-    if (player_y - camera->y < camera->margin)
+    if (player_y - camera->y < camera->margin) // Se o jogador está perto da borda superior
     {
         camera->y = player_y - camera->margin;
     }
-    else if (player_y - camera->y > camera->height - camera->margin)
+    else if (player_y - camera->y > camera->height - camera->margin) // Se o jogador está perto da borda inferior
     {
         camera->y = player_y - camera->height + camera->margin;
     }

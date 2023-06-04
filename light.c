@@ -18,17 +18,21 @@ void create_torches(Bitmap pixmap, Torch *torches, int num_torches)
             y = random_between(0, pixmap.height);
         } while (normal_map_decode(pixmap.data[y * pixmap.width + x]) != WALKABLE);
 
-        torches[i] = (Torch){(Rect){{x, y}, {x, y}, 3}, random_between(6, 12)};
+        torches[i].position = (Rect){{x, y}, {x, y}, 3};
+        torches[i].radius = random_between(6, 12);
     }
 }
 
-void light_pass_inner(Bitmap pixmap, int r, Bitmap normalmap, Vec2f light_pos_screen)
+void light_pass(Bitmap pixmap, Rect rect, int r, Bitmap normalmap)
 {
-    float inc = M_PI / 720.f;
+    // Atualizar a posição da luz para levar em conta a posição da câmera
+    Vec2f center = rect_center(rect);
+
+    float inc = M_PI / 720;
     for (float theta = 0; theta < 2 * M_PI; theta += inc)
     {
         Vec2f vec = {cos(theta), sin(theta)};
-        Vec2f line_pos = light_pos_screen;
+        Vec2f line_pos = center;
 
         for (int k = 0; k < r; k++)
         {
@@ -49,15 +53,6 @@ void light_pass_inner(Bitmap pixmap, int r, Bitmap normalmap, Vec2f light_pos_sc
             line_pos = vec2f_add(line_pos, vec);
         }
     }
-}
-
-void light_pass(Bitmap pixmap, Rect rect, int r, Bitmap normalmap)
-{
-    // Atualizar a posição da luz para levar em conta a posição da câmera
-    Vec2f center = rect_center(rect);
-    // Vec2f light_pos_screen = {center.x - camera.x + 0.5f, center.y - camera.y + 0.5f};
-    // Vec2f light_pos_screen = {x - camera.x + 0.5f, y - camera.y + 0.5f};
-    light_pass_inner(pixmap, r, normalmap, center);
 }
 
 void light_reset(Bitmap distmap)

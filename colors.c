@@ -1,5 +1,5 @@
 #include "colors.h"
-#include "light.h"
+#define LIGHT_RADIUS 20
 
 // Função para interpolação linear entre duas cores
 void lerp_color(short start_color[3], short end_color[3], float t, short *result_color)
@@ -14,9 +14,11 @@ void lerp_color(short start_color[3], short end_color[3], float t, short *result
 void init_gradient_color_pairs(short start_color[3], short end_color[3], int num_pairs, int base)
 {
     float ts[num_pairs];
-    for (int i = 0; i < num_pairs; i++)
+    for (int i = 0; i < num_pairs; i++) // Cores realistas interpolacao logaritmica
     {
-        ts[i] = powf(2, (float)i / (float)num_pairs) - 1;
+        float exp = (float)i / (float)num_pairs;
+        float num = powf(2, exp) - 1;
+        ts[i] = num;
     }
     for (int i = base; i < base + num_pairs; i++)
     {
@@ -31,6 +33,15 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3], int num
 
 void setup_colors()
 {
+    init_color(Color_Black, 0, 0, 0);
+    init_color(Color_Red, 1000, 0, 0);
+    init_color(Color_Green, 0, 1000, 0);
+    init_color(Color_Yellow, 1000, 1000, 0);
+    init_color(Color_Blue, 0, 0, 1000);
+    init_color(Color_Magenta, 1000, 0, 1000);
+    init_color(Color_Cyan, 0, 1000, 1000);
+    init_color(Color_White, 1000, 1000, 1000);
+
     init_color(Culur_Black, 0, 0, 0);
     init_color(Culur_Gray, 300, 300, 300);
     init_color(Culur_Shine, 900, 0, 0);
@@ -55,10 +66,10 @@ void setup_colors()
     {
         init_pair(i, i, i);
     }
-    init_pair(Culur_Default, COLOR_WHITE, COLOR_BLACK);
-    init_pair(Culur_Default_Gray, Culur_Gray, COLOR_BLACK);
-    init_pair(Culur_Default_Green, COLOR_GREEN, COLOR_BLACK);
-    init_pair(Culur_Default_Red, COLOR_RED, COLOR_BLACK);
+    init_pair(Culur_Default, Color_White, Color_Black);
+    init_pair(Culur_Default_Gray, Culur_Gray, Color_Black);
+    init_pair(Culur_Default_Green, Color_Green, Color_Black);
+    init_pair(Culur_Default_Red, Color_Red, Color_Black);
     init_pair(Culur_Spike, Culur_Spike_Front, Culur_Spike_Back);
     init_pair(Culur_Hotbar, Culur_Hotbar_Front, Culur_Hotbar_Back);
     init_pair(Culur_Hotbar_Selected, Culur_Hotbar_Selected_Front, Culur_Hotbar_Selected_Back);
@@ -66,8 +77,8 @@ void setup_colors()
     init_pair(Culur_Menu_Highlight, Culur_Menu_Highlight_Text, Culur_Menu_Highlight_Background);
 
     // Definir as cores base para o gradiente (valores entre 0 e 1000)
-    short end_color[3] = {700, 500, 20}; // preto
-    short start_color[3] = {0, 0, 0};    // branco
+    short end_color[3] = {700, 500, 20}; // amarelo
+    short start_color[3] = {0, 0, 0};    // preto
 
     init_gradient_color_pairs(start_color, end_color, LIGHT_RADIUS, Culur_Light_Gradient);
 }

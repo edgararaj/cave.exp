@@ -22,6 +22,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "items.h"
+#include "movimento.h"
 
 void init_game(GameState *gs, Rect window) {
     Rect rects[10];
@@ -144,47 +145,6 @@ void render_hp(WINDOW *win_game, Camera camera, Rect rect, int hp)
     int new_x = (int)(translated_rect.tl.x * X_SCALE + (size.x * X_SCALE) / 2.f - (char_width / 2.f)) + 1;
     wattrset(win_game, COLOR_PAIR(Culur_Default));
     mvwprintw(win_game, translated_rect.tl.y - 1, new_x, "%d", hp);
-}
-
-void update_player(RectFloat *st, int key, int delta_us)
-{
-    Vec2f move = {0};
-    switch (key)
-    {
-    case KEY_A1:
-        move = (Vec2f){-1, -1};
-        break;
-    case KEY_UP:
-    case 'w':
-        move = (Vec2f){0, -1};
-        break;
-    case KEY_A3:
-        move = (Vec2f){1, -1};
-        break;
-    case KEY_LEFT:
-    case 'a':
-        move = (Vec2f){-1, 0};
-        break;
-    case KEY_B2:
-        break;
-    case KEY_RIGHT:
-    case 'd':
-        move = (Vec2f){1, 0};
-        break;
-    case KEY_C1:
-        move = (Vec2f){-1, 1};
-        break;
-    case KEY_DOWN:
-    case 's':
-        move = (Vec2f){0, 1};
-        break;
-    case KEY_C3:
-        move = (Vec2f){1, 1};
-        break;
-    default:
-        break;
-    }
-    *st = rect_float_translate(*st, move);
 }
 
 Rect project_rect(Camera camera, Rect player)

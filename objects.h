@@ -1,5 +1,5 @@
 #pragma once
-#include <ncurses.h>
+#include <stdint.h>
 
 typedef struct
 {

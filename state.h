@@ -5,10 +5,6 @@
 #define MAX_CHESTS 100
 #define MAX_CHESTS_PER_ROOM 2
 
-#define ITEM_GOLD 1
-#define ITEM_SWORD 2
-#define ITEM_POTION 3
-
 // Define the maximum number of items a player can carry
 #define MAX_INVENTORY_SIZE 10
 

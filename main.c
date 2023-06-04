@@ -57,6 +57,8 @@ int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *
     return x->tv_sec < y->tv_sec;
 }
 
+#define BILLION 1000000000L
+
 int main()
 {
     srand(time(NULL));
@@ -137,8 +139,15 @@ int main()
 
     int start_menu = 1;
 
+    // Uint64 oldtime = SDL_GetTicks64();
+    int fps_counter = 0;
+    int frames_drawn = 0;
+    int fps = 0;
+
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    uint64_t diff;
+
     int delta_us = 0;
     while (1) {
         getmaxyx(stdscr, window_size.y, window_size.x);
@@ -169,11 +178,29 @@ int main()
             }
         }
 
+        // Uint64 newtime = SDL_GetTicks64();
+        // int ms = (newtime - oldtime);
+        // oldtime = newtime;
+
+        // fps_counter += ms;
+        // frames_drawn++;
+        // if(fps_counter >= 1000) {
+        //     fps = (float)frames_drawn / (float)(fps_counter/1000.0f);
+        // }
+        // char title[100];
+        // snprintf(title, 100, "GAME | %i ms, %i fps", ms, fps);
+        // printf("%d ms, %d fps\n", ms, fps);
+
         clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-        struct timeval result;
-        timeval_subtract(&result, (struct timeval*) &end, (struct timeval*) &start);
-        delta_us = result.tv_usec + result.tv_sec * 1e6;
+        diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
         start = end;
+
+        // fps_counter += (int)(diff * 1e-6);
+        // frames_drawn++;
+        // if(fps_counter >= 1000) {
+        //     fps = (float)frames_drawn / (float)(fps_counter/1000.0f);
+        // }
+        add_term_line("%d ms, %d fps", (int)(diff * 1e-6), (int)(1000/(diff * 1e-6)));
     }
 
     endwin();

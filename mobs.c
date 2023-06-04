@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
+#include "colors.h"
 
 void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
 {
@@ -138,14 +139,14 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
         if (mob_dist_to_player > THREAT_RADIUS || mob->called)
         {
             if (mob->called)
-                mob->warrior.rect.color = COLOR_BLUE;
+                mob->warrior.rect.color = Color_Blue;
             else
                 mob->warrior.rect.color = COLOR_RED;
             attack_player(mob, player, map, delta_us);
         }
         else if (mob_dist_to_player > 0)
         {
-            mob->warrior.rect.color = COLOR_YELLOW;
+            mob->warrior.rect.color = Color_Yellow;
         }
         else
         {
@@ -160,7 +161,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
             call_others(mobs, num_mobs, ii, player_light);
             if (mob->called)
             {
-                mob->warrior.rect.color = COLOR_BLUE;
+                mob->warrior.rect.color = Color_Blue;
             }
             else
             {
@@ -188,7 +189,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
             }
             else
             {
-                mob->warrior.rect.color = COLOR_YELLOW;
+                mob->warrior.rect.color = Color_Yellow;
             }
         }
         else
@@ -204,7 +205,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
             // call_others(mobs, num_mobs, ii, player_light);
             if (mob->called)
             {
-                mob->warrior.rect.color = COLOR_BLUE;
+                mob->warrior.rect.color = Color_Blue;
             }
             else
             {
@@ -237,7 +238,7 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
             // }
             // else
             // {
-            //     mob->warrior.rect.color = COLOR_YELLOW;
+            //     mob->warrior.rect.color = Color_Yellow;
             // }
         }
         else

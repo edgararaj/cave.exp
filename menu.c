@@ -15,7 +15,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
                        "QUIT",  "WORK DONE BY:", "Afonso Martins", "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = ARRAY_SIZE(choices);
 
-        FILE *f = fopen("name.txt", "r");
+    FILE *f = fopen("name.txt", "r");
     if (f == NULL) {
         perror("Erro ao abrir o arquivo");
         return;
@@ -36,10 +36,10 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
                 continue; // Ignora os caracteres de nova linha
             n[i][j] = c;
         }
-        if (feof(f))
-            break;
     }
     fclose(f);
+
+    wattrset(sms->win, COLOR_PAIR(Culur_Menu));
 
     int y = 4;
     int x = window_size.x / 2 - logo_x / 2;
@@ -71,30 +71,25 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
         break;
     }
 
-    wbkgd(sms->win, COLOR_PAIR(Culur_Menu));
-
     for (int i = 0; i < n_choices; i++)
     {
         int y = start_y + i;
         if (i == sms->highlight)
         {
-            wattron(sms->win, COLOR_PAIR(Culur_Menu_Highlight)); // Texto branco com fundo cinza
+            wattrset(sms->win, COLOR_PAIR(Culur_Menu_Highlight)); // Texto branco com fundo cinza
         }
         else
         {
-            wattron(sms->win, COLOR_PAIR(Culur_Menu)); // Texto vermelho com fundo preto
+            wattrset(sms->win, COLOR_PAIR(Culur_Menu)); // Texto vermelho com fundo preto
         }
 
         int text_width = strlen(choices[i]);
         int text_x = (max_x - text_width) / 2;
 
         mvwprintw(sms->win, y, text_x, "%s", choices[i]);
-
-        wattroff(sms->win, COLOR_PAIR(Culur_Menu_Highlight));
-        wattroff(sms->win, COLOR_PAIR(Culur_Menu));
     }
 
-    if (choice == 10)
+    if (choice == MKEY_ENTER)
     {
         if (sms->highlight == 0)
         {
