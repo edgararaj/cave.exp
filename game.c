@@ -81,7 +81,7 @@ void init_game(GameState *gs, Rect window) {
     Warrior player = (Warrior){0};
     player.rect =
         (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
-    player.dmg = 5;
+    player.dmg = 10;
     player.hp = 100;
     player.maxHP = 100;
     player.weight = 10;
