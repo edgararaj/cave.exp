@@ -49,7 +49,7 @@ void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_s
 
     if (choice == 10) {
         if (sms->highlight == 3 || sms->highlight == 2 || sms->highlight == 1) {
-            *state = State_Game;
+            *state = State_New_Game;
         }
         if (sms->highlight == 4) {
             *state = State_Menu;

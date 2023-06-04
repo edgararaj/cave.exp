@@ -1,4 +1,5 @@
 #include "game.h"
+#include "buffs.h"
 #include "camera.h"
 #include "collide.h"
 #include "colors.h"
@@ -35,6 +36,10 @@ void init_game(GameState *gs, Rect window) {
 
     generate_tunnels_and_rasterize(gs->collision, rects, rects_count);
     erode(gs->collision, 2200);
+
+    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
+    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
+    erode(pixmap, 2200);
     int portal_room = random_between(0, rects_count - 1);
     int div = 2;
     int portal_div = random_between(0, div * div - 1);
@@ -62,7 +67,8 @@ void init_game(GameState *gs, Rect window) {
                     generate_obstacles(gs->collision, sub);
                 }
             }
-            else {
+            else
+            {
                 portal_rect = generate_portal(sub);
             }
         }
@@ -168,16 +174,20 @@ void render_player_attack(GameState *gs, Warrior player, Vec2i window_size)
     Circle c;
     c.radius = player.weight;
 
-    c.center = vec2f_to_i(
-        rect_center(rect_translate(project_rect(gs->camera, rect_float_to_rect(player.rect)), (Vec2i){-c.radius, -c.radius})));
+    c.center = vec2f_to_i(rect_center(
+        rect_translate(project_rect(gs->camera, rect_float_to_rect(player.rect)), (Vec2i){-c.radius, -c.radius})));
     wattrset(gs->win_game, COLOR_PAIR(5));
     print_circle(gs->win_game, window_size, c);
 }
 
-int use_key(GameState* gs)
+int use_key(GameState *gs)
 {
     if (collide_rect_rect(rect_float_to_rect(gs->player.rect), gs->portal))
     {
+        add_term_line("SOCORRO SOCORRO AJUDA SOCORRO!\n");
+        generate_random_buffs();
+        apply_buffs(gs);
+
         Rect window = {};
         window.tl.x = 0;
         window.tl.y = 0;
@@ -216,7 +226,8 @@ void mix_lightmap(Bitmap output, Bitmap input)
 
 void update_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us)
 {
-    wresize(gs->win_log, window_size.y - gs->minimap_height - gs->player_stats_height - gs->inventory_height, gs->sidebar_width * X_SCALE);
+    wresize(gs->win_log, window_size.y - gs->minimap_height - gs->player_stats_height - gs->inventory_height,
+            gs->sidebar_width * X_SCALE);
     wresize(gs->win_minimap, gs->minimap_height, gs->sidebar_width * X_SCALE);
     mvwin(gs->win_minimap, window_size.y - gs->minimap_height, 0);
     window_size.x -= gs->sidebar_width;
@@ -227,6 +238,12 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     gs->camera.width = window_size.x;
     gs->camera.height = window_size.y;
     Vec2i player_center = vec2f_to_i(rect_float_center(gs->player.rect));
+
+    if (gs->player.hp <= 0)
+    {
+        *state = State_Over;
+    }
+    
     if (key == 't')
     {
         ++gs->cam_mode;
@@ -256,7 +273,8 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
                 remove_item(&gs->inventory, i);
                 break;
             case Item_Key:
-                if (use_key(gs)) {
+                if (use_key(gs))
+                {
                     remove_item(&gs->inventory, i);
                 };
                 break;
@@ -354,7 +372,8 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     }
 }
 
-void draw_game(GameState *gs, Vec2i window_size, int delta_us) {
+void draw_game(GameState *gs, Vec2i window_size, int delta_us)
+{
     werase(gs->win_game);
     werase(gs->win_log);
     werase(gs->win_minimap);
@@ -431,13 +450,15 @@ void draw_game(GameState *gs, Vec2i window_size, int delta_us) {
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_minimap, gs->illuminated, (Vec2i){gs->sidebar_width, gs->minimap_height}, player_center);
-    draw_inventory(gs->win_inventory, &gs->inventory, (Vec2i){gs->sidebar_width * X_SCALE, gs->inventory_height}, gs->inventory.selected_item);
+    draw_inventory(gs->win_inventory, &gs->inventory, (Vec2i){gs->sidebar_width * X_SCALE, gs->inventory_height},
+                   gs->inventory.selected_item);
 
     render_term(gs->win_log, delta_us);
     render_player_stats(gs->win_stats, gs->player_stats, gs->player, (Vec2i){gs->sidebar_width * X_SCALE, gs->player_stats_height});
     
     // wattrset(gs->win_game, COLOR_PAIR(Culur_Default));
-    // mvwprintw(gs->win_game, window_size.y - 1, 0, "Press ESC or P to pause | %d FPS | %f ms", (int)(1e6/delta_us), 1e-3*delta_us);
+    // mvwprintw(gs->win_game, window_size.y - 1, 0, "Press ESC or P to pause | %d FPS | %f ms", (int)(1e6/delta_us),
+    // 1e-3*delta_us);
 
     wrefresh(gs->win_game);
     wrefresh(gs->win_log);
