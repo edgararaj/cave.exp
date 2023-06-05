@@ -184,7 +184,6 @@ int use_key(GameState *gs)
 {
     if (collide_rect_rect(rect_float_to_rect(gs->player.rect), gs->portal))
     {
-        add_term_line("SOCORRO SOCORRO AJUDA SOCORRO!\n");
         generate_random_buffs();
         apply_buffs(gs);
 
@@ -228,19 +227,11 @@ Blast blasts[MAX_BLASTS];
 
 
 void fire_blastgun(Warrior *player) {
-    // finding an inactive slot for the new blast
     for (int i = 0; i < MAX_BLASTS; i++) {
         if (!blasts[i].active) {
-            // set the blast size to be 3x3
             blasts[i].rect = (RectFloat){{player->rect.tl.x - 1, player->rect.tl.y - 1}, {player->rect.br.x + 1, player->rect.br.y + 1}, 9};
-            
-            // the direction of the blast is the direction the player is facing
             blasts[i].direction = player->direction;
-
-            // mark the blast as active
             blasts[i].active = 1;
-
-            // stop looking for slots
             break;
         }
     }
@@ -250,8 +241,6 @@ void update_blasts(GameState *gs, int delta_us) {
     for (int i = 0; i < MAX_BLASTS; i++) {
         if (blasts[i].active) {
             blasts[i].rect = rect_float_translate(blasts[i].rect, vec2f_mul_const(blasts[i].direction, delta_us * BLAST_SPEED));
-
-            // check for collision with the wall
             if (collide_rect_bitmap(rect_float_to_rect(blasts[i].rect), gs->collision)) {
                 blasts[i].active = 0;
             } else {
@@ -259,7 +248,6 @@ void update_blasts(GameState *gs, int delta_us) {
                     Rect tempRect1 = rect_float_to_rect(blasts[i].rect);
                     Rect tempRect2 = rect_float_to_rect(gs->mobs[j].warrior.rect);
                     if (gs->mobs[j].warrior.hp > 0 && collide_rect_rect(tempRect1, tempRect2)) {
-                        // instantly kill the mob
                         gs->mobs[j].warrior.hp = 0;
                         blasts[i].active = 0;
                         break;
