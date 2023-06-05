@@ -13,10 +13,10 @@ int collide_rect_rect(Rect a, Rect b)
     int r1y = a.tl.y;
     int r2y = b.tl.y;
 
-    return (r1x + r1w >= r2x && // r1 right edge past r2 left
-            r1x <= r2x + r2w && // r1 left edge past r2 right
-            r1y + r1h >= r2y && // r1 top edge past r2 bottom
-            r1y <= r2y + r2h);  // r1 bottom edge past r2 top
+    return (r1x + r1w >= r2x && 
+            r1x <= r2x + r2w && 
+            r1y + r1h >= r2y && 
+            r1y <= r2y + r2h); 
 }
 
 int collide_circle_line(Circle circle, Line line)

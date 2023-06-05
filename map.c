@@ -215,25 +215,25 @@ void erode(Bitmap bitmap, int iterations)
 
             switch (direction)
             {
-            case 0: // Mova para a esquerda
+            case 0: // Move para a esquerda
                 if (digger_x > 2)
                 {
                     digger_x -= 1;
                 }
                 break;
-            case 1: // Mova para a direita
+            case 1: // Move para a direita
                 if (digger_x < bitmap.width - 2)
                 {
                     digger_x += 1;
                 }
                 break;
-            case 2: // Mova para cima
+            case 2: // Move para cima
                 if (digger_y > 2)
                 {
                     digger_y -= 1;
                 }
                 break;
-            case 3: // Mova para baixo
+            case 3: // Move para baixo
                 if (digger_y < bitmap.height - 2)
                 {
                     digger_y += 1;
@@ -262,7 +262,7 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
         {
             Vec2i pos = (Vec2i){x, y};
             if (get_bitmap_value(pixmap, pos) == WALKABLE && rand() % 100 < 1)
-            { // 3.5% chance to place a spike
+            { // 3.5% chance de colocar um spike
                 set_bitmap_value(pixmap, pos, SPIKE);
             }
         }
@@ -401,7 +401,7 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitma
 
 void box_sampling_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled, int size)
 {
-    // Use box sampling to downscale the image and sample a square of size
+    // Usa uma caixa para reduzir a escala da imagem e amostrar um quadrado de tamanho
     // size*size
     float scale_x = (float)illuminated.width / window_size.x;
     float scale_y = (float)illuminated.height / window_size.y;

@@ -44,7 +44,7 @@ void draw_pause(StartPauseState *sms, State *state, int choice, Vec2i window_siz
         }
 
         int text_width = strlen(choices[i]);
-        int text_x = (max_x - text_width) / 2;            // Posição horizontal centralizada
+        int text_x = (max_x - text_width) / 2; // Posição horizontal centralizada
 
         mvwprintw(sms->win, y, text_x, "%s", choices[i]); // +1 para compensar a borda esquerda da box
 

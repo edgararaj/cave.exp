@@ -11,7 +11,7 @@ typedef struct
         };
     };
     int width, height; // Largura e altura da câmera
-    int margin;        // Margem nas bordas da câmera
+    int margin; // Margem nas bordas da câmera
 } Camera;
 
 typedef enum

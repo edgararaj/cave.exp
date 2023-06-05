@@ -61,7 +61,7 @@ void draw_info(WINDOW *win, int key, State *state, Vec2i window_size, int delta_
     {
         *state = State_Menu;
         mvwin(win, 0, 0);
-        pos = 0; // Reset the position when we leave the page
+        pos = 0; // Reseta a posiçao quando saimos da pagina
     }
 
     wrefresh(win);
