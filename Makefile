@@ -1,5 +1,5 @@
 LIBS  = -lm -lncurses -lc
-CFLAGS = -std=gnu11 -ggdb -Wall -Wextra -pedantic -O0
+CFLAGS = -std=gnu11 -ggdb -Wall -Wextra -pedantic -O2
 #-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
 
 .PHONY: all sdl run clean ncurses
