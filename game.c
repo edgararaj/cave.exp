@@ -223,42 +223,6 @@ void mix_lightmap(Bitmap output, Bitmap input)
     }
 }
 
-Blast blasts[MAX_BLASTS];
-
-
-void fire_blastgun(Warrior *player) {
-    for (int i = 0; i < MAX_BLASTS; i++) {
-        if (!blasts[i].active) {
-            blasts[i].rect = (RectFloat){{player->rect.tl.x - 1, player->rect.tl.y - 1}, {player->rect.br.x + 1, player->rect.br.y + 1}, 9};
-            blasts[i].direction = player->direction;
-            blasts[i].active = 1;
-            break;
-        }
-    }
-}
-
-void update_blasts(GameState *gs, int delta_us) {
-    for (int i = 0; i < MAX_BLASTS; i++) {
-        if (blasts[i].active) {
-            blasts[i].rect = rect_float_translate(blasts[i].rect, vec2f_mul_const(blasts[i].direction, delta_us * BLAST_SPEED));
-            if (collide_rect_bitmap(rect_float_to_rect(blasts[i].rect), gs->collision)) {
-                blasts[i].active = 0;
-            } else {
-                for (int j = 0; j < MAX_MOBS; j++) {
-                    Rect tempRect1 = rect_float_to_rect(blasts[i].rect);
-                    Rect tempRect2 = rect_float_to_rect(gs->mobs[j].warrior.rect);
-                    if (gs->mobs[j].warrior.hp > 0 && collide_rect_rect(tempRect1, tempRect2)) {
-                        gs->mobs[j].warrior.hp = 0;
-                        blasts[i].active = 0;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}
-
-
 void update_game(GameState *gs, Vec2i window_size, int key, State *state, int delta_us)
 {
     wresize(gs->win_log, window_size.y - gs->minimap_height - gs->player_stats_height - gs->inventory_height,
@@ -304,7 +268,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
                 player_attack(gs->mobs, MAX_MOBS, &gs->player);
                 break;
             case Item_BlastGun:
-                fire_blastgun(&gs->player);
+                // adicionar mais tarde
                 break;
             case Item_HealthPotion:
                 use_health_potion(&gs->player);
