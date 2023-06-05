@@ -132,7 +132,7 @@ int main(void)
 
     StartOverState smsmsm;
     smsmsm.win = win_menu;
-    smsmsm.highlight = 1;
+    smsmsm.highlight = 0;
 
     StartNiveisState smsm;
     smsm.win = win_menu;

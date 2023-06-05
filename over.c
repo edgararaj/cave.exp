@@ -70,10 +70,10 @@ void draw_game_over(StartOverState *sms, State *state, int choice, Vec2i window_
         }
         break;
     case KEY_DOWN:
-        if (sms->highlight == 4)
+        if (sms->highlight == 3)
             sms->highlight = sms->highlight - 4;
         ++sms->highlight;
-        sms->highlight %= 5;
+        sms->highlight %= 4;
         break;
     default:
         break;
