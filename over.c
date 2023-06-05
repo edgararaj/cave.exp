@@ -16,15 +16,15 @@ void draw_game_over(StartOverState *sms, State *state, int choice, Vec2i window_
                        "Edgar Araujo",  "Goncalo Barroso", "(Afonso Martins)"};
     int n_choices = ARRAY_SIZE(choices);
 
-    FILE *f = fopen("name.txt", "r");
+    FILE *f = fopen("over.txt", "r");
     if (f == NULL)
     {
         perror("Erro ao abrir o arquivo");
         return;
     }
 
-    int logo_x = 94;
-    int logo_y = 8;
+    int logo_x = 99;
+    int logo_y = 10;
 
     char n[logo_y][logo_x];
     memset(n, ' ', sizeof(n)); // Inicializa toda a matriz com espaços

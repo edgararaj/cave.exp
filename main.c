@@ -105,6 +105,9 @@ int main(void)
     gs.inventory.items[0].type = ItemType_Weapon;
 
     gs.inventory.items[1].name = Item_BlastGun;
+    gs.inventory.items[1].count = 1;
+    gs.inventory.items[1].type = ItemType_Weapon;
+    
     gs.inventory.items[2].name = Item_HealthPotion;
     gs.inventory.items[3].name = Item_ManaPotion;
     gs.inventory.items[4].name = Item_Key;

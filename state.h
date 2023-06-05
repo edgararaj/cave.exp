@@ -77,6 +77,7 @@ typedef struct
 {
     RectFloat rect;
     Vec2f velocity;
+    Vec2f direction;
     int hp;
     int maxHP;
     int dmg;
@@ -199,3 +200,9 @@ typedef enum {
     BUFF_INCREASE_MOBS_SPEED,
     BUFF_INCREASE_ROOMS
 } BuffType;
+
+typedef struct {
+    RectFloat rect;
+    Vec2f direction;
+    int active;
+} Blast;
