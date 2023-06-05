@@ -65,7 +65,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
         break;
     case KEY_DOWN:
         ++sms->highlight;
-        sms->highlight %= 3;
+        sms->highlight %= 4;
         break;
     default:
         break;

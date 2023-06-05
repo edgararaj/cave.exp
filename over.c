@@ -10,10 +10,10 @@ void draw_game_over(StartMenuState *sms, State *state, int choice, Vec2i window_
 {
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
-    char *choices[] = {"GAME OVER",     "RESTART",       "INFO",
+    char *choices[] = {"GAME OVER",    "RESTART",        "INFO",           "MENU",
 
-                       "QUIT",          "WORK DONE BY:", "Afonso Martins",
-                       "Davide Santos", "Edgar Araujo",  "Goncalo Barroso"};
+                       "QUIT",         "WORK DONE BY:",  "Afonso Martins", "Davide Santos",
+                       "Edgar Araujo", "Goncalo Barroso"};
     int n_choices = ARRAY_SIZE(choices);
 
     FILE *f = fopen("name.txt", "r");
@@ -70,10 +70,10 @@ void draw_game_over(StartMenuState *sms, State *state, int choice, Vec2i window_
         }
         break;
     case KEY_DOWN:
-        if (sms->highlight == 3)
-            sms->highlight = sms->highlight - 3;
+        if (sms->highlight == 4)
+            sms->highlight = sms->highlight - 4;
         ++sms->highlight;
-        sms->highlight %= 4;
+        sms->highlight %= 5;
         break;
     default:
         break;
@@ -113,6 +113,10 @@ void draw_game_over(StartMenuState *sms, State *state, int choice, Vec2i window_
             *state = State_Info;
         }
         if (sms->highlight == 3)
+        {
+            *state = State_Menu;
+        }
+        if (sms->highlight == 4)
         {
             exit(0);
         }
