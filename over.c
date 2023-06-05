@@ -10,7 +10,7 @@ void draw_game_over(StartOverState *sms, State *state, int choice, Vec2i window_
 {
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
-    char *choices[] = {"GAME OVER",    "RESTART",        "INFO",           "MENU",
+    char *choices[] = {    "RESTART",        "INFO",           "MENU",
 
                        "QUIT",          "WORK DONE BY:", "Davide Santos",
                        "Edgar Araujo",  "Goncalo Barroso", "(Afonso Martins)"};
@@ -64,7 +64,7 @@ void draw_game_over(StartOverState *sms, State *state, int choice, Vec2i window_
     {
     case KEY_UP:
         --sms->highlight;
-        if (sms->highlight < 1)
+        if (sms->highlight < 0)
         {
             sms->highlight = n_choices - 6;
         }
@@ -104,19 +104,19 @@ void draw_game_over(StartOverState *sms, State *state, int choice, Vec2i window_
 
     if (choice == 10)
     {
-        if (sms->highlight == 1)
+        if (sms->highlight == 0)
         {
             *state = State_Niveis;
         }
-        if (sms->highlight == 2)
+        if (sms->highlight == 1)
         {
             *state = State_Info;
         }
-        if (sms->highlight == 3)
+        if (sms->highlight == 2)
         {
             *state = State_Menu;
         }
-        if (sms->highlight == 4)
+        if (sms->highlight == 3)
         {
             exit(0);
         }
