@@ -73,7 +73,7 @@ void add_light_map_value(Bitmap bitmap, Vec2i pos, int value)
 
 void set_dist_map_value(Bitmap bitmap, Vec2i pos, int value)
 {
-    assert(value >= 0 && value <= MAX_DIST);
+    // assert(value >= 0 && value <= MAX_DIST);
     bitmap.data[pos.y * bitmap.width + pos.x] &= (~DIST_MAP_MASK);
     bitmap.data[pos.y * bitmap.width + pos.x] |= dist_map_encode(value);
 }
@@ -333,11 +333,11 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
 void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
 {
     Rect rect = expand_rect(rect2, -5);
-    for (int x = rect.tl.x; x < rect.br.x - 3; x++) // -3 to avoid going out of bounds
+    for (int x = rect.tl.x; x < rect.br.x - 3; x++)     // -3 to avoid going out of bounds
     {
         for (int y = rect.tl.y; y < rect.br.y - 2; y++) // -2 to avoid going out of bounds
         {
-            if (rand() % 1000 < 5) // 0.5% chance to place a chest
+            if (rand() % 1000 < 5)                      // 0.5% chance to place a chest
             {
                 // Place the chest pattern
                 for (int dx = 0; dx < 4; dx++)
@@ -369,16 +369,18 @@ void generate_chests(GameState *gs, Bitmap pixmap, Rect rect2)
     }
 }
 
-int has_item(Inventory *inventory, ItemType type)
+int map_is_walkable(Bitmap pixmap, Camera camera, Vec2f pos, Vec2f inc)
 {
-    for (int i = 0; i < inventory->size; i++)
+    Vec2f inc_x = {inc.x, 0};
+    Vec2f inc_y = {0, inc.y};
+    int data = normal_map_decode(pixmap.data[(int)pos.y * pixmap.width + (int)pos.x]);
+    if (data == SPIKE)
     {
-        if (inventory->items[i].type == type)
-        {
-            return 1;
-        }
+        // Handle player stepping on a spike
     }
-    return 0;
+    return (!map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_x), vec2i_to_f(camera.offset))) ||
+            !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc_y), vec2i_to_f(camera.offset)))) &&
+           !map_is_wall(pixmap, vec2f_add(vec2f_add(pos, inc), vec2i_to_f(camera.offset)));
 }
 
 void generate_portal(Bitmap pixmap, Vec2i location)

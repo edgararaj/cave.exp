@@ -279,7 +279,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
         if (gs->mobs[i].warrior.hp <= 0)
             continue;
         render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect));
-        render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].warrior.hp);
+        render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].type);
     }
 
     if (gs->player_attacking)
@@ -300,7 +300,7 @@ void draw_game(GameState *gs, Vec2i window_size, int key, int delta_ms)
     }
 
     render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect), gs->player.hp);
-    displayHUD(&player_stats);
+    // displayHUD(&player_stats);
 
     render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->player.rect));
     render_minimap(gs->win_game, gs->illuminated, window_size, player_center, gs->minimap_maximized);
