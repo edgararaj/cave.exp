@@ -109,9 +109,6 @@ void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count)
         Vec2i prev_center = get_center(rects[i - 1]);
         Vec2i new_center = get_center(rects[i]);
 
-        // add_term_line("P:%d,%d N:%d,%d", prev_center.x, prev_center.y,
-        // new_center.x, new_center.y);
-
         if (rand() % 2 == 1)
         {
             apply_horizontal_tunnel(prev_center.x, new_center.x, prev_center.y, bitmap);
@@ -156,7 +153,6 @@ int generate_rects(Rect window, Rect *rects, int rects_max)
             if (valid_new_rect)
             {
                 rects[rects_count++] = new_rect;
-                add_term_line("n %d", rects_count);
             }
         }
     }

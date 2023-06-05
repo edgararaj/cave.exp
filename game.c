@@ -36,10 +36,6 @@ void init_game(GameState *gs, Rect window) {
 
     generate_tunnels_and_rasterize(gs->collision, rects, rects_count);
     erode(gs->collision, 2200);
-
-    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 2200);
     int portal_room = random_between(0, rects_count - 1);
     int div = 2;
     int portal_div = random_between(0, div * div - 1);
@@ -87,10 +83,10 @@ void init_game(GameState *gs, Rect window) {
     Warrior player = (Warrior){0};
     player.rect =
         (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
-    player.dmg = 10;
+    player.dmg = 20;
     player.hp = 100;
     player.maxHP = 100;
-    player.weight = 10;
+    player.weight = 4;
     player.velocity = (Vec2f){0, 0};
 
     Camera camera = {{{0, 0}}, 0, 0, 10};
@@ -139,7 +135,7 @@ void player_attack(Mob *mobs, int num_mobs, Warrior *player)
     }
     if (attacked)
     {
-        player->dmg_cooldown = 1e6;
+        player->dmg_cooldown = 1e6 * 0.2;
     }
     player->attacking = 0.1 * 1e6;
 }
@@ -336,7 +332,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
 
     for (int i = 0; i < gs->arrow_count; i++)
     {
-        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_div_const(gs->arrows[i].velocity, 2));
+        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_mul_const(gs->arrows[i].velocity, delta_us / 1e6 * 10));
         if (collide_rect_rect(rect_float_to_rect(gs->arrows[i].rect), rect_float_to_rect(gs->player.rect)))
         {
             gs->player.hp -= 10;
