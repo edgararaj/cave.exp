@@ -1,7 +1,7 @@
 #include "ncurses.h"
 #include "objects.h"
 
-void update_player(RectFloat *st, int key, int delta_us)
+void update_player(RectFloat *st, int key)
 {
     Vec2f move = {0};
     switch (key)

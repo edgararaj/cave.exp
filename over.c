@@ -6,25 +6,25 @@
 #include "state.h"
 #include "utils.h"
 
-void draw_game_over(StartMenuState *sms, State *state, int choice, Vec2i window_size)
+void draw_game_over(StartOverState *sms, State *state, int choice, Vec2i window_size)
 {
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
     char *choices[] = {"GAME OVER",    "RESTART",        "INFO",           "MENU",
 
-                       "QUIT",         "WORK DONE BY:",  "Afonso Martins", "Davide Santos",
-                       "Edgar Araujo", "Goncalo Barroso"};
+                       "QUIT",          "WORK DONE BY:", "Davide Santos",
+                       "Edgar Araujo",  "Goncalo Barroso", "(Afonso Martins)"};
     int n_choices = ARRAY_SIZE(choices);
 
-    FILE *f = fopen("name.txt", "r");
+    FILE *f = fopen("over.txt", "r");
     if (f == NULL)
     {
         perror("Erro ao abrir o arquivo");
         return;
     }
 
-    int logo_x = 94;
-    int logo_y = 8;
+    int logo_x = 99;
+    int logo_y = 10;
 
     char n[logo_y][logo_x];
     memset(n, ' ', sizeof(n)); // Inicializa toda a matriz com espaços

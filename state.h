@@ -6,10 +6,10 @@
 #define MAX_CHESTS 100
 #define MAX_CHESTS_PER_ROOM 2
 
-// Define the maximum number of items a player can carry
+/// Define o número máximo de itens que um jogador pode carregar
 #define MAX_INVENTORY_SIZE 10
 
-// Define the item type
+// Define o tipo de item
 typedef enum
 {
     Item_ManaPotion,
@@ -69,14 +69,15 @@ typedef struct
 
 typedef struct
 {
-    HotbarItem items[HOTBAR_SIZE]; // The items in the hotbar
-    int selected;                  // The currently selected item
+    HotbarItem items[HOTBAR_SIZE];
+    int selected;                  // O item selecionado atualmente
 } Hotbar;
 
 typedef struct
 {
     RectFloat rect;
     Vec2f velocity;
+    Vec2f direction;
     int hp;
     int maxHP;
     int dmg;
@@ -172,9 +173,9 @@ typedef struct
 {
     WINDOW *win;
     int highlight;
-    Star *stars;  // array of Star
-    int num_stars; // size of the array
-    Bitmap star_map; // bitmap for the stars
+    Star *stars;
+    int num_stars; 
+    Bitmap star_map;
 } StartMenuState;
 
 typedef struct {
@@ -199,3 +200,9 @@ typedef enum {
     BUFF_INCREASE_MOBS_SPEED,
     BUFF_INCREASE_ROOMS
 } BuffType;
+
+typedef struct {
+    RectFloat rect;
+    Vec2f direction;
+    int active;
+} Blast;

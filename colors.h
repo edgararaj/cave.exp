@@ -44,9 +44,8 @@ typedef enum
     Culur_Default_Blue,
     Culur_Default_Red,
     Culur_Light_Gradient,
-    // ... LIGHT_RADIUS reserved
 } Color;
 
 void lerp_color(short start_color[3], short end_color[3], float t, short *result_color);
 void init_gradient_color_pairs(short start_color[3], short end_color[3], int num_pairs, int base);
-void setup_colors();
+void setup_colors(void);

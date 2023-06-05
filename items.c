@@ -42,10 +42,10 @@ void use_health_potion(Warrior *player)
 {
     if (player->hp < player->maxHP)
     {
-        player->hp += 50; // Restore 50 HP
+        player->hp += 50; // Aumenta 50 HP
         if (player->hp > player->maxHP)
         {
-            player->hp = player->maxHP; // Cap the HP at maxHP
+            player->hp = player->maxHP;
         }
         add_term_line("Health Potion used! HP is now %d.", player->hp);
     }
@@ -60,10 +60,10 @@ void use_health_potion(Warrior *player)
 // {
 //     if (player->mana < player->maxMana)
 //     {
-//         player->mana += 50; // Restore 50 mana
+//         player->mana += 50; 
 //         if (player->mana > player->maxMana)
 //         {
-//             player->mana = player->maxMana; // Cap the mana at maxMana
+//             player->mana = player->maxMana;
 //         }
 //         // add_term_line("%s used! Mana is now %d.\n", item->name, player->mana);
 //     }

@@ -10,16 +10,16 @@ int add_item(Inventory *inventory, Item name, int count)
 {
     for (int i = 0; i < inventory->size; i++)
     {
-        if (inventory->items[i].name == name) // If the item is already in the inventory
+        if (inventory->items[i].name == name) // Se o item já está no inventário
         {
-            inventory->items[i].count += count; // Increase the count of the item
+            inventory->items[i].count += count; // Aumenta a quantidade do item
             return 1;
         }
     }
-    if (inventory->size < MAX_INVENTORY_SIZE) // If the item is not in the inventory and there's space
+    if (inventory->size < MAX_INVENTORY_SIZE) // Se o item não está no inventário e há espaço
     {
         inventory->items[inventory->size].name = name;
-        inventory->items[inventory->size].count = count; // Set the count of the new item to 1
+        inventory->items[inventory->size].count = count; // Mete a contagem do novo item a 1
         inventory->size++;
         return 1;
     }
@@ -46,9 +46,9 @@ int remove_item_name(Inventory *inventory, Item name)
 {
     for (int i = 0; i < inventory->size; i++)
     {
-        if (inventory->items[i].name == name) // If the item is already in the inventory
+        if (inventory->items[i].name == name) // Se o item já está no inventário
         {
-            inventory->items[i].count--; // Decrease the count of the item
+            inventory->items[i].count--; // Diminui a contagem do item
             return 1;
         }
     }
@@ -59,7 +59,7 @@ int remove_item(Inventory *inventory, int index)
 {
     if (index < inventory->size)
     {
-        inventory->items[index].count--;        // Decrease the count of the item
+        inventory->items[index].count--;        // Diminui a contagem do item
         // if (inventory->items_counts[index] == 0) // If the count of the item becomes 0
         // {
         //     for (int i = index; i < inventory->size - 1; i++)
@@ -77,7 +77,8 @@ int remove_item(Inventory *inventory, int index)
 void split_string(char* str, char* buffer, int n)
 {
     int i;
-    for (i = 0; i < strlen(str) - n; i++)
+    int str_length = (int) strlen(str);
+    for (i = 0; i < str_length - n; i++)
     {
         buffer[i] = str[i + n];
     }
@@ -117,10 +118,10 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size, int se
                 wattrset(win, COLOR_PAIR(Culur_Default_Green));
             else
                 wattrset(win, COLOR_PAIR(Culur_Default));
-            mvwprintw(win, i+1, 1, buffer);
-
+            mvwprintw(win, i+1, 1, "%s", buffer);
+            
             wattrset(win, COLOR_PAIR(Culur_Default_Blue));
-            mvwprintw(win, i+1, 1+n, buffer2);
+            mvwprintw(win, i+1, 1+n, "%s", buffer2);
         }
         else if (inventory->items[i].count == 0)
         {

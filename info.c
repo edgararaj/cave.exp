@@ -12,7 +12,7 @@ static int time_start = 5e2;
 static int time = 5e2;
 static unsigned long pos = 0;
 
-void draw_text(WINDOW* win, int x, int y, char* c, int delta_us)
+void draw_text(WINDOW* win, int y, char* c, int delta_us)
 {
     char arroz[5024];
     if (timer_update(&time, delta_us)) {
@@ -54,14 +54,14 @@ void draw_info(WINDOW *win, int key, State *state, Vec2i window_size, int delta_
 
     for (int i = 0; i < n_lines; i++) {
         int y = start_y + i;
-        draw_text(win, 0, y, lines[i], delta_us);
+        draw_text(win, y, lines[i], delta_us);
     }
 
     if (key == 'q')
     {
         *state = State_Menu;
         mvwin(win, 0, 0);
-        pos = 0; // Reset the position when we leave the page
+        pos = 0; // Reseta a posiçao quando saimos da pagina
     }
 
     wrefresh(win);

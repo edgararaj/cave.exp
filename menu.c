@@ -12,7 +12,7 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
     werase(sms->win);
     char *choices[] = {"START", "CONTROLOS",     "INFO",
 
-                       "QUIT",  "WORK DONE BY:", "Afonso Martins", "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
+                       "QUIT",  "WORK DONE BY:", "Davide Santos", "Edgar Araujo", "Goncalo Barroso", "(Afonso Martins)"};
     int n_choices = ARRAY_SIZE(choices);
 
     FILE *f = fopen("name.txt", "r");

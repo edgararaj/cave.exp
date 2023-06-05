@@ -109,9 +109,6 @@ void generate_tunnels_and_rasterize(Bitmap bitmap, Rect *rects, int rect_count)
         Vec2i prev_center = get_center(rects[i - 1]);
         Vec2i new_center = get_center(rects[i]);
 
-        // add_term_line("P:%d,%d N:%d,%d", prev_center.x, prev_center.y,
-        // new_center.x, new_center.y);
-
         if (rand() % 2 == 1)
         {
             apply_horizontal_tunnel(prev_center.x, new_center.x, prev_center.y, bitmap);
@@ -156,7 +153,6 @@ int generate_rects(Rect window, Rect *rects, int rects_max)
             if (valid_new_rect)
             {
                 rects[rects_count++] = new_rect;
-                add_term_line("n %d", rects_count);
             }
         }
     }
@@ -215,25 +211,25 @@ void erode(Bitmap bitmap, int iterations)
 
             switch (direction)
             {
-            case 0: // Mova para a esquerda
+            case 0: // Move para a esquerda
                 if (digger_x > 2)
                 {
                     digger_x -= 1;
                 }
                 break;
-            case 1: // Mova para a direita
+            case 1: // Move para a direita
                 if (digger_x < bitmap.width - 2)
                 {
                     digger_x += 1;
                 }
                 break;
-            case 2: // Mova para cima
+            case 2: // Move para cima
                 if (digger_y > 2)
                 {
                     digger_y -= 1;
                 }
                 break;
-            case 3: // Mova para baixo
+            case 3: // Move para baixo
                 if (digger_y < bitmap.height - 2)
                 {
                     digger_y += 1;
@@ -262,14 +258,14 @@ void generate_spikes(Bitmap pixmap, Rect rect2)
         {
             Vec2i pos = (Vec2i){x, y};
             if (get_bitmap_value(pixmap, pos) == WALKABLE && rand() % 100 < 1)
-            { // 3.5% chance to place a spike
+            { // 3.5% chance de colocar um spike
                 set_bitmap_value(pixmap, pos, SPIKE);
             }
         }
     }
 }
 
-Inventory generate_chest_items()
+Inventory generate_chest_items(void)
 {
     Inventory result = {0};
     int num_items = random_between(1, 3);
@@ -357,7 +353,6 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitma
             }
             int collision_data = get_bitmap_value(map, (Vec2i){map_x, map_y});
             int light_data = get_bitmap_value(light, (Vec2i){map_x, map_y});
-            int dist_data = get_bitmap_value(dist, (Vec2i){map_x, map_y});
 
             if (collision_data == WALKABLE)
             {
@@ -402,7 +397,7 @@ void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitma
 
 void box_sampling_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled, int size)
 {
-    // Use box sampling to downscale the image and sample a square of size
+    // Usa uma caixa para reduzir a escala da imagem e amostrar um quadrado de tamanho
     // size*size
     float scale_x = (float)illuminated.width / window_size.x;
     float scale_y = (float)illuminated.height / window_size.y;

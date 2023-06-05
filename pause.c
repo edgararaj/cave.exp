@@ -10,7 +10,7 @@ void draw_pause(StartPauseState *sms, State *state, int choice, Vec2i window_siz
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
     char *choices[] = {"CONTINUE",       "RESTART",       "CONTROLOS",     "INFO",         "QUIT",
-                       "WORK DONE BY:", "Afonso Martins", "Davide Santos", "Edgar Araujo", "Goncalo Barroso"};
+                       "WORK DONE BY:", "Davide Santos", "Edgar Araujo", "Goncalo Barroso", "(Afonso Martins)"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
     int max_x = window_size.x;
@@ -44,7 +44,7 @@ void draw_pause(StartPauseState *sms, State *state, int choice, Vec2i window_siz
         }
 
         int text_width = strlen(choices[i]);
-        int text_x = (max_x - text_width) / 2;            // Posição horizontal centralizada
+        int text_x = (max_x - text_width) / 2; // Posição horizontal centralizada
 
         mvwprintw(sms->win, y, text_x, "%s", choices[i]); // +1 para compensar a borda esquerda da box
 

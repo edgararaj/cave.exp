@@ -31,7 +31,7 @@ void init_gradient_color_pairs(short start_color[3], short end_color[3], int num
     }
 }
 
-void setup_colors()
+void setup_colors(void)
 {
     init_color(Color_Black, 0, 0, 0);
     init_color(Color_Red, 1000, 0, 0);

@@ -59,7 +59,7 @@ int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *
 
 #define BILLION 1000000000L
 
-int main()
+int main(void)
 {
     srand(time(NULL));
     cbreak();
@@ -93,7 +93,7 @@ int main()
 
     setup_colors();
 
-    Rect window = {};
+    Rect window = {{0, 0}, {0, 0}, 0};
     window.tl.x = 0;
     window.tl.y = 0;
     window.br.x = MAP_WIDTH;
@@ -202,7 +202,7 @@ int main()
         uint64_t diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
         start = end;
         delta_us = diff * 1e-3;
-        add_term_line("%d ms, %d fps", (int)(diff * 1e-6), (int)(1000/(diff * 1e-6)));
+        // add_term_line("%d ms, %d fps", (int)(diff * 1e-6), (int)(1000/(diff * 1e-6)));
     }
 
     endwin();

@@ -249,8 +249,8 @@ void zero_bitmap(Bitmap bitmap)
 
 Bitmap alloc_bitmap(int width, int height)
 {
-    uint32_t* data = (uint32_t *)malloc(width * height * sizeof(uint32_t));
-    Bitmap result = {data, {width, height}};
+    int* data = (int *)malloc(width * height * sizeof(int));
+    Bitmap result = {data, {{width, height}}};
     zero_bitmap(result);
     return result;
 }
@@ -267,6 +267,9 @@ void set_bitmap_value(Bitmap bitmap, Vec2i pos, int value)
 
 int get_bitmap_value(Bitmap bitmap, Vec2i pos)
 {
+    if (pos.x < 0 || pos.x >= bitmap.width || pos.y < 0 || pos.y >= bitmap.height) {
+        return 0;
+    }
     return bitmap.data[pos.y * bitmap.width + pos.x];
 }
 

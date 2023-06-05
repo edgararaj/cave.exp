@@ -36,10 +36,6 @@ void init_game(GameState *gs, Rect window) {
 
     generate_tunnels_and_rasterize(gs->collision, rects, rects_count);
     erode(gs->collision, 2200);
-
-    Bitmap pixmap = alloc_bitmap(MAP_WIDTH, MAP_HEIGHT);
-    generate_tunnels_and_rasterize(pixmap, rects, rects_count);
-    erode(pixmap, 2200);
     int portal_room = random_between(0, rects_count - 1);
     int div = 2;
     int portal_div = random_between(0, div * div - 1);
@@ -87,10 +83,10 @@ void init_game(GameState *gs, Rect window) {
     Warrior player = (Warrior){0};
     player.rect =
         (RectFloat){{first_rect_center.x, first_rect_center.y}, {first_rect_center.x, first_rect_center.y}, 2};
-    player.dmg = 10;
+    player.dmg = 20;
     player.hp = 100;
     player.maxHP = 100;
-    player.weight = 10;
+    player.weight = 4;
     player.velocity = (Vec2f){0, 0};
 
     Camera camera = {{{0, 0}}, 0, 0, 10};
@@ -125,7 +121,7 @@ void init_game(GameState *gs, Rect window) {
     gs->arrows = malloc(sizeof(Arrow) * MAX_ARROWS);
 }
 
-void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int delta_us)
+void player_attack(Mob *mobs, int num_mobs, Warrior *player)
 {
     int attacked = 0;
     if (!player->dmg_cooldown)
@@ -134,12 +130,12 @@ void player_attack(GameState *gs, Mob *mobs, int num_mobs, Warrior *player, int 
         {
             if (mobs[i].warrior.hp <= 0)
                 continue;
-            attacked += warrior_attack(player, &mobs[i].warrior, delta_us);
+            attacked += warrior_attack(player, &mobs[i].warrior);
         }
     }
     if (attacked)
     {
-        player->dmg_cooldown = 1e6;
+        player->dmg_cooldown = 1e6 * 0.2;
     }
     player->attacking = 0.1 * 1e6;
 }
@@ -184,11 +180,10 @@ int use_key(GameState *gs)
 {
     if (collide_rect_rect(rect_float_to_rect(gs->player.rect), gs->portal))
     {
-        add_term_line("SOCORRO SOCORRO AJUDA SOCORRO!\n");
         generate_random_buffs();
         apply_buffs(gs);
 
-        Rect window = {};
+        Rect window = {{0, 0}, {0, 0}, 0};
         window.tl.x = 0;
         window.tl.y = 0;
         window.br.x = MAP_WIDTH;
@@ -266,17 +261,29 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
             switch (item)
             {
             case Item_Sword:
-                player_attack(gs, gs->mobs, MAX_MOBS, &gs->player, delta_us);
+                player_attack(gs->mobs, MAX_MOBS, &gs->player);
+                break;
+            case Item_BlastGun:
+                // adicionar mais tarde
                 break;
             case Item_HealthPotion:
                 use_health_potion(&gs->player);
                 remove_item(&gs->inventory, i);
+                break;
+            case Item_ManaPotion:
+                // adicionar mais tarde
                 break;
             case Item_Key:
                 if (use_key(gs))
                 {
                     remove_item(&gs->inventory, i);
                 };
+                break;
+            case Item__Size:
+                // adicionar mais tarde
+                break;
+            default:
+                // adicionar mais tarde
                 break;
             }
         }
@@ -293,7 +300,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     timer_update(&gs->player.dmg_cooldown, delta_us);
 
     RectFloat prev_player = gs->player.rect;
-    update_player(&gs->player.rect, key, delta_us);
+    update_player(&gs->player.rect, key);
     if (collide_rect_bitmap(rect_float_to_rect(gs->player.rect), gs->collision))
     {
         gs->player.rect = prev_player;
@@ -325,7 +332,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
 
     for (int i = 0; i < gs->arrow_count; i++)
     {
-        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_div_const(gs->arrows[i].velocity, 2));
+        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_mul_const(gs->arrows[i].velocity, delta_us / 1e6 * 10));
         if (collide_rect_rect(rect_float_to_rect(gs->arrows[i].rect), rect_float_to_rect(gs->player.rect)))
         {
             gs->player.hp -= 10;
