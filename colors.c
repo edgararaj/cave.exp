@@ -50,8 +50,8 @@ void setup_colors(void)
     init_color(Culur_Spike_Back, 100, 100, 100);
     init_color(Culur_Outer_Chest, 500, 250, 0);
     init_color(Culur_Chest, 1000, 1000, 0);
-    init_color(Culur_Outer_Portal, 1000, 1000, 800);
-    init_color(Culur_Portal, 800, 1000, 400);
+    init_color(Culur_Outer_Portal, 501, 0, 501);
+    init_color(Culur_Portal, 784, 392, 784);
     init_color(Culur_Hotbar_Back, 500, 500, 500);
     init_color(Culur_Hotbar_Front, 1000, 1000, 1000);
     init_color(Culur_Hotbar_Selected_Back, 500, 500, 0);
