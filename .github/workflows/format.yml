@@ -11,10 +11,10 @@ jobs:
       uses: actions/checkout@v2
       
     - name: Install clang-format
-      run: sudo apt-get install -y clang-format-10
+      run: sudo apt-get install -y clang-format
       
     - name: Run clang-format
-      run: find . -regex '.*\.\(c\|h\)' -exec clang-format-10 -style=file -i {} \;
+      run: find . -regex '.*\.\(c\|h\)' -exec clang-format -style=file -i {} \;
 
     - name: Check for modifications
       run: git diff --exit-code || (echo "Code is not formatted properly" && exit 1)
