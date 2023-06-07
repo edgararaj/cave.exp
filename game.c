@@ -12,6 +12,7 @@
 #include "light.h"
 #include "map.h"
 #include "mobs.h"
+#include "movimento.h"
 #include "objects.h"
 #include "player.h"
 #include "state.h"
@@ -22,10 +23,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include "items.h"
-#include "movimento.h"
 
-void init_game(GameState *gs, Rect window) {
+void init_game(GameState *gs, Rect window)
+{
     zero_bitmap(gs->illuminated);
     zero_bitmap(gs->collision);
     zero_bitmap(gs->light);
@@ -58,7 +58,8 @@ void init_game(GameState *gs, Rect window) {
                     chests++;
                     num_chests++;
                 }
-                else {
+                else
+                {
                     generate_spikes(gs->collision, sub);
                     generate_obstacles(gs->collision, sub);
                 }
@@ -117,7 +118,8 @@ void init_game(GameState *gs, Rect window) {
     gs->chests = yoo_chests;
     gs->chests_count = num_chests;
     gs->portal = portal_rect;
-    if (gs->arrows) free(gs->arrows);
+    if (gs->arrows)
+        free(gs->arrows);
     gs->arrows = malloc(sizeof(Arrow) * MAX_ARROWS);
 }
 
@@ -238,7 +240,7 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
     {
         *state = State_Over;
     }
-    
+
     if (key == 't')
     {
         ++gs->cam_mode;
@@ -332,7 +334,8 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
 
     for (int i = 0; i < gs->arrow_count; i++)
     {
-        gs->arrows[i].rect = rect_float_translate(gs->arrows[i].rect, vec2f_mul_const(gs->arrows[i].velocity, delta_us / 1e6 * 10));
+        gs->arrows[i].rect =
+            rect_float_translate(gs->arrows[i].rect, vec2f_mul_const(gs->arrows[i].velocity, delta_us / 1e6 * 10));
         if (collide_rect_rect(rect_float_to_rect(gs->arrows[i].rect), rect_float_to_rect(gs->player.rect)))
         {
             gs->player.hp -= 10;
@@ -368,13 +371,15 @@ void update_game(GameState *gs, Vec2i window_size, int key, State *state, int de
             gs->player.hp -= SPIKE_DAMAGE;
         }
     }
-    else {
+    else
+    {
         gs->player_spike_damage_cooldown = 0;
     }
 
     gs->inventory.items[0].cooldown = gs->player.dmg_cooldown / 1e6;
 
-    if (key == 27 || key == 'p') {
+    if (key == 27 || key == 'p')
+    {
         *state = State_Pause;
     }
 }
@@ -442,7 +447,7 @@ void draw_game(GameState *gs, Vec2i window_size, int delta_us)
         int dist = get_bitmap_value(gs->distance, vec2f_to_i(rect_float_center(gs->mobs[i].warrior.rect)));
         if (gs->mobs[i].warrior.hp <= 0 || dist == 0 || dist > MAX_DIST_SHINE)
             continue;
-        
+
         render_rect(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect));
         render_hp(gs->win_game, gs->camera, rect_float_to_rect(gs->mobs[i].warrior.rect), gs->mobs[i].warrior.hp);
 
@@ -461,8 +466,9 @@ void draw_game(GameState *gs, Vec2i window_size, int delta_us)
                    gs->inventory.selected_item);
 
     render_term(gs->win_log, delta_us);
-    render_player_stats(gs->win_stats, gs->player_stats, gs->player, (Vec2i){gs->sidebar_width * X_SCALE, gs->player_stats_height});
-    
+    render_player_stats(gs->win_stats, gs->player_stats, gs->player,
+                        (Vec2i){gs->sidebar_width * X_SCALE, gs->player_stats_height});
+
     // wattrset(gs->win_game, COLOR_PAIR(Culur_Default));
     // mvwprintw(gs->win_game, window_size.y - 1, 0, "Press ESC or P to pause | %d FPS | %f ms", (int)(1e6/delta_us),
     // 1e-3*delta_us);

@@ -1,6 +1,6 @@
 #pragma once
-#include "objects.h"
 #include "camera.h"
+#include "objects.h"
 #include <ncurses.h>
 
 #define MAX_CHESTS 100
@@ -20,12 +20,14 @@ typedef enum
     Item_BlastGun,
 } Item;
 
-typedef enum {
+typedef enum
+{
     ItemType_Disposable,
     ItemType_Weapon
 } ItemType;
 
-typedef struct {
+typedef struct
+{
     ItemType type;
     int count;
     Item name;
@@ -39,7 +41,8 @@ typedef struct
     int selected_item;
 } Inventory;
 
-typedef struct {
+typedef struct
+{
     Inventory inventory;
     Rect rect;
     int is_open;
@@ -57,20 +60,18 @@ typedef enum
     State_Over
 } State;
 
-
 typedef struct
 {
     int type;
     int count;
 } HotbarItem;
 
-
 #define HOTBAR_SIZE 9
 
 typedef struct
 {
     HotbarItem items[HOTBAR_SIZE];
-    int selected;                  // O item selecionado atualmente
+    int selected; // O item selecionado atualmente
 } Hotbar;
 
 typedef struct
@@ -130,7 +131,8 @@ typedef struct
     int radius;
 } Torch;
 
-typedef struct {
+typedef struct
+{
     Rect rect;
     int radius;
     Vec2f velocity;
@@ -151,7 +153,7 @@ typedef struct
     Bitmap distance;
     Bitmap light;
     Torch *torches;
-    Chest* chests;
+    Chest *chests;
     Rect portal;
     int chests_count;
     Mob *mobs;
@@ -160,7 +162,7 @@ typedef struct
     int minimap_maximized;
     int player_spike_damage_cooldown;
     int chestCount;
-    Arrow* arrows;
+    Arrow *arrows;
     int arrow_count;
 
     int minimap_height;
@@ -174,26 +176,30 @@ typedef struct
     WINDOW *win;
     int highlight;
     Star *stars;
-    int num_stars; 
+    int num_stars;
     Bitmap star_map;
 } StartMenuState;
 
-typedef struct {
+typedef struct
+{
     WINDOW *win;
     int highlight;
 } StartNiveisState;
 
-typedef struct {
+typedef struct
+{
     WINDOW *win;
     int highlight;
 } StartPauseState;
 
-typedef struct {
+typedef struct
+{
     WINDOW *win;
     int highlight;
 } StartOverState;
 
-typedef enum {
+typedef enum
+{
     BUFF_INCREASE_MOBS_HEALTH,
     BUFF_INCREASE_MOBS_DAMAGE,
     BUFF_INCREASE_MAX_MOBS,
@@ -201,7 +207,8 @@ typedef enum {
     BUFF_INCREASE_ROOMS
 } BuffType;
 
-typedef struct {
+typedef struct
+{
     RectFloat rect;
     Vec2f direction;
     int active;

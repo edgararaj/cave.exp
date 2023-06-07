@@ -9,8 +9,9 @@ void draw_pause(StartPauseState *sms, State *state, int choice, Vec2i window_siz
 {
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
-    char *choices[] = {"CONTINUE",       "RESTART",       "CONTROLOS",     "INFO",         "QUIT",
-                       "WORK DONE BY:", "Davide Santos", "Edgar Araujo", "Goncalo Barroso", "(Afonso Martins)"};
+    char *choices[] = {
+        "CONTINUE",     "RESTART",         "CONTROLOS",       "INFO", "QUIT", "WORK DONE BY:", "Davide Santos",
+        "Edgar Araujo", "Goncalo Barroso", "(Afonso Martins)"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
     int max_x = window_size.x;

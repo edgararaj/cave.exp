@@ -14,8 +14,7 @@ jobs:
       run: sudo apt-get install -y clang-format-10
       
     - name: Run clang-format
-      run: find . -regex '.*\.\(cpp\|hpp\|cc\|cxx\)' -exec clang-format-10 -style=file -i {} \;
+      run: find . -regex '.*\.\(c\|h\)' -exec clang-format-10 -style=file -i {} \;
 
     - name: Check for modifications
-      run: |
-        git diff --exit-code || (echo "Code is not formatted properly" && exit 1)
+      run: git diff --exit-code || (echo "Code is not formatted properly" && exit 1)

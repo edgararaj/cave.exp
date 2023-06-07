@@ -56,8 +56,8 @@ void setup_colors(void)
     init_color(Culur_Hotbar_Front, 1000, 1000, 1000);
     init_color(Culur_Hotbar_Selected_Back, 500, 500, 0);
     init_color(Culur_Hotbar_Selected_Front, 0, 1000, 0);
-    init_color(Culur_Menu_Background, 0, 0, 0);   // Preto
-    init_color(Culur_Menu_Text, 1000, 0, 0);      // Vermelho
+    init_color(Culur_Menu_Background, 0, 0, 0);                 // Preto
+    init_color(Culur_Menu_Text, 1000, 0, 0);                    // Vermelho
     init_color(Culur_Menu_Highlight_Background, 500, 500, 500); // Cinza
     init_color(Culur_Menu_Highlight_Text, 1000, 1000, 1000);    // Branco
 

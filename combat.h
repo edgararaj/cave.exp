@@ -1,6 +1,6 @@
 #pragma once
-#include "inventory.h"
 #include "dist.h"
+#include "inventory.h"
 #include "items.h"
 #include "objects.h"
 

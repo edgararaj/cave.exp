@@ -2,21 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "colors.h"
 #include "state.h"
 #include "utils.h"
-#include "colors.h"
 
 void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
 {
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
-    char *choices[] = {"START", "CONTROLOS",     "INFO",
+    char *choices[] = {"START",        "CONTROLOS",       "INFO",
 
-                       "QUIT",  "WORK DONE BY:", "Davide Santos", "Edgar Araujo", "Goncalo Barroso", "(Afonso Martins)"};
+                       "QUIT",         "WORK DONE BY:",   "Davide Santos",
+                       "Edgar Araujo", "Goncalo Barroso", "(Afonso Martins)"};
     int n_choices = ARRAY_SIZE(choices);
 
     FILE *f = fopen("name.txt", "r");
-    if (f == NULL) {
+    if (f == NULL)
+    {
         perror("Erro ao abrir o arquivo");
         return;
     }
@@ -27,8 +29,10 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
     char n[logo_y][logo_x];
     memset(n, ' ', sizeof(n)); // Inicializa toda a matriz com espaços
 
-    for (int i = 0; i < logo_y; i++) {
-        for (int j = 0; j < logo_x; j++) {
+    for (int i = 0; i < logo_y; i++)
+    {
+        for (int j = 0; j < logo_x; j++)
+        {
             char c = fgetc(f);
             if (c == EOF)
                 break;
@@ -43,8 +47,10 @@ void draw_menu(StartMenuState *sms, State *state, int choice, Vec2i window_size)
 
     int y = 4;
     int x = window_size.x / 2 - logo_x / 2;
-    for (int i = 0; i < logo_y; i++) {
-        for (int j = 0; j < logo_x; j++) {
+    for (int i = 0; i < logo_y; i++)
+    {
+        for (int j = 0; j < logo_x; j++)
+        {
             mvwprintw(sms->win, y + i, x + j, "%c", n[i][j]);
         }
     }

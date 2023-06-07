@@ -1,6 +1,6 @@
 #include "combat.h"
-#include "utils.h"
 #include "term.h"
+#include "utils.h"
 
 int warrior_attack(Warrior *a, Warrior *b)
 {

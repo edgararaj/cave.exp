@@ -27,7 +27,9 @@ void dist_pass_recursive(Bitmap distmap, Bitmap collision, Vec2i point, int valu
         for (int j = -1; j < 2; j++)
         {
             Vec2i add = {i, j};
-            if (map_is_wall(collision, vec2i_to_f(vec2i_add(point, add))) || (!map_is_wall(collision, vec2i_to_f(vec2i_add(point, add))) && map_is_walkable(collision, vec2i_to_f(point), vec2i_to_f(add))))
+            if (map_is_wall(collision, vec2i_to_f(vec2i_add(point, add))) ||
+                (!map_is_wall(collision, vec2i_to_f(vec2i_add(point, add))) &&
+                 map_is_walkable(collision, vec2i_to_f(point), vec2i_to_f(add))))
                 dist_pass_recursive(distmap, collision, vec2i_add(point, add), value + 1, illuminated);
         }
     }

@@ -33,7 +33,7 @@ typedef struct
     short color;
 } RectFloat;
 
-typedef struct 
+typedef struct
 {
     RectFloat rect;
     Vec2f velocity;

@@ -1,8 +1,9 @@
-#include "game.h"
 #include "mobs.h"
 #include "collide.h"
+#include "colors.h"
 #include "combat.h"
 #include "dist.h"
+#include "game.h"
 #include "light.h"
 #include "map.h"
 #include "objects.h"
@@ -11,7 +12,6 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
-#include "colors.h"
 
 void create_mobs(Bitmap pixmap, Mob *mobs, int num_mobs)
 {
@@ -63,7 +63,8 @@ Vec2i step_to_player(Bitmap map, Mob *mob)
 
 void move_mob(Mob *mob, Vec2i step, int delta_us)
 {
-    mob->warrior.rect = rect_float_translate(mob->warrior.rect, vec2f_mul_const(vec2i_to_f(step), mob->speed * delta_us / 1e6));
+    mob->warrior.rect =
+        rect_float_translate(mob->warrior.rect, vec2f_mul_const(vec2i_to_f(step), mob->speed * delta_us / 1e6));
 }
 
 void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
@@ -77,7 +78,8 @@ void attack_player(Mob *mob, Warrior *player, Bitmap map, int delta_us)
 
     if (timer_update(&mob->warrior.dmg_cooldown, delta_us))
     {
-        if (warrior_attack(&mob->warrior, player)) {
+        if (warrior_attack(&mob->warrior, player))
+        {
             mob->warrior.dmg_cooldown = 1e6;
             mob->warrior.attacking = 0.1 * 1e6;
         }
@@ -99,8 +101,8 @@ void wander(Mob *mob, Bitmap map, int delta_us)
 {
     if (mob->wander_to.x != 0 && mob->wander_to.y != 0)
     {
-        RectFloat new_rect =
-            rect_float_translate(mob->warrior.rect, vec2f_mul_const(vec2i_to_f(mob->wander_to), mob->speed * delta_us / 1e6));
+        RectFloat new_rect = rect_float_translate(
+            mob->warrior.rect, vec2f_mul_const(vec2i_to_f(mob->wander_to), mob->speed * delta_us / 1e6));
         if (!collide_rect_bitmap(rect_float_to_rect(new_rect), map) && rand() % 100 < 10)
         {
             mob->warrior.rect = new_rect;
@@ -133,10 +135,12 @@ void call_others(Mob *mobs, int num_mobs)
     }
 }
 
-void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bitmap player_light, int delta_us, Arrow* arrows, int *arrow_count)
+void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bitmap player_light, int delta_us,
+                Arrow *arrows, int *arrow_count)
 {
     Mob *mob = &mobs[ii];
-    int mob_dist_to_player = LIGHT_RADIUS - get_bitmap_value(player_light, vec2f_to_i(rect_float_center(mob->warrior.rect)));
+    int mob_dist_to_player =
+        LIGHT_RADIUS - get_bitmap_value(player_light, vec2f_to_i(rect_float_center(mob->warrior.rect)));
     if (mob->type == MobType_Stupid)
     {
         if (mob_dist_to_player < THREAT_RADIUS || mob->called)
@@ -252,7 +256,8 @@ void update_mob(Mob *mobs, int num_mobs, int ii, Bitmap map, Warrior *player, Bi
     }
 }
 
-void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap player_light, int delta_us, Arrow* arrows, int* arrow_count)
+void update_mobs(Mob *mobs, int num_mobs, Bitmap map, Warrior *player, Bitmap player_light, int delta_us, Arrow *arrows,
+                 int *arrow_count)
 {
     for (int i = 0; i < num_mobs; i++)
     {

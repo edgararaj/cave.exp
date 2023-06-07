@@ -2,13 +2,21 @@
 #include <ncurses.h>
 #include <string.h>
 
-void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_size) {
+void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_size)
+{
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
-    char *choices[] = {"MODOS:",        "FACIL",          "MEDIO",
-                       "DIFICIL",       "MENU",           "------------------",
-                       "WORK DONE BY:", "Davide Santos", "Edgar Araujo",
-                       "Goncalo Barroso", "(Afonso Martins)"};
+    char *choices[] = {"MODOS:",
+                       "FACIL",
+                       "MEDIO",
+                       "DIFICIL",
+                       "MENU",
+                       "------------------",
+                       "WORK DONE BY:",
+                       "Davide Santos",
+                       "Edgar Araujo",
+                       "Goncalo Barroso",
+                       "(Afonso Martins)"};
     int n_choices = sizeof(choices) / sizeof(char *);
 
     int max_x = window_size.x;
@@ -16,26 +24,30 @@ void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_s
 
     int start_y = (max_y - n_choices) / 2; // Posição vertical inicial do menu
 
-    switch (choice) {
-        case KEY_UP:
-            --sms->highlight;
-            if (sms->highlight < 1) {
-                sms->highlight = n_choices - 7;
-            }
-            break;
-        case KEY_DOWN:
-            if (sms->highlight == 4)
-                sms->highlight = sms->highlight - 4;
-            ++sms->highlight;
-            sms->highlight %= 5;
-            break;
-        default:
-            break;
+    switch (choice)
+    {
+    case KEY_UP:
+        --sms->highlight;
+        if (sms->highlight < 1)
+        {
+            sms->highlight = n_choices - 7;
+        }
+        break;
+    case KEY_DOWN:
+        if (sms->highlight == 4)
+            sms->highlight = sms->highlight - 4;
+        ++sms->highlight;
+        sms->highlight %= 5;
+        break;
+    default:
+        break;
     }
 
-    for (int i = 0; i < n_choices; i++) {
+    for (int i = 0; i < n_choices; i++)
+    {
         int y = start_y + i;
-        if (i == sms->highlight) {
+        if (i == sms->highlight)
+        {
             wattron(sms->win, A_REVERSE);
         }
 
@@ -47,11 +59,14 @@ void draw_niveis(StartNiveisState *sms, State *state, int choice, Vec2i window_s
         wattroff(sms->win, A_REVERSE);
     }
 
-    if (choice == 10) {
-        if (sms->highlight == 3 || sms->highlight == 2 || sms->highlight == 1) {
+    if (choice == 10)
+    {
+        if (sms->highlight == 3 || sms->highlight == 2 || sms->highlight == 1)
+        {
             *state = State_New_Game;
         }
-        if (sms->highlight == 4) {
+        if (sms->highlight == 4)
+        {
             *state = State_Menu;
         }
     }

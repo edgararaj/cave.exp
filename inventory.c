@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "colors.h"
 #include "inventory.h"
 #include "items.h"
 #include "term.h"
-#include "colors.h"
 
 int add_item(Inventory *inventory, Item name, int count)
 {
@@ -23,13 +23,14 @@ int add_item(Inventory *inventory, Item name, int count)
         inventory->size++;
         return 1;
     }
-    else {
+    else
+    {
         add_term_line("Inventory is full!");
     }
     return 0;
 }
 
-int add_inventory(Inventory* inventory, Inventory other)
+int add_inventory(Inventory *inventory, Inventory other)
 {
     for (int i = 0; i < other.size; i++)
     {
@@ -59,7 +60,7 @@ int remove_item(Inventory *inventory, int index)
 {
     if (index < inventory->size)
     {
-        inventory->items[index].count--;        // Diminui a contagem do item
+        inventory->items[index].count--; // Diminui a contagem do item
         // if (inventory->items_counts[index] == 0) // If the count of the item becomes 0
         // {
         //     for (int i = index; i < inventory->size - 1; i++)
@@ -74,10 +75,10 @@ int remove_item(Inventory *inventory, int index)
     return 0;
 }
 
-void split_string(char* str, char* buffer, int n)
+void split_string(char *str, char *buffer, int n)
 {
     int i;
-    int str_length = (int) strlen(str);
+    int str_length = (int)strlen(str);
     for (i = 0; i < str_length - n; i++)
     {
         buffer[i] = str[i + n];
@@ -90,7 +91,7 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size, int se
 {
     for (int i = 0; i < inventory->size; i++)
     {
-        char* name = "Unknown";
+        char *name = "Unknown";
         if (inventory->items[i].name == Item_HealthPotion)
             name = "Health Potion";
         else if (inventory->items[i].name == Item_ManaPotion)
@@ -111,29 +112,29 @@ void draw_inventory(WINDOW *win, Inventory *inventory, Vec2i window_size, int se
                 snprintf(buffer, 100, "%d. %s x%d", i + 1, name, inventory->items[i].count);
 
             char buffer2[100];
-            int n = (1-inventory->items[i].cooldown) * strlen(buffer);
+            int n = (1 - inventory->items[i].cooldown) * strlen(buffer);
             split_string(buffer, buffer2, n);
 
             if (i + 1 == selected)
                 wattrset(win, COLOR_PAIR(Culur_Default_Green));
             else
                 wattrset(win, COLOR_PAIR(Culur_Default));
-            mvwprintw(win, i+1, 1, "%s", buffer);
-            
+            mvwprintw(win, i + 1, 1, "%s", buffer);
+
             wattrset(win, COLOR_PAIR(Culur_Default_Blue));
-            mvwprintw(win, i+1, 1+n, "%s", buffer2);
+            mvwprintw(win, i + 1, 1 + n, "%s", buffer2);
         }
         else if (inventory->items[i].count == 0)
         {
             if (i + 1 == selected)
             {
                 wattrset(win, COLOR_PAIR(Culur_Default_Red));
-                mvwprintw(win, i+1, 1, "%d. %s (Empty)", i + 1, name);
+                mvwprintw(win, i + 1, 1, "%d. %s (Empty)", i + 1, name);
             }
             else
             {
                 wattrset(win, COLOR_PAIR(Culur_Default_Gray));
-                mvwprintw(win, i+1, 1, "%d. %s", i + 1, name);
+                mvwprintw(win, i + 1, 1, "%d. %s", i + 1, name);
             }
         }
     }

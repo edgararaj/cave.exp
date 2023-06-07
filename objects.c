@@ -1,8 +1,8 @@
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
-#include "objects.h"
 #include "map.h"
+#include "objects.h"
 #include "screen.h"
 #include "utils.h"
 
@@ -181,7 +181,6 @@ Rect rect_float_to_rect(RectFloat rect)
     return result;
 }
 
-
 // -------------------
 // |        |        |
 // |   0    |    1   |
@@ -243,12 +242,15 @@ Rect expand_rect(Rect rect, int amount)
 
 void zero_bitmap(Bitmap bitmap)
 {
-    for (int i = 0; i < bitmap.width * bitmap.height; i++) { bitmap.data[i] = 0; }
+    for (int i = 0; i < bitmap.width * bitmap.height; i++)
+    {
+        bitmap.data[i] = 0;
+    }
 }
 
 Bitmap alloc_bitmap(int width, int height)
 {
-    int* data = (int *)malloc(width * height * sizeof(int));
+    int *data = (int *)malloc(width * height * sizeof(int));
     Bitmap result = {data, {{width, height}}};
     zero_bitmap(result);
     return result;
@@ -266,13 +268,15 @@ void set_bitmap_value(Bitmap bitmap, Vec2i pos, int value)
 
 int get_bitmap_value(Bitmap bitmap, Vec2i pos)
 {
-    if (pos.x < 0 || pos.x >= bitmap.width || pos.y < 0 || pos.y >= bitmap.height) {
+    if (pos.x < 0 || pos.x >= bitmap.width || pos.y < 0 || pos.y >= bitmap.height)
+    {
         return 0;
     }
     return bitmap.data[pos.y * bitmap.width + pos.x];
 }
 
-int get_rect_distance(Bitmap distance, Rect rect) {
+int get_rect_distance(Bitmap distance, Rect rect)
+{
     int tl = get_bitmap_value(distance, rect.tl);
     int tr = get_bitmap_value(distance, (Vec2i){rect.br.x, rect.tl.y});
     int bl = get_bitmap_value(distance, (Vec2i){rect.tl.x, rect.br.y});

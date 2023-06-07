@@ -18,7 +18,8 @@
 #define SPIKE_DAMAGE_COOLDOWN 1e6
 
 int map_is_wall(Bitmap pixmap, Vec2f pos);
-void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitmap dist, WINDOW *window, Bitmap illuminated);
+void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitmap dist, WINDOW *window,
+                Bitmap illuminated);
 void render_minimap(WINDOW *win, Bitmap illuminated, Vec2i window_size, Vec2i player_pos);
 int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc);
 void add_light_map_value(Bitmap bitmap, Vec2i pos, int value);
@@ -31,5 +32,5 @@ void generate_spikes(Bitmap pixmap, Rect rect2);
 void generate_obstacles(Bitmap bitmap, Rect rect2);
 Chest generate_chest(Rect rect2);
 Rect generate_portal(Rect rect2);
-void draw_chest(WINDOW* win, Rect rect);
-void draw_portal(WINDOW* win, Rect rect);
+void draw_chest(WINDOW *win, Rect rect);
+void draw_portal(WINDOW *win, Rect rect);

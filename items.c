@@ -60,7 +60,7 @@ void use_health_potion(Warrior *player)
 // {
 //     if (player->mana < player->maxMana)
 //     {
-//         player->mana += 50; 
+//         player->mana += 50;
 //         if (player->mana > player->maxMana)
 //         {
 //             player->mana = player->maxMana;

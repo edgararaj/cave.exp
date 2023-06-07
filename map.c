@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "collide.h"
 #include "colors.h"
+#include "dist.h"
 #include "draw.h"
 #include "light.h"
 #include "map.h"
@@ -11,7 +12,6 @@
 #include "state.h"
 #include "term.h"
 #include "utils.h"
-#include "dist.h"
 
 void apply_horizontal_tunnel(int x1, int x2, int y, Bitmap bitmap)
 {
@@ -339,7 +339,8 @@ int map_is_walkable(Bitmap pixmap, Vec2f pos, Vec2f inc)
             !map_is_wall(pixmap, vec2f_add(pos, inc)));
 }
 
-void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitmap dist, WINDOW *window, Bitmap illuminated)
+void render_map(WINDOW *win_game, Camera camera, Bitmap map, Bitmap light, Bitmap dist, WINDOW *window,
+                Bitmap illuminated)
 {
     for (int x = 0; x < camera.width; ++x)
     {
@@ -425,7 +426,6 @@ void box_sampling_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled, in
             set_bitmap_value(scaled, (Vec2i){x, y}, average * (LIGHT_RADIUS - 1));
         }
     }
-
 }
 
 void bilinear_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled)
@@ -448,10 +448,12 @@ void bilinear_scale(Bitmap illuminated, Vec2i window_size, Bitmap scaled)
             float y_ratio = map_y - map_y1;
             float x_opposite = 1 - x_ratio;
             float y_opposite = 1 - y_ratio;
-            float top_left = illuminated.data[map_y1 * illuminated.width + map_x1] == WALKABLE ? LIGHT_RADIUS -1 : 0;
-            float top_right = illuminated.data[map_y1 * illuminated.width + map_x2] == WALKABLE ? LIGHT_RADIUS -1 : 0;
-            float bottom_left = illuminated.data[map_y2 * illuminated.width + map_x1] == WALKABLE ? LIGHT_RADIUS -1: 0;
-            float bottom_right = illuminated.data[map_y2 * illuminated.width + map_x2] == WALKABLE ? LIGHT_RADIUS -1: 0;
+            float top_left = illuminated.data[map_y1 * illuminated.width + map_x1] == WALKABLE ? LIGHT_RADIUS - 1 : 0;
+            float top_right = illuminated.data[map_y1 * illuminated.width + map_x2] == WALKABLE ? LIGHT_RADIUS - 1 : 0;
+            float bottom_left =
+                illuminated.data[map_y2 * illuminated.width + map_x1] == WALKABLE ? LIGHT_RADIUS - 1 : 0;
+            float bottom_right =
+                illuminated.data[map_y2 * illuminated.width + map_x2] == WALKABLE ? LIGHT_RADIUS - 1 : 0;
             float top = top_left * x_opposite + top_right * x_ratio;
             float bottom = bottom_left * x_opposite + bottom_right * x_ratio;
             float value = top * y_opposite + bottom * y_ratio;

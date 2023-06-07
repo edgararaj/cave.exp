@@ -10,10 +10,10 @@ void draw_game_over(StartOverState *sms, State *state, int choice, Vec2i window_
 {
     wresize(sms->win, window_size.y, window_size.x);
     werase(sms->win);
-    char *choices[] = {"GAME OVER",     "RESTART",       "INFO",
+    char *choices[] = {"GAME OVER",    "RESTART",         "INFO",
 
-                       "QUIT",          "WORK DONE BY:", "Davide Santos",
-                       "Edgar Araujo",  "Goncalo Barroso", "(Afonso Martins)"};
+                       "QUIT",         "WORK DONE BY:",   "Davide Santos",
+                       "Edgar Araujo", "Goncalo Barroso", "(Afonso Martins)"};
     int n_choices = ARRAY_SIZE(choices);
 
     FILE *f = fopen("over.txt", "r");
