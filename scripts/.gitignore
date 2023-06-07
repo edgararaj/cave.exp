@@ -1,7 +1,0 @@
-*.sw[po]
-*~
-.DS_Store
-*.orig
-*.rej
-*.bak
-*.py[co]
